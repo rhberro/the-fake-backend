@@ -1,5 +1,4 @@
 # the-fake-backend
----
 
 This service allows the developer to work on a new feature or an existing one using fake data while the real service is in development.
 
@@ -7,7 +6,6 @@ This service allows the developer to work on a new feature or an existing one us
 * [**Getting Started**](#getting-started)
 
 ## Installing
----
 
 Start by adding the service as a development dependency:
 
@@ -22,7 +20,6 @@ npm install --save-dev the-fake-backend
 ```
 
 ## Getting Started
----
 
 After installing, create a new file that will be responsible for configuring and starting the service.
 
