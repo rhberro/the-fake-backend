@@ -1,13 +1,13 @@
 # the-fake-backend
 
-This service allows the developer to work on a new feature or an existing one using fake data while the real service is in development.
+Build a fake backend by providing the content of files or JavaScript objects through configurable routes. This service allows the developer to work on a new feature or an existing one using fake data while the real service is in development.
 
 * [**Installing**](#installing)
 * [**Getting Started**](#getting-started)
 
 ## Installing
 
-Start by adding the service as a development dependency:
+Start by adding the service as a development dependency.
 
 ```
 yarn add --dev the-fake-backend
