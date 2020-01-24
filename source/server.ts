@@ -5,12 +5,19 @@ import Method from './interfaces/Method';
 import Route from './interfaces/Route';
 import Server from './interfaces/Server';
 import ServerOptions from './interfaces/ServerOptions';
+import { createInputManager } from './input';
+import { createProxyManager } from './proxy';
+import { createThrottlingManager } from './throttling';
+import { createUIManager } from './ui';
 import { readFixtureSync } from './files';
 
 export function createServer(options?: ServerOptions): Server {
-  const { middlewares } = options || {};
+  const { middlewares, proxies, throttlings } = options || {};
   
-  const expressServer: express.Application = express();
+  const proxyManager = createProxyManager(proxies);
+  const throttlingManager = createThrottlingManager(throttlings);
+
+  const expressServer = express();
 
   expressServer.use(middlewares || cors());
 
@@ -21,13 +28,23 @@ export function createServer(options?: ServerOptions): Server {
    * @param {express.Request} req The request object.
    * @param {express.Respose} res The response object.
    */
-  function createMethodResponse(method: Method, req: express.Request, res: express.Response) {
+  function createMethodResponse(method: Method, req: express.Request, res: express.Response): void {
     const { code = 200, data, file } = method;
     const { path } = req;
 
-    let content = data || readFixtureSync(file || path);
+    const proxy = proxyManager.getCurrent();
 
-    return res.status(code).send(content);
+    if (proxy) {
+      return proxy.proxy(req, res);
+    }
+
+    const content = data || readFixtureSync(file || path);
+
+    function sendContent() {
+      res.status(code).send(content);
+    }
+
+    setTimeout(sendContent, throttlingManager.getCurrentDelay());
   }
 
   /**
@@ -74,6 +91,27 @@ export function createServer(options?: ServerOptions): Server {
      * @param {number} port The server port.
      */
     listen(port: number = 8080): void {
+      const inputManager = createInputManager();
+      const uiManager = createUIManager(proxyManager, throttlingManager);
+
+      inputManager.init(true);
+
+      uiManager.drawDashboard();
+
+      function onThrottling() {
+        throttlingManager.toggleCurrent();
+        uiManager.drawDashboard();
+      }
+
+      function onConnection() {
+        proxyManager.toggleCurrent();
+        uiManager.drawDashboard();
+      }
+
+      inputManager.addListener('c', onConnection);
+      inputManager.addListener('t', onThrottling);
+      inputManager.addListener('r', uiManager.drawDashboard);
+
       expressServer.listen(port);
     },
   };

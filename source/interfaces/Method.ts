@@ -3,6 +3,4 @@ export default interface Method {
   data: any,
   file: string,
   type: 'get' | 'post' | 'put' | 'delete' | 'patch',
-  paginate: boolean,
-  search: true,
 }
