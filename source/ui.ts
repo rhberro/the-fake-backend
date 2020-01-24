@@ -9,7 +9,7 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
   const display = readline.createInterface(
     {
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
     }
   );
 
@@ -43,11 +43,14 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
       paragraph(
         chalk.bold.blackBright('Connections:'),
         (currentProxy && currentProxy.name) || 'Local',
+        currentProxy && chalk.bold.black(currentProxy.host),
       );
 
       paragraph(
         chalk.bold.blackBright('Throttlings:'),
         (currentThrottling && currentThrottling.name) || 'Disabled',
+        currentThrottling && chalk.bold.black(currentThrottling.values[0]),
+        currentThrottling && chalk.bold.black(currentThrottling.values[1]),
       );
 
       line('Press', chalk.bold('q'), 'to stop and quit the service or', chalk.bold('r'), 'to redraw.');

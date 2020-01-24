@@ -6,7 +6,7 @@ import InputManager from './interfaces/InputManager';
 export function createInputManager(): InputManager {
   const listeners: Array<InputListener> = [
     { key: 'q', control: false, event: process.exit },
-    { key: 'c', control: true, event: process.exit }
+    { key: 'c', control: true, event: process.exit },
   ];
 
   /**
