@@ -7,11 +7,13 @@ import Server from './interfaces/Server';
 import ServerOptions from './interfaces/ServerOptions';
 import { createInputManager } from './input';
 import { createProxyManager } from './proxy';
+import createPaginatedResponse from './response/paginated';
+import createSearchableResponse from './response/searchable';
 import { createThrottlingManager } from './throttling';
 import { createUIManager } from './ui';
 import { readFixtureSync } from './files';
 
-export function createServer(options?: ServerOptions): Server {
+export function createServer(options: ServerOptions): Server {
   const { middlewares, proxies, throttlings } = options || {};
   
   const proxyManager = createProxyManager(proxies);
@@ -29,7 +31,7 @@ export function createServer(options?: ServerOptions): Server {
    * @param {express.Respose} res The response object.
    */
   function createMethodResponse(method: Method, req: express.Request, res: express.Response): void {
-    const { code = 200, data, file } = method;
+    const { code = 200, data, file, paginated, search } = method;
     const { path } = req;
 
     const proxy = proxyManager.getCurrent();
@@ -38,7 +40,15 @@ export function createServer(options?: ServerOptions): Server {
       return proxy.proxy(req, res);
     }
 
-    const content = data || readFixtureSync(file || path);
+    let content = data || readFixtureSync(file || path);
+
+    if (search) {
+      content = createSearchableResponse(req, res, content, method);
+    }
+
+    if (paginated) {
+      content = createPaginatedResponse(req, res, content, options);
+    }
 
     function sendContent() {
       res.status(code).send(content);

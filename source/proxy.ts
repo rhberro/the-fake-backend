@@ -4,6 +4,13 @@ import Proxy from "./interfaces/Proxy";
 import ProxyManager from "./interfaces/ProxyManager";
 import ProxyProperties from './interfaces/ProxyProperties';
 
+/**
+ * Add a proxy property to the proxy properties
+ * 
+ * @param {ProxyProperties} proxy - The proxy properties object.
+ * 
+ * @return {Proxy} The proxy with the proxy middleware.
+ */
 function createProxyMiddleware(proxy: ProxyProperties): Proxy {
   const { name, host } = proxy;
 
@@ -14,11 +21,18 @@ function createProxyMiddleware(proxy: ProxyProperties): Proxy {
       {
         target: host,
         changeOrigin: true,
-      }
+      },
     ),
   };
 }
 
+/**
+ * Create a new proxy manager.
+ *
+ * @param {Array<ProxyProperties>} proxies - The current list of proxies.
+ *
+ * @return {ProxyManager} The proxy manager.
+ */
 export function createProxyManager(proxies: Array<ProxyProperties> = []): ProxyManager {
   let currentProxyIndex: number | null = null;
 

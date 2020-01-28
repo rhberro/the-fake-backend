@@ -3,4 +3,4 @@ export default interface ThrottlingManager {
   getCurrent: Function,
   getCurrentDelay: Function,
   toggleCurrent: Function,
-};
+}

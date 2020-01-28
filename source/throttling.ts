@@ -1,6 +1,13 @@
 import Throttling from "./interfaces/Throttling";
 import ThrottlingManager from "./interfaces/ThrottlingManager";
 
+/**
+ * Create a new throttling manager.
+ * 
+ * @param {Array<Throttling>} throttlings - The current list of throttlings.
+ * 
+ * @return {ThrottlingManager} The throttling manager.
+ */
 export function createThrottlingManager(throttlings: Array<Throttling> = []): ThrottlingManager {
   let currentThrottlingIndex: number | null = null;
 

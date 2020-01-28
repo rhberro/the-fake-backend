@@ -3,6 +3,11 @@ import * as readline from 'readline';
 import InputListener from './interfaces/InputListener';
 import InputManager from './interfaces/InputManager';
 
+/**
+ * Create a new input manager.
+ *
+ * @return {InputManager} The input manager.
+ */
 export function createInputManager(): InputManager {
   const listeners: Array<InputListener> = [
     { key: 'q', control: false, event: process.exit },
