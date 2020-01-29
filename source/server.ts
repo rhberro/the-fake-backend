@@ -24,7 +24,7 @@ export function createServer(options: ServerOptions): Server {
 
   expressServer.use(middlewares || cors());
   expressServer.use(
-    (req: express.Request, res: express.Response, next: Function) => uiManager.drawRequest(req, res)
+    (req: express.Request, res: express.Response, next: Function) => uiManager.drawRequest(req, res, next)
   );
 
   /**

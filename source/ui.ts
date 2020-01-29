@@ -117,6 +117,7 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
         ),
       );
 
+      next();
     }
   }
 }
