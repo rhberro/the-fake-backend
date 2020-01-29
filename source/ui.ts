@@ -1,4 +1,5 @@
 import * as chalk from 'chalk';
+import * as express from 'express';
 import * as readline from 'readline';
 
 import ProxyManager from "./interfaces/ProxyManager";
@@ -21,12 +22,23 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
     }
   );
 
+  function write(text: string) {
+    display.write(text);
+  }
+
   /**
    * Clear the user screen.
    */
   function clear(): void {
-    display.write('\x1b[2J');
-    display.write('\x1b[0f');
+    write('\x1b[2J');
+    write('\x1b[0f');
+  }
+
+  /**
+   * Write a line break to the user screen.
+   */
+  function linebreak(): void {
+    write('\r\n');
   }
 
   /**
@@ -35,8 +47,8 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
    * @param {Array<string>} parameters - An array of text to display.
    */
   function line(...parameters: Array<string>): void {
-    display.write(parameters.join('\x20'));
-    display.write('\r\n');
+    write(parameters.join('\x20'));
+    write('\r\n');
   }
 
   /**
@@ -58,24 +70,53 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
 
       clear();
 
-      line('The service is running!');
-
-      paragraph(
-        chalk.bold.blackBright('Connection:'),
-        (currentProxy && chalk.white(currentProxy.name)) || 'Local',
-        currentProxy && chalk.bold.black(currentProxy.host),
+      line(
+        chalk.bold.green('The service is running!')
       );
 
+      line(chalk.blackBright('Connection:'));
       paragraph(
-        chalk.bold.blackBright('Throttling:'),
-        (currentThrottling && chalk.white(currentThrottling.name)) || 'Disabled',
+        (currentProxy && chalk.bold.white(currentProxy.name)) || 'Local',
+        currentProxy && chalk.bold.blackBright(currentProxy.host),
+      );
+
+      line(chalk.blackBright('Throttling:'));
+      paragraph(
+        (currentThrottling && chalk.bold.white(currentThrottling.name)) || 'Disabled',
         currentThrottling && chalk.bold.black(currentThrottling.values[0]),
         currentThrottling && chalk.bold.black('-'),
         currentThrottling && chalk.bold.black(currentThrottling.values[1]),
         currentThrottling && chalk.bold.black('ms'),
       );
 
-      line('Press', chalk.bold.white('q'), 'to stop and quit the service or', chalk.bold.white('r'), 'to redraw.');
+      line(
+        'Press',
+        chalk.bold.white('c'), 'to toggle the connection,',
+        chalk.bold.white('t'), 'to toggle the throttling or',
+        chalk.bold.white('q'), 'to stop and quit the service.',
+      );
+
+      linebreak();
     },
+
+    /**
+     * Draw the request information to the user screen.
+     * 
+     * @param {express.Request} req - The route request object.
+     * @param {express.Response} res - The route response object.
+     * @param {express.Request} next - The express next function.
+     */
+    drawRequest(req: express.Request, res: express.Response, next: Function): void {
+      const currentThrottling = throttlingManager.getCurrent();
+      const currentThrottlingDelay = throttlingManager.getCurrentDelay();
+
+      line(chalk.bold.white(req.path));
+      line(
+        currentThrottling && chalk.blackBright(
+          '[' + currentThrottlingDelay + 'ms]'
+        ),
+      );
+
+    }
   }
 }

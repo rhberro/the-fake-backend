@@ -6,8 +6,8 @@ import Route from './interfaces/Route';
 import Server from './interfaces/Server';
 import ServerOptions from './interfaces/ServerOptions';
 import { createInputManager } from './input';
-import { createProxyManager } from './proxy';
 import createPaginatedResponse from './response/paginated';
+import { createProxyManager } from './proxy';
 import createSearchableResponse from './response/searchable';
 import { createThrottlingManager } from './throttling';
 import { createUIManager } from './ui';
@@ -18,10 +18,14 @@ export function createServer(options: ServerOptions): Server {
   
   const proxyManager = createProxyManager(proxies);
   const throttlingManager = createThrottlingManager(throttlings);
+  const uiManager = createUIManager(proxyManager, throttlingManager);
 
   const expressServer = express();
 
   expressServer.use(middlewares || cors());
+  expressServer.use(
+    (req: express.Request, res: express.Response, next: Function) => uiManager.drawRequest(req, res)
+  );
 
   /**
    * Create the method response object.
@@ -41,6 +45,7 @@ export function createServer(options: ServerOptions): Server {
     }
 
     let content = data || readFixtureSync(file || path);
+
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
@@ -102,7 +107,6 @@ export function createServer(options: ServerOptions): Server {
      */
     listen(port: number = 8080): void {
       const inputManager = createInputManager();
-      const uiManager = createUIManager(proxyManager, throttlingManager);
 
       inputManager.init(true);
 
@@ -120,7 +124,6 @@ export function createServer(options: ServerOptions): Server {
 
       inputManager.addListener('c', onConnection);
       inputManager.addListener('t', onThrottling);
-      inputManager.addListener('r', uiManager.drawDashboard);
 
       expressServer.listen(port);
     },
