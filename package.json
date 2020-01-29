@@ -1,7 +1,7 @@
 {
   "name": "the-fake-backend",
   "description": "Build a fake backend by providing the content of files or JavaScript objects through configurable routes.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "ISC",
   "main": "build/index.js",
   "types": "build/index.d.ts",
