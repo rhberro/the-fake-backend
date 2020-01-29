@@ -1,5 +1,9 @@
 # the-fake-backend
 
+[![NPM Version](https://img.shields.io/npm/v/the-fake-backend.svg?style=flat)](https://www.npmjs.com/package/the-fake-backend)
+[![NPM Downloads](https://img.shields.io/npm/dm/the-fake-backend.svg?style=flat)](https://npmcharts.com/compare/the-fake-backend?minimal=true)
+[![Publish Size](https://badgen.net/packagephobia/publish/the-fake-backend)](https://packagephobia.now.sh/result?p=the-fake-backend)
+
 Build a fake backend by providing the content of files or JavaScript objects through configurable routes. This service allows the developer to work on a new feature or an existing one using fake data while the real service is in development.
 
 * [**Installing**](#installing)
@@ -24,9 +28,9 @@ npm install --save-dev the-fake-backend
 After installing, create a new file that will be responsible for configuring and starting the service.
 
 ```typescript
-const { createServer, Server } = require('the-fake-backend');
+const { createServer } = require('the-fake-backend');
 
-const server: Server = createServer();
+const server = createServer();
 
 server.routes(
   [
