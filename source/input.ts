@@ -47,7 +47,7 @@ export function createInputManager(): InputManager {
     init(raw: boolean = true): void {
       readline.emitKeypressEvents(process.stdin);
 
-      if (process.stdin.setRawMode) {
+      if (typeof process.stdin.setRawMode === "function") {
         process.stdin.setRawMode(raw);
         process.stdin.on('keypress', onKeyPress);
       }
