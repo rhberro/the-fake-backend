@@ -30,8 +30,8 @@
   "scripts": {
     "prepare": "npm run build",
     "build": "tsc",
-    "test": "jest --runInBand",
-    "test:coverage": "jest --runInBand --coverage"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "chalk": "^3.0.0",
