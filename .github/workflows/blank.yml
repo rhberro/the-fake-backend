@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Testing
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.14.1
+      - run: npm install
+      - run: npm test
