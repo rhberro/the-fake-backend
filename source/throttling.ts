@@ -40,7 +40,7 @@ export function createThrottlingManager(throttlings: Array<Throttling> = []): Th
      */
     getCurrentDelay(): number {
       const { values: [minimum, maximum] } = this.getCurrent() || { values: [0, 0] };
-      return Math.ceil(Math.random() * (minimum + 1 - maximum) + maximum);
+      return Math.ceil(Math.random() * (minimum - maximum) + maximum);
     },
 
     /**
