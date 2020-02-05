@@ -10,7 +10,10 @@ Build a fake backend by providing the content of files or JavaScript objects thr
 
 * [**Installing**](#installing)
 * [**Getting Started**](#getting-started)
-* [**Files**](#files)
+  * [**Files**](#files)
+* [**Properties**](#properties)
+  * [**Routes**](#routes)
+  * [**Methods**](#methods)
 * [**Searching**](#searching)
 
 ## Installing
@@ -55,7 +58,7 @@ server.listen(8080);
 
 This will create the http://localhost:8080/example endpoint.
 
-## Files
+### Files
 
 You can also use files content as response instead using the `data` property.
 
@@ -95,6 +98,30 @@ The script above generates the following two endpoints.
 |--------|-----------------------------------|-----------------------------------------------------|
 | GET    | http://localhost:8080/cats        | The `data/cats.json` file content.                  |
 | GET    | http://localhost:8080/dogs        | The `data/my/custom/path/to/dogs.txt` file content. |
+
+## Properties
+
+### Routes
+
+A route has two properties, both are required and equaly important.
+
+| Property  | Required | Description                                                        |
+|-----------|----------|--------------------------------------------------------------------|
+| path      | yes      | The endpoint address (URI).                                        |
+| method    | yes      | The route methods, check the method's properties table below.      |
+
+### Methods
+
+Every method accept its own properties so you can configure the way you want.
+
+| Property  | Required | Default  |
+|-----------|----------|----------|
+| type      | yes      |          |
+| code      | no       | 200      |
+| data      | no       |          |
+| file      | no       |          |
+| search    | no       |          |
+| paginated | no       | false    |
 
 ## Searching
 
