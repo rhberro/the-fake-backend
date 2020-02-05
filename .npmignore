@@ -1,6 +1,12 @@
 # node package manager.
 .npmignore
 
+# github.
+.github/
+
 # service.
 source/
+
+# tests.
+__mocks__/
 test/
