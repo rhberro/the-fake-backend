@@ -10,6 +10,8 @@ Build a fake backend by providing the content of files or JavaScript objects thr
 
 * [**Installing**](#installing)
 * [**Getting Started**](#getting-started)
+* [**Files**](#files)
+* [**Searching**](#searching)
 
 ## Installing
 
@@ -29,7 +31,7 @@ npm install --save-dev the-fake-backend
 
 After installing, create a new file that will be responsible for configuring and starting the service.
 
-```typescript
+```javascript
 const { createServer } = require('the-fake-backend');
 
 const server = createServer();
@@ -49,4 +51,97 @@ server.routes(
 );
 
 server.listen(8080);
+```
+
+This will create the http://localhost:8080/example endpoint.
+
+## Files
+
+You can also use files content as response instead using the `data` property.
+
+```javascript
+const { createServer } = require('the-fake-backend');
+
+const server = createServer();
+
+server.routes(
+  [
+    {
+      path: '/cats',
+      methods: [
+        {
+          type: 'get',
+        },
+      ],
+    },
+    {
+      path: '/dogs',
+      methods: [
+        {
+          type: 'get',
+          file: 'data/my/custom/path/to/dogs.txt',
+        },
+      ],
+    },
+  ]
+);
+
+server.listen(8080);
+```
+
+The script above generates the following two endpoints.
+
+| Method | Path                              | Response                                            |
+|--------|-----------------------------------|-----------------------------------------------------|
+| GET    | http://localhost:8080/cats        | The `data/cats.json` file content.                  |
+| GET    | http://localhost:8080/dogs        | The `data/my/custom/path/to/dogs.txt` file content. |
+
+## Searching
+
+You can make an endpoint searchable by declaring the search property.
+
+```json
+// /data/dogs.json
+[
+  { "id": 1, "name": "Doogo" },
+  { "id": 2, "name": "Dogger" },
+  { "id": 3, "name": "Dog" },
+  { "id": 4, "name": "Doggernaut" },
+  { "id": 5, "name": "Dogging" }
+]
+```
+
+```javascript
+const { createServer } = require('the-fake-backend');
+
+const server = createServer();
+
+server.routes(
+  [
+    {
+      path: '/dogs',
+      methods: [
+        {
+          type: 'get',
+          search: {
+            parameter: 'search',
+            properties: ['name'],
+          },
+        },
+      ],
+    },
+  ]
+);
+
+server.listen(8080);
+```
+
+You can now make requests to the `http://localhost:8080/dogs?search=dogg` endpoint. The response will be the `data/dogs.json` file content filtered.
+
+```json
+[
+  { "id": 2, "name": "Dogger" },
+  { "id": 4, "name": "Doggernaut" },
+  { "id": 5, "name": "Dogging" }
+]
 ```
