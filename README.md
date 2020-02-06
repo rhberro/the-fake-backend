@@ -61,7 +61,7 @@ This will create the http://localhost:8080/example endpoint.
 
 ### Files
 
-You can also use files content as response instead using the `data` property.
+You can also use files content as response instead of using the `data` property.
 
 ```javascript
 const { createServer } = require('the-fake-backend');
