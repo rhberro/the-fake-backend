@@ -12,6 +12,7 @@ Build a fake backend by providing the content of files or JavaScript objects thr
 * [**Getting Started**](#getting-started)
   * [**Files**](#files)
 * [**Properties**](#properties)
+  * [**Server**](#server)
   * [**Routes**](#routes)
   * [**Methods**](#methods)
 * [**Searching**](#searching)
@@ -101,9 +102,15 @@ The script above generates the following two endpoints.
 
 ## Properties
 
-### Routes
+### Server
 
-A route has two properties, both are required and equaly important.
+| Property    | Required | Description                                                             |
+|-------------|----------|-------------------------------------------------------------------------|
+| middlewares | no       | An array of functions compatible with [express's middlewares](https://expressjs.com/en/guide/writing-middleware.html).            |
+| proxies     | no       | The server proxies.                                                     |
+| throttlings | no       | The server throttlings.                                                 |
+
+### Routes
 
 | Property  | Required | Description                                                        |
 |-----------|----------|--------------------------------------------------------------------|
@@ -111,8 +118,6 @@ A route has two properties, both are required and equaly important.
 | method    | yes      | The route methods, check the method's properties table below.      |
 
 ### Methods
-
-Every method accept its own properties so you can configure the way you want.
 
 | Property  | Required | Default  |
 |-----------|----------|----------|
