@@ -1,1 +1,1 @@
-module.exports = () => 'proxy';
+export default () => 'proxy';

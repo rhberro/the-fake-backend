@@ -1,7 +1,6 @@
-import * as express from 'express';
-
 import Method from '../interfaces/Method';
 import Search from '../interfaces/Search';
+import express from 'express';
 
 function filterProperty(query: any, item: any, parameter: string, property: string) {
   return item[property] && item[property].toLowerCase().includes(

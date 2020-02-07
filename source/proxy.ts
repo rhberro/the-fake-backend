@@ -1,8 +1,7 @@
-import * as httpProxyMiddleware from 'http-proxy-middleware';
-
 import Proxy from "./interfaces/Proxy";
 import ProxyManager from "./interfaces/ProxyManager";
 import ProxyProperties from './interfaces/ProxyProperties';
+import httpProxyMiddleware from 'http-proxy-middleware';
 
 /**
  * Add a proxy property to the proxy properties

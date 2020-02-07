@@ -1,7 +1,6 @@
-import * as express from 'express';
-
 import PaginationProperties from '../interfaces/PaginationProperties';
 import ServerOptions from '../interfaces/ServerOptions';
+import express from 'express';
 
 function getPaginationProperties(options?: ServerOptions): PaginationProperties {
   const { pagination } = options || {};

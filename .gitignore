@@ -1,5 +1,4 @@
 # node package manager.
-yarn-error.lock
 node_modules/
 
 # service.

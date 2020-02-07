@@ -1,16 +1,15 @@
-import * as cors from 'cors';
-import * as express from 'express';
-
 import Method from './interfaces/Method';
 import Route from './interfaces/Route';
 import Server from './interfaces/Server';
 import ServerOptions from './interfaces/ServerOptions';
+import cors from 'cors';
 import { createInputManager } from './input';
 import createPaginatedResponse from './response/paginated';
 import { createProxyManager } from './proxy';
 import createSearchableResponse from './response/searchable';
 import { createThrottlingManager } from './throttling';
 import { createUIManager } from './ui';
+import express from 'express';
 import { readFixtureSync } from './files';
 
 export function createServer(options: ServerOptions): Server {

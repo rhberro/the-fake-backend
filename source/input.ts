@@ -1,7 +1,6 @@
-import * as readline from 'readline';
-
 import InputListener from './interfaces/InputListener';
 import InputManager from './interfaces/InputManager';
+import readline from 'readline';
 
 /**
  * Create a new input manager.

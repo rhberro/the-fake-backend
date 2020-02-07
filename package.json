@@ -29,8 +29,8 @@
     "express"
   ],
   "scripts": {
-    "prepare": "npm run build",
-    "build": "tsc",
+    "prepare": "rollup --config",
+    "build": "rollup --config",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
@@ -46,8 +46,11 @@
     "@types/http-proxy-middleware": "^0.19.3",
     "@types/jest": "^25.1.1",
     "@types/node": "^13.7.0",
-    "@types/sinon": "^7.5.1",
     "jest": "^25.1.0",
+    "rollup": "^1.31.0",
+    "rollup-plugin-cleaner": "^1.0.0",
+    "rollup-plugin-terser": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.25.3",
     "ts-jest": "^25.2.0",
     "typescript": "^3.7.5"
   }

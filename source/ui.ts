@@ -1,10 +1,9 @@
-import * as chalk from 'chalk';
-import * as express from 'express';
-import * as readline from 'readline';
-
 import ProxyManager from "./interfaces/ProxyManager";
 import ThrottlingManager from "./interfaces/ThrottlingManager";
 import UIManager from "./interfaces/UIManager";
+import chalk from 'chalk';
+import express from 'express';
+import readline from 'readline';
 
 /**
  * Create a new UI manager.
