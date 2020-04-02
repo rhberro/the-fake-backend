@@ -11,6 +11,7 @@ import { createThrottlingManager } from './throttling';
 import { createUIManager } from './ui';
 import express from 'express';
 import { readFixtureSync } from './files';
+import { overridesListener } from './overridesListener'
 
 export function createServer(options: ServerOptions): Server {
   const { middlewares, proxies, throttlings } = options || {};
@@ -124,6 +125,29 @@ export function createServer(options: ServerOptions): Server {
     });
   }
 
+  /**
+  * Sets the current override methods selected.
+  * @param routePath The route path that will be updated.
+  * @param routeMethodType The route method type that will be updated.
+  * @param overrideNameSelected The override name selected.
+  */
+  function selectMethodOverride(
+    routePath: string,
+    routeMethodType: string,
+    overrideNameSelected?: string
+  ) {
+    const route = allRoutes.find(({ path }) => path === routePath);
+    const routeMethod = route?.methods.find(
+      ({ type }) => type === routeMethodType
+    );
+
+    routeMethod?.overrides?.forEach(override => {
+      override.selected = override.name === overrideNameSelected;
+    });
+
+    uiManager.writeEndpointChanged(routePath, routeMethodType, overrideNameSelected)
+  }
+
   return {
     /**
      * Register the server routes.
@@ -159,29 +183,12 @@ export function createServer(options: ServerOptions): Server {
 
       inputManager.addListener('c', onConnection);
       inputManager.addListener('t', onThrottling);
+      inputManager.addListener('o', overridesListener({
+        getAllRoutes: () => allRoutes,
+        selectMethodOverride
+      }))
 
       expressServer.listen(port);
     },
-
-    /**
-     * Sets the current override methods selected.
-     * @param routePath The route path that will be updated.
-     * @param routeMethodType The route method type that will be updated.
-     * @param overrideNameSelected The override name selected.
-     */
-    selectMethodOverride(
-      routePath: string,
-      routeMethodType: string,
-      overrideNameSelected?: string
-    ) {
-      const route = allRoutes.find(({ path }) => path === routePath);
-      const routeMethod = route?.methods.find(
-        ({ type }) => type === routeMethodType
-      );
-
-      routeMethod?.overrides?.forEach(override => {
-        override.selected = override.name === overrideNameSelected;
-      });
-    }
   };
 }
