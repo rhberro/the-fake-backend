@@ -127,6 +127,68 @@ The script above generates the following two endpoints.
 | file      | no       |          |
 | search    | no       |          |
 | paginated | no       | false    |
+| overrides | no       |          |
+
+
+### Overrides
+
+The same [Methods](#methods) properties but requires a `name` and does not have `type` and `overrides` properties.
+
+| Property  | Required | Default |
+| --------- | -------- | ------- |
+| name      | yes      |         |
+| code      | no       | 200     |
+| data      | no       |         |
+| file      | no       |         |
+| search    | no       |         |
+| paginated | no       | false   |
+| selected  | no       | false   |
+
+This property allows you to create an array of options that will override the current `method` option.
+
+When a request is made the server will check if the `method` object contains the `overrides` property and if there is one `override` selected through the property `selected`. If there is an `override` selected it will be merged with the `method` object.
+
+You can set the current override selected with the server function `selectMethodOverride`.
+
+For example:
+
+```javascript
+const server = createServer({ ... })
+
+server.routes([
+  {
+    path: '/user',
+    methods: [
+      {
+        type: 'get',
+        file: 'data/my/custom/path/to/client-user.json',
+        overrides: [
+          {
+            name: 'Staff',
+            file: 'data/my/custom/path/to/staff-user.json'
+          },
+          {
+            name: 'Super Admin',
+            file: 'data/my/custom/path/to/super-admin-user.json'
+          },
+          {
+            name: 'Error 500',
+            code: 500
+          }
+        ]
+      }
+    ]
+  }
+]);
+
+// curl -XGET http://localhost:8080/user
+// Returns `data/my/custom/path/to/client-user.json` file content.
+
+server.selectMethodOverride('/user', 'get', 'Super Admin')
+// curl -XGET http://localhost:8080/user
+// Returns `data/my/custom/path/to/super-admin-user.json` file content.
+```
+
 
 ## Searching
 
