@@ -1,7 +1,7 @@
 import InputListener from './interfaces/InputListener';
 import InputManager from './interfaces/InputManager';
+import InputListenerPromiseResponse from './interfaces/InputListenerPromiseResponse';
 import readline from 'readline';
-import tty from 'tty';
 
 /**
  * Create a new input manager.
@@ -36,18 +36,44 @@ export function createInputManager(): InputManager {
       ).map(executeEvent);
   }
 
-  function executeEvent(listener: InputListener) {
-    const eventResult = listener.event()
-    const isPromise = Boolean(eventResult && eventResult.then)
+  function isPromise(obj: any) {
+    return Boolean(obj.then)
+  }
 
-    if (isPromise) {
-      eventResult.then(() => {
-        console.log('THEN')
-      }).catch(() => {
-        console.log('CATCH')
+  function executeEvent(listener: InputListener) {
+    unbindKeypress();
+    const eventResult = listener.event()
+
+    if (eventResult && isPromise(eventResult)) {
+      eventResult.then(data => {
+        if (data && data.usingInquirer) {
+          reopenStdinAfterInquirer();
+        }
       })
+    } else {
+      bindKeypress();
     }
   }
+
+  function reopenStdinAfterInquirer() {
+    readline.emitKeypressEvents(process.stdin);
+
+    if (typeof process.stdin.setRawMode === "function") {
+      process.stdin.setRawMode(true);
+    }
+
+    process.stdin.resume();
+    bindKeypress();
+  }
+
+  function bindKeypress() {
+    process.stdin.on('keypress', onKeyPress);
+  }
+
+  function unbindKeypress() {
+    process.stdin.off('keypress', onKeyPress);
+  }
+
 
   return {
     /**
@@ -60,8 +86,9 @@ export function createInputManager(): InputManager {
 
       if (typeof process.stdin.setRawMode === "function") {
         process.stdin.setRawMode(raw);
-        process.stdin.on('keypress', onKeyPress);
       }
+
+      bindKeypress();
     },
 
     /**
@@ -71,7 +98,7 @@ export function createInputManager(): InputManager {
      * @param {Function} event - The event callback.
      * @param {boolean} control - The control key state.
      */
-    addListener(key: string, event: Function, control: boolean = false): void {
+    addListener(key: string, event: () => Promise<InputListenerPromiseResponse> | void, control: boolean = false): void {
       const listener: InputListener = { key, event, control };
       listeners.push(listener);
     },

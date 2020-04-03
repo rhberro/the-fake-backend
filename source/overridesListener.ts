@@ -2,6 +2,7 @@ import OverrideListenerOptions from './interfaces/OverrideListenerOptions';
 import Route from './interfaces/Route';
 import Method from './interfaces/Method';
 import MethodOverride from './interfaces/MethodOverride';
+import InputListenerPromiseResponse from './interfaces/InputListenerPromiseResponse';
 import inquirer from 'inquirer'
 
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
@@ -43,15 +44,12 @@ const getMethodOverridesByType = ({ methods }: Route, routeMethodType: string) =
   throw new Error(`Method with type "${routeMethodType}" not found`)
 }
 
-const routeMethodTypesToChoices = (route: Route) => {
-  return filterMethodsWithOverrides(route.methods).map(({ type }) => ({
-    name: type.toUpperCase(),
-    value: type,
-  }));
+const getRouteMethodsTypes = (route: Route) => {
+  return filterMethodsWithOverrides(route.methods).map(({ type }) => type.toUpperCase());
 };
 
-const overridesToChoices = (overrides: MethodOverride[]) =>
-  overrides.map(({ name }) => ({ name, value: name }));
+const getOverridesNames = (overrides: MethodOverride[]) =>
+  overrides.map(({ name }) => name);
 
 const filterByPredicate = (list: string[]) => (predicate: string) =>
   predicate ? list.filter(item => item.includes(predicate)) : list
@@ -69,27 +67,35 @@ const selectEndpointUrl = (routePaths: string[]) => {
   ]);
 }
 
-const selectMethodType = (route: Route) =>
-  inquirer.prompt([
+const selectMethodType = (route: Route) => {
+  const methodsTypes = getRouteMethodsTypes(route);
+  const filter = filterByPredicate(methodsTypes)
+
+  return inquirer.prompt([
     {
-      type: 'list',
+      type: 'autocomplete',
       name: 'type',
       message: 'Select the type:',
-      choices: routeMethodTypesToChoices(route),
+      source: (_: any, input: string) => Promise.resolve(filter(input)),
     },
-  ]);
+  ]).then(({ type }) => ({ type: type.toLowerCase() }));
+}
 
-const selectOverride = (overrides: MethodOverride[]) =>
-  inquirer.prompt([
+const selectOverride = (overrides: MethodOverride[]) => {
+  const methodsTypes = getOverridesNames(overrides);
+  const filter = filterByPredicate(methodsTypes)
+
+  return inquirer.prompt([
     {
-      type: 'list',
+      type: 'autocomplete',
       name: 'name',
       message: 'Select the override settings:',
-      choices: overridesToChoices(overrides),
+      source: (_: any, input: string) => Promise.resolve(filter(input)),
     },
   ]);
+}
 
-const thisIsAPromise = async (options: OverrideListenerOptions) => {
+const overrideUrl = async (options: OverrideListenerOptions) => {
   const routes = filterRoutesWithOverrides(options.getAllRoutes())
   const { url } = await selectEndpointUrl(getRoutesPaths(routes))
   const route = getRouteByUrl(routes, url)
@@ -100,6 +106,5 @@ const thisIsAPromise = async (options: OverrideListenerOptions) => {
   options.selectMethodOverride(url, type, name)
 }
 
-export const overridesListener = (options: OverrideListenerOptions) => () => {
-  return thisIsAPromise(options)
-}
+export const overridesListener = (options: OverrideListenerOptions) => (): Promise<InputListenerPromiseResponse> =>
+  overrideUrl(options).then(() => ({ usingInquirer: true }))

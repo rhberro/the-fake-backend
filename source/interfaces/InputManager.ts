@@ -1,3 +1,5 @@
+import InputListenerPromiseResponse from './InputListenerPromiseResponse'
+
 export default interface InputManager {
   /**
    * Register an event listener to a key.
@@ -10,7 +12,7 @@ export default interface InputManager {
     /**
      * The event callback.
      */
-    event: Function,
+    event: () => Promise<InputListenerPromiseResponse> | void,
     /**
      * The control key state.
      */
