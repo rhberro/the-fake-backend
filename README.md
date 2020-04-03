@@ -148,8 +148,6 @@ This property allows you to create an array of options that will override the cu
 
 When a request is made the server will check if the `method` object contains the `overrides` property and if there is one `override` selected through the property `selected`. If there is an `override` selected it will be merged with the `method` object.
 
-You can set the current override selected with the server function `selectMethodOverride`.
-
 For example:
 
 ```javascript
@@ -184,7 +182,8 @@ server.routes([
 // curl -XGET http://localhost:8080/user
 // Returns `data/my/custom/path/to/client-user.json` file content.
 
-server.selectMethodOverride('/user', 'get', 'Super Admin')
+Press 'o' on terminal and change the URl '/user' with method 'get' with override 'Super Admin'
+
 // curl -XGET http://localhost:8080/user
 // Returns `data/my/custom/path/to/super-admin-user.json` file content.
 ```
