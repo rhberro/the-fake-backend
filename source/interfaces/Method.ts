@@ -1,10 +1,9 @@
+import MethodOverride from "./MethodOverride";
+import MethodProperties from "./MethodProperties";
 import Search from "./Search";
 
-export default interface Method {
-  code: number,
-  data: any,
-  file: string,
-  paginated: boolean,
+export default interface Method extends MethodProperties {
+  type: "get" | "post" | "put" | "delete" | "patch",
   search: Search,
-  type: 'get' | 'post' | 'put' | 'delete' | 'patch',
+  overrides?: Array<MethodOverride>,
 }

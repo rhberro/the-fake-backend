@@ -11,20 +11,43 @@ import { createThrottlingManager } from './throttling';
 import { createUIManager } from './ui';
 import express from 'express';
 import { readFixtureSync } from './files';
+import { overridesListener } from './overridesListener'
 
 export function createServer(options: ServerOptions): Server {
   const { middlewares, proxies, throttlings } = options || {};
-  
+
   const proxyManager = createProxyManager(proxies);
   const throttlingManager = createThrottlingManager(throttlings);
   const uiManager = createUIManager(proxyManager, throttlingManager);
 
   const expressServer = express();
+  const allRoutes: Array<Route> = [];
 
   expressServer.use(middlewares || cors());
   expressServer.use(
     (req: express.Request, res: express.Response, next: Function) => uiManager.drawRequest(req, res, next)
   );
+
+  /**
+   * Merge method with current override selected.
+   * @param method The method object.
+   */
+  function parseMethod(method: Method) {
+    if (method.overrides) {
+      const overrideSelected = method.overrides.find(
+        ({ selected }) => selected
+      );
+
+      if (overrideSelected) {
+        return {
+          ...method,
+          ...overrideSelected
+        };
+      }
+    }
+
+    return method;
+  }
 
   /**
    * Create the method response object.
@@ -34,7 +57,7 @@ export function createServer(options: ServerOptions): Server {
    * @param {express.Respose} res The response object.
    */
   function createMethodResponse(method: Method, req: express.Request, res: express.Response): void {
-    const { code = 200, data, file, paginated, search } = method;
+    const { code = 200, data, file, paginated, search } = parseMethod(method);
     const { path } = req;
 
     const proxy = proxyManager.getCurrent();
@@ -44,7 +67,6 @@ export function createServer(options: ServerOptions): Server {
     }
 
     let content = data || readFixtureSync(file || path);
-
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
@@ -89,6 +111,43 @@ export function createServer(options: ServerOptions): Server {
     methods.map(createRouteMethod);
   }
 
+  /**
+   * Setter for `allRoutes`.
+   * @param routes Routes to set.
+   */
+  function setAllRoutes(routes: Array<Route>) {
+    while (allRoutes.length > 0) {
+      allRoutes.pop();
+    }
+
+    routes.forEach(route => {
+      allRoutes.push(route);
+    });
+  }
+
+  /**
+  * Sets the current override methods selected.
+  * @param routePath The route path that will be updated.
+  * @param routeMethodType The route method type that will be updated.
+  * @param overrideNameSelected The override name selected.
+  */
+  function selectMethodOverride(
+    routePath: string,
+    routeMethodType: string,
+    overrideNameSelected?: string
+  ) {
+    const route = allRoutes.find(({ path }) => path === routePath);
+    const routeMethod = route?.methods.find(
+      ({ type }) => type === routeMethodType
+    );
+
+    routeMethod?.overrides?.forEach(override => {
+      override.selected = override.name === overrideNameSelected;
+    });
+
+    uiManager.writeEndpointChanged(routePath, routeMethodType, overrideNameSelected)
+  }
+
   return {
     /**
      * Register the server routes.
@@ -96,6 +155,7 @@ export function createServer(options: ServerOptions): Server {
      * @param {Array<Route>} routes The server routes.
      */
     routes(routes: Array<Route>): void {
+      setAllRoutes(routes);
       routes.map(createRoute);
     },
 
@@ -123,6 +183,10 @@ export function createServer(options: ServerOptions): Server {
 
       inputManager.addListener('c', onConnection);
       inputManager.addListener('t', onThrottling);
+      inputManager.addListener('o', overridesListener({
+        getAllRoutes: () => allRoutes,
+        selectMethodOverride
+      }))
 
       expressServer.listen(port);
     },

@@ -1,5 +1,6 @@
 import InputListener from './interfaces/InputListener';
 import InputManager from './interfaces/InputManager';
+import InputListenerPromiseResponse from './interfaces/InputListenerPromiseResponse';
 import readline from 'readline';
 
 /**
@@ -26,16 +27,53 @@ export function createInputManager(): InputManager {
    * Filter and apply listeners that matches the event's properties.
    *
    * @param {any} chunk
-   * @param {readline.key} key - The eveny key.
+   * @param {readline.key} key - The event key.
    */
   function onKeyPress(chunk: any, key: readline.Key): void {
     listeners
       .filter(
         filterInputListener, key
-      ).map(
-        listener => listener.event()
-      );
+      ).map(executeEvent);
   }
+
+  function isPromise(obj: any) {
+    return Boolean(obj.then)
+  }
+
+  function executeEvent(listener: InputListener) {
+    unbindKeypress();
+    const eventResult = listener.event()
+
+    if (eventResult && isPromise(eventResult)) {
+      eventResult.then(data => {
+        if (data && data.usingInquirer) {
+          reopenStdinAfterInquirer();
+        }
+      })
+    } else {
+      bindKeypress();
+    }
+  }
+
+  function reopenStdinAfterInquirer() {
+    readline.emitKeypressEvents(process.stdin);
+
+    if (typeof process.stdin.setRawMode === "function") {
+      process.stdin.setRawMode(true);
+    }
+
+    process.stdin.resume();
+    bindKeypress();
+  }
+
+  function bindKeypress() {
+    process.stdin.on('keypress', onKeyPress);
+  }
+
+  function unbindKeypress() {
+    process.stdin.off('keypress', onKeyPress);
+  }
+
 
   return {
     /**
@@ -48,8 +86,9 @@ export function createInputManager(): InputManager {
 
       if (typeof process.stdin.setRawMode === "function") {
         process.stdin.setRawMode(raw);
-        process.stdin.on('keypress', onKeyPress);
       }
+
+      bindKeypress();
     },
 
     /**
@@ -59,7 +98,7 @@ export function createInputManager(): InputManager {
      * @param {Function} event - The event callback.
      * @param {boolean} control - The control key state.
      */
-    addListener(key: string, event: Function, control: boolean = false): void {
+    addListener(key: string, event: () => Promise<InputListenerPromiseResponse> | void, control: boolean = false): void {
       const listener: InputListener = { key, event, control };
       listeners.push(listener);
     },

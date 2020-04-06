@@ -42,7 +42,7 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
 
   /**
    * Write a message to the user screen followed by a line break.
-   * 
+   *
    * @param {Array<string>} parameters - An array of text to display.
    */
   function line(...parameters: Array<string>): void {
@@ -52,7 +52,7 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
 
   /**
    * Add two empty spaces before writing a message to the user screen followed by a line break.
-   * 
+   *
    * @param {Array<string>} parameters - An array of text to display.
    */
   function paragraph(...parameters: Array<string>): void {
@@ -92,6 +92,7 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
         'Press',
         chalk.bold.white('c'), 'to toggle the connection,',
         chalk.bold.white('t'), 'to toggle the throttling or',
+        chalk.bold.white('o'), 'to change endpoint settings according "overrides"',
         chalk.bold.white('q'), 'to stop and quit the service.',
       );
 
@@ -100,7 +101,7 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
 
     /**
      * Draw the request information to the user screen.
-     * 
+     *
      * @param {express.Request} req - The route request object.
      * @param {express.Response} res - The route response object.
      * @param {express.Request} next - The express next function.
@@ -117,6 +118,13 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
       );
 
       next();
+    },
+
+    writeEndpointChanged: (routePath: string, routeMethodType: string, overrideNameSelected: string) => {
+      const endpoint = chalk.magenta(`(${routeMethodType.toUpperCase()}) ${routePath}`);
+
+      display.write(`Endpoint ${endpoint} changed to response ${chalk.magenta(overrideNameSelected)}`);
+      linebreak();
     }
   }
 }
