@@ -38,7 +38,9 @@
     "chalk": "^4.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "http-proxy-middleware": "^0.20.0"
+    "http-proxy-middleware": "^0.20.0",
+    "inquirer": "^7.1.0",
+    "inquirer-autocomplete-prompt": "^1.0.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",
@@ -47,8 +49,6 @@
     "@types/inquirer": "^6.5.0",
     "@types/jest": "^25.2.1",
     "@types/node": "^13.11.0",
-    "inquirer": "^7.1.0",
-    "inquirer-autocomplete-prompt": "^1.0.2",
     "jest": "^25.2.7",
     "rollup": "^1.31.0",
     "rollup-plugin-cleaner": "^1.0.0",
