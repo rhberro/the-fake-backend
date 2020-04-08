@@ -13,6 +13,8 @@ import express from 'express';
 import { readFixtureSync } from './files';
 import { overridesListener } from './overridesListener';
 
+const isSuccessfulStatusCode = (code: number) => code >= 200 && code <= 299
+
 export function createServer(options: ServerOptions): Server {
   const { middlewares, proxies, throttlings } = options || {};
 
@@ -51,25 +53,15 @@ export function createServer(options: ServerOptions): Server {
   }
 
   /**
-   * Create the method response object.
+   * Get the method content.
    *
    * @param {Method} method The method object.
    * @param {express.Request} req The request object.
-   * @param {express.Respose} res The response object.
+   * @param {express.Response} res The response object.
    */
-  function createMethodResponse(
-    method: Method,
-    req: express.Request,
-    res: express.Response
-  ): void {
-    const { code = 200, data, file, paginated, search } = parseMethod(method);
+  function getContent(method: Method, req: express.Request, res: express.Response) {
+    const { data, file, paginated, search } = method;
     const { path } = req;
-
-    const proxy = proxyManager.getCurrent();
-
-    if (proxy) {
-      return proxy.proxy(req, res);
-    }
 
     let content = data || readFixtureSync(file || path);
 
@@ -81,11 +73,43 @@ export function createServer(options: ServerOptions): Server {
       content = createPaginatedResponse(req, res, content, options);
     }
 
-    function sendContent() {
-      res.status(code).send(content);
+    return content;
+  }
+
+  /**
+   * Response the url with the content.
+   *
+   * @param {Method} method The method object.
+   * @param {express.Request} req The request object.
+   * @param {express.Response} res The response object.
+   */
+  function sendContent(res: express.Response, code: number, content: any) {
+    setTimeout(() => res.status(code).send(content), throttlingManager.getCurrentDelay());
+  }
+
+  /**
+   * Create the method response object.
+   *
+   * @param {Method} method The method object.
+   * @param {express.Request} req The request object.
+   * @param {express.Response} res The response object.
+   */
+  function createMethodResponse(method: Method, req: express.Request, res: express.Response): void {
+    const parsedMethod = parseMethod(method);
+    const { code = 200 } = parsedMethod;
+    const proxy = proxyManager.getCurrent();
+
+    if (proxy) {
+      return proxy.proxy(req, res);
     }
 
-    setTimeout(sendContent, throttlingManager.getCurrentDelay());
+    if (isSuccessfulStatusCode(code)) {
+      const content = getContent(parsedMethod, req, res)
+
+      sendContent(res, code, content);
+    } else {
+      sendContent(res, code, null);
+    }
   }
 
   /**
