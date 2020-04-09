@@ -46,7 +46,7 @@ server.routes(
       path: '/example',
       methods: [
         {
-          type: 'get',
+          type: 'get', // or MethodType.GET with Typescript
           data: 'you-response-data-here',
         },
       ],
@@ -74,7 +74,7 @@ server.routes(
       path: '/cats',
       methods: [
         {
-          type: 'get',
+          type: 'get', // or MethodType.GET with Typescript
         },
       ],
     },
@@ -82,7 +82,7 @@ server.routes(
       path: '/dogs',
       methods: [
         {
-          type: 'get',
+          type: 'get', // or MethodType.GET with Typescript
           file: 'data/my/custom/path/to/dogs.txt',
         },
       ],
@@ -158,7 +158,7 @@ server.routes([
     path: '/user',
     methods: [
       {
-        type: 'get',
+        type: 'get', // or MethodType.GET with Typescript
         file: 'data/my/custom/path/to/client-user.json',
         overrides: [
           {
@@ -215,7 +215,7 @@ server.routes(
       path: '/dogs',
       methods: [
         {
-          type: 'get',
+          type: 'get', // or MethodType.GET with Typescript
           search: {
             parameter: 'search',
             properties: ['name'],
