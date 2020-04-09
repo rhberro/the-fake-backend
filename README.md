@@ -15,6 +15,7 @@ Build a fake backend by providing the content of files or JavaScript objects thr
   * [**Server**](#server)
   * [**Routes**](#routes)
   * [**Methods**](#methods)
+  * [**Overrides**](#overrides)
 * [**Searching**](#searching)
 
 ## Installing
