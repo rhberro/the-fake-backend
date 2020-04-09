@@ -1,5 +1,5 @@
-import Method from '../interfaces/Method';
-import Search from '../interfaces/Search';
+import { Method, Search } from '../interfaces';
+
 import express from 'express';
 
 function filterProperty(

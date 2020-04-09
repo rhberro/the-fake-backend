@@ -1,5 +1,4 @@
-import Throttling from './interfaces/Throttling';
-import ThrottlingManager from './interfaces/ThrottlingManager';
+import { Throttling, ThrottlingManager } from './interfaces';
 
 /**
  * Create a new throttling manager.

@@ -1,5 +1,5 @@
-import ProxyManager from '../source/interfaces/ProxyManager';
-import ProxyProperties from '../source/interfaces/ProxyProperties';
+import { ProxyManager, ProxyProperties } from '../source/interfaces';
+
 import { createProxyManager } from '../source/proxy';
 
 describe('source/proxy.ts', () => {

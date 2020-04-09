@@ -1,7 +1,4 @@
-import Method from './interfaces/Method';
-import Route from './interfaces/Route';
-import Server from './interfaces/Server';
-import ServerOptions from './interfaces/ServerOptions';
+import { Method, Route, Server, ServerOptions } from './interfaces';
 import cors from 'cors';
 import { createInputManager } from './input';
 import createPaginatedResponse from './response/paginated';
