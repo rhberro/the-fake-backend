@@ -66,7 +66,8 @@ export function createServer(options: ServerOptions): Server {
       return proxy.proxy(req, res);
     }
 
-    let content = data || readFixtureSync(file || path);
+    const resolvedData = typeof data === "function" ? data(req) : data;
+    let content = resolvedData || readFixtureSync(file || path);
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
