@@ -9,14 +9,11 @@ export default {
     format: 'cjs',
   },
   plugins: [
-    cleaner(
-      { targets: ['build'] }
-    ),
-    typescript(
-      { typescript: require('typescript'), objectHashIgnoreUnknownHack: true, }
-    ),
-    terser(
-      { output: { comments: false, }, }
-    ),
+    cleaner({ targets: ['build'] }),
+    typescript({
+      typescript: require('typescript'),
+      objectHashIgnoreUnknownHack: true,
+    }),
+    terser({ output: { comments: false } }),
   ],
 };
