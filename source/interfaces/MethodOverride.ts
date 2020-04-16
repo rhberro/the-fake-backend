@@ -1,6 +1,6 @@
-import MethodProperties from "./MethodProperties";
+import MethodProperties from './MethodProperties';
 
 export default interface MethodOverride extends MethodProperties {
-  name: string,
-  selected: boolean,
+  name: string;
+  selected: boolean;
 }

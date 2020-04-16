@@ -1,4 +1,4 @@
 export default interface ProxyProperties {
-  name: string,
-  host: string,
+  name: string;
+  host: string;
 }

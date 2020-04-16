@@ -11,7 +11,7 @@ import { createThrottlingManager } from './throttling';
 import { createUIManager } from './ui';
 import express from 'express';
 import { readFixtureSync } from './files';
-import { overridesListener } from './overridesListener'
+import { overridesListener } from './overridesListener';
 
 export function createServer(options: ServerOptions): Server {
   const { middlewares, proxies, throttlings } = options || {};
@@ -25,7 +25,8 @@ export function createServer(options: ServerOptions): Server {
 
   expressServer.use(middlewares || cors());
   expressServer.use(
-    (req: express.Request, res: express.Response, next: Function) => uiManager.drawRequest(req, res, next)
+    (req: express.Request, res: express.Response, next: Function) =>
+      uiManager.drawRequest(req, res, next)
   );
 
   /**
@@ -41,7 +42,7 @@ export function createServer(options: ServerOptions): Server {
       if (overrideSelected) {
         return {
           ...method,
-          ...overrideSelected
+          ...overrideSelected,
         };
       }
     }
@@ -56,7 +57,11 @@ export function createServer(options: ServerOptions): Server {
    * @param {express.Request} req The request object.
    * @param {express.Respose} res The response object.
    */
-  function createMethodResponse(method: Method, req: express.Request, res: express.Response): void {
+  function createMethodResponse(
+    method: Method,
+    req: express.Request,
+    res: express.Response
+  ): void {
     const { code = 200, data, file, paginated, search } = parseMethod(method);
     const { path } = req;
 
@@ -120,17 +125,17 @@ export function createServer(options: ServerOptions): Server {
       allRoutes.pop();
     }
 
-    routes.forEach(route => {
+    routes.forEach((route) => {
       allRoutes.push(route);
     });
   }
 
   /**
-  * Sets the current override methods selected.
-  * @param routePath The route path that will be updated.
-  * @param routeMethodType The route method type that will be updated.
-  * @param overrideNameSelected The override name selected.
-  */
+   * Sets the current override methods selected.
+   * @param routePath The route path that will be updated.
+   * @param routeMethodType The route method type that will be updated.
+   * @param overrideNameSelected The override name selected.
+   */
   function selectMethodOverride(
     routePath: string,
     routeMethodType: string,
@@ -141,11 +146,15 @@ export function createServer(options: ServerOptions): Server {
       ({ type }) => type === routeMethodType
     );
 
-    routeMethod?.overrides?.forEach(override => {
+    routeMethod?.overrides?.forEach((override) => {
       override.selected = override.name === overrideNameSelected;
     });
 
-    uiManager.writeEndpointChanged(routePath, routeMethodType, overrideNameSelected)
+    uiManager.writeEndpointChanged(
+      routePath,
+      routeMethodType,
+      overrideNameSelected
+    );
   }
 
   return {
@@ -183,10 +192,13 @@ export function createServer(options: ServerOptions): Server {
 
       inputManager.addListener('c', onConnection);
       inputManager.addListener('t', onThrottling);
-      inputManager.addListener('o', overridesListener({
-        getAllRoutes: () => allRoutes,
-        selectMethodOverride
-      }))
+      inputManager.addListener(
+        'o',
+        overridesListener({
+          getAllRoutes: () => allRoutes,
+          selectMethodOverride,
+        })
+      );
 
       expressServer.listen(port);
     },

@@ -1,4 +1,4 @@
-import InputListenerPromiseResponse from './InputListenerPromiseResponse'
+import InputListenerPromiseResponse from './InputListenerPromiseResponse';
 
 export default interface InputManager {
   /**
@@ -17,6 +17,6 @@ export default interface InputManager {
      * The control key state.
      */
     control?: boolean
-  ) => void,
-  init: Function,
+  ) => void;
+  init: Function;
 }
