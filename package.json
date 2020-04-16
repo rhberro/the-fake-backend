@@ -55,6 +55,7 @@
     "@types/jest": "^25.2.1",
     "@types/node": "^13.11.0",
     "commitizen": "^4.0.4",
+    "cz-conventional-changelog": "^3.1.0",
     "husky": "^4.2.5",
     "jest": "^25.2.7",
     "prettier": "2.0.4",
@@ -65,5 +66,10 @@
     "rollup-plugin-typescript2": "^0.25.3",
     "ts-jest": "^25.3.1",
     "typescript": "^3.8.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
