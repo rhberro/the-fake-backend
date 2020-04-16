@@ -29,6 +29,7 @@
     "express"
   ],
   "scripts": {
+    "commit": "git-cz",
     "format": "prettier --write 'source/**/*'",
     "format:staged": "pretty-quick --staged",
     "prepare": "rollup --config",
@@ -45,12 +46,15 @@
     "inquirer-autocomplete-prompt": "^1.0.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.4",
     "@types/http-proxy-middleware": "^0.19.3",
     "@types/inquirer": "^6.5.0",
     "@types/jest": "^25.2.1",
     "@types/node": "^13.11.0",
+    "commitizen": "^4.0.4",
     "husky": "^4.2.5",
     "jest": "^25.2.7",
     "prettier": "2.0.4",
