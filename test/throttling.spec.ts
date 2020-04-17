@@ -17,7 +17,9 @@ describe('source/throttling.ts', () => {
 
   describe('createThrottlingManager', () => {
     it('returns an instance of ThrottlingManager', () => {
-      expect(throttlingManager).toMatchObject<ThrottlingManager>(throttlingManager);
+      expect(throttlingManager).toMatchObject<ThrottlingManager>(
+        throttlingManager
+      );
     });
   });
 
@@ -44,7 +46,9 @@ describe('source/throttling.ts', () => {
     });
 
     it('returns a number between the first throttling values', () => {
-      const currentDelay = throttlingManager.toggleCurrent() || throttlingManager.getCurrentDelay()
+      const currentDelay =
+        throttlingManager.toggleCurrent() ||
+        throttlingManager.getCurrentDelay();
       expect(currentDelay).toBeGreaterThanOrEqual(throttlings[0].values[0]);
       expect(currentDelay).toBeLessThanOrEqual(throttlings[0].values[1]);
     });
@@ -59,7 +63,7 @@ describe('source/throttling.ts', () => {
       throttlingManager.toggleCurrent();
       throttlingManager.toggleCurrent();
       throttlingManager.toggleCurrent();
-      throttlingManager.toggleCurrent()
+      throttlingManager.toggleCurrent();
       expect(throttlingManager.getCurrent()).toEqual(null);
     });
   });

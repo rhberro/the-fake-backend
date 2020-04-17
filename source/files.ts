@@ -83,10 +83,12 @@ export function readFixtureSync(path: string): any {
   const extension = extname(path);
 
   try {
-    return extension
-      ? readFixtureFileSync(path)
-      : readFixturePathSync(path);
+    return extension ? readFixtureFileSync(path) : readFixturePathSync(path);
   } catch (error) {
-    console.error('You probably forgot to create the fixture file.', path, error);
+    console.error(
+      'You probably forgot to create the fixture file.',
+      path,
+      error
+    );
   }
 }

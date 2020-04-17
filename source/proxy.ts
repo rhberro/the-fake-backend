@@ -1,13 +1,13 @@
-import Proxy from "./interfaces/Proxy";
-import ProxyManager from "./interfaces/ProxyManager";
+import Proxy from './interfaces/Proxy';
+import ProxyManager from './interfaces/ProxyManager';
 import ProxyProperties from './interfaces/ProxyProperties';
 import httpProxyMiddleware from 'http-proxy-middleware';
 
 /**
  * Add a proxy property to the proxy properties
- * 
+ *
  * @param {ProxyProperties} proxy - The proxy properties object.
- * 
+ *
  * @return {Proxy} The proxy with the proxy middleware.
  */
 function createProxyMiddleware(proxy: ProxyProperties): Proxy {
@@ -16,12 +16,10 @@ function createProxyMiddleware(proxy: ProxyProperties): Proxy {
   return {
     host,
     name,
-    proxy: httpProxyMiddleware(
-      {
-        target: host,
-        changeOrigin: true,
-      },
-    ),
+    proxy: httpProxyMiddleware({
+      target: host,
+      changeOrigin: true,
+    }),
   };
 }
 
@@ -32,7 +30,9 @@ function createProxyMiddleware(proxy: ProxyProperties): Proxy {
  *
  * @return {ProxyManager} The proxy manager.
  */
-export function createProxyManager(proxies: Array<ProxyProperties> = []): ProxyManager {
+export function createProxyManager(
+  proxies: Array<ProxyProperties> = []
+): ProxyManager {
   let currentProxyIndex: number | null = null;
 
   const proxyMiddlewares = proxies.map(createProxyMiddleware);
@@ -40,7 +40,7 @@ export function createProxyManager(proxies: Array<ProxyProperties> = []): ProxyM
   return {
     /**
      * Get all proxies.
-     * 
+     *
      * @return {Array<Proxy>} An array containing all the proxies.
      */
     getAll(): Array<Proxy> {
@@ -49,7 +49,7 @@ export function createProxyManager(proxies: Array<ProxyProperties> = []): ProxyM
 
     /**
      * Get current proxy.
-     * 
+     *
      * @return {Proxy} The current proxy.
      */
     getCurrent(): Proxy | null {
