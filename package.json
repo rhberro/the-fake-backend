@@ -1,7 +1,7 @@
 {
   "name": "the-fake-backend",
   "description": "Build a fake backend by providing the content of files or JavaScript objects through configurable routes.",
-  "version": "1.0.11",
+  "version": "1.0.11-development",
   "license": "ISC",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -35,7 +35,8 @@
     "prepare": "rollup --config",
     "build": "rollup --config",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "semantic-release": "semantic-release"
   },
   "dependencies": {
     "chalk": "^4.0.0",
@@ -65,7 +66,8 @@
     "rollup-plugin-terser": "^5.2.0",
     "rollup-plugin-typescript2": "^0.25.3",
     "ts-jest": "^25.3.1",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "semantic-release": "^17.0.6"
   },
   "config": {
     "commitizen": {
