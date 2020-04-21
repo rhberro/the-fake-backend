@@ -9,6 +9,7 @@ export { default as PaginationProperties } from './PaginationProperties';
 export { default as Proxy } from './Proxy';
 export { default as ProxyManager } from './ProxyManager';
 export { default as ProxyProperties } from './ProxyProperties';
+export { default as ProxyResult } from './ProxyResult';
 export { default as Route } from './Route';
 export { default as Search } from './Search';
 export { default as Server } from './Server';
