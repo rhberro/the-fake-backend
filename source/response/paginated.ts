@@ -1,5 +1,5 @@
-import PaginationProperties from '../interfaces/PaginationProperties';
-import ServerOptions from '../interfaces/ServerOptions';
+import { PaginationProperties, ServerOptions } from '../interfaces';
+
 import express from 'express';
 
 function getPaginationProperties(

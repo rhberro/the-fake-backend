@@ -1,5 +1,5 @@
-import Throttling from '../source/interfaces/Throttling';
-import ThrottlingManager from '../source/interfaces/ThrottlingManager';
+import { Throttling, ThrottlingManager } from '../source/interfaces';
+
 import { createThrottlingManager } from '../source/throttling';
 
 describe('source/throttling.ts', () => {

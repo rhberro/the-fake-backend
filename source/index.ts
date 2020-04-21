@@ -1,3 +1,3 @@
 export { createServer } from './server';
-export { default as Server } from './interfaces/Server';
-export { default as ServerOptions } from './interfaces/ServerOptions';
+export * from './interfaces'
+export * from './enums'

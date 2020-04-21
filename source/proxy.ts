@@ -1,7 +1,4 @@
-import Proxy from './interfaces/Proxy';
-import ProxyManager from './interfaces/ProxyManager';
-import ProxyProperties from './interfaces/ProxyProperties';
-import ProxyResult from "./interfaces/ProxyResult";
+import { Proxy, ProxyManager, ProxyProperties, ProxyResult } from './interfaces';
 import httpProxyMiddleware from 'http-proxy-middleware';
 
 /**

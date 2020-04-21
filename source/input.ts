@@ -1,6 +1,8 @@
-import InputListener from './interfaces/InputListener';
-import InputListenerPromiseResponse from './interfaces/InputListenerPromiseResponse';
-import InputManager from './interfaces/InputManager';
+import {
+  InputListener,
+  InputListenerPromiseResponse,
+  InputManager,
+} from './interfaces';
 import readline from 'readline';
 
 /**

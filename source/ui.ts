@@ -1,6 +1,4 @@
-import ProxyManager from './interfaces/ProxyManager';
-import ThrottlingManager from './interfaces/ThrottlingManager';
-import UIManager from './interfaces/UIManager';
+import { ProxyManager, ThrottlingManager, UIManager } from './interfaces';
 import chalk from 'chalk';
 import express from 'express';
 import readline from 'readline';

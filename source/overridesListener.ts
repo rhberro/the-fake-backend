@@ -1,8 +1,10 @@
-import OverrideListenerOptions from './interfaces/OverrideListenerOptions';
-import Route from './interfaces/Route';
-import Method from './interfaces/Method';
-import MethodOverride from './interfaces/MethodOverride';
-import InputListenerPromiseResponse from './interfaces/InputListenerPromiseResponse';
+import {
+  InputListenerPromiseResponse,
+  Method,
+  MethodOverride,
+  OverrideListenerOptions,
+  Route,
+} from './interfaces';
 import inquirer from 'inquirer';
 
 inquirer.registerPrompt(
