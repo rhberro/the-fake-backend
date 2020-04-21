@@ -1,10 +1,10 @@
-import Route from './Route'
+import Route from './Route';
 
 export default interface OverrideListenerOptions {
   /**
    * Getter of `allRoutes`.
    */
-  getAllRoutes: () => Array<Route>,
+  getAllRoutes: () => Array<Route>;
 
   /**
    * Sets the current override methods selected.
@@ -22,5 +22,5 @@ export default interface OverrideListenerOptions {
      * The override name selected.
      */
     overrideNameSelected?: string
-  ) => void,
+  ) => void;
 }

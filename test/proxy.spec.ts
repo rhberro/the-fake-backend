@@ -1,12 +1,12 @@
-import ProxyManager from '../source/interfaces/ProxyManager';
-import ProxyProperties from '../source/interfaces/ProxyProperties';
+import { ProxyManager, ProxyProperties } from '../source/interfaces';
+
 import { createProxyManager } from '../source/proxy';
 
 describe('source/proxy.ts', () => {
   let proxyManager: ProxyManager;
 
   const proxies: Array<ProxyProperties> = [
-    { name: 'First', host: 'firsthost.com', },
+    { name: 'First', host: 'firsthost.com' },
     { name: 'Second', host: 'secondhost.com' },
     { name: 'Third', host: 'thirdhost.com' },
   ];
@@ -55,7 +55,7 @@ describe('source/proxy.ts', () => {
       proxyManager.toggleCurrent();
       proxyManager.toggleCurrent();
       proxyManager.toggleCurrent();
-      proxyManager.toggleCurrent()
+      proxyManager.toggleCurrent();
       expect(proxyManager.getCurrent()).toEqual(null);
     });
   });

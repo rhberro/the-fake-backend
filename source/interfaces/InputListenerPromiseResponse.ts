@@ -1,3 +1,3 @@
 export default interface InputListenerPromiseResponse {
-  usingInquirer: boolean,
+  usingInquirer: boolean;
 }

@@ -1,6 +1,4 @@
-import ProxyManager from "./interfaces/ProxyManager";
-import ThrottlingManager from "./interfaces/ThrottlingManager";
-import UIManager from "./interfaces/UIManager";
+import { ProxyManager, ThrottlingManager, UIManager } from './interfaces';
 import chalk from 'chalk';
 import express from 'express';
 import readline from 'readline';
@@ -13,13 +11,14 @@ import readline from 'readline';
  *
  * @return {UIManager} The UI manager.
  */
-export function createUIManager(proxyManager: ProxyManager, throttlingManager: ThrottlingManager): UIManager {
-  const display = readline.createInterface(
-    {
-      input: process.stdin,
-      output: process.stdout,
-    }
-  );
+export function createUIManager(
+  proxyManager: ProxyManager,
+  throttlingManager: ThrottlingManager
+): UIManager {
+  const display = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
   function write(text: string) {
     display.write(text);
@@ -69,31 +68,34 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
 
       clear();
 
-      line(
-        chalk.bold.green('The service is running!')
-      );
+      line(chalk.bold.green('The service is running!'));
 
       line(chalk.blackBright('Connection:'));
       paragraph(
         (currentProxy && chalk.bold.white(currentProxy.name)) || 'Local',
-        currentProxy && chalk.bold.blackBright(currentProxy.host),
+        (currentProxy && chalk.bold.blackBright(currentProxy.host)) || ''
       );
 
       line(chalk.blackBright('Throttling:'));
       paragraph(
-        (currentThrottling && chalk.bold.white(currentThrottling.name)) || 'Disabled',
+        (currentThrottling && chalk.bold.white(currentThrottling.name)) ||
+          'Disabled',
         currentThrottling && chalk.bold.black(currentThrottling.values[0]),
         currentThrottling && chalk.bold.black('-'),
         currentThrottling && chalk.bold.black(currentThrottling.values[1]),
-        currentThrottling && chalk.bold.black('ms'),
+        currentThrottling && chalk.bold.black('ms')
       );
 
       line(
         'Press',
-        chalk.bold.white('c'), 'to toggle the connection,',
-        chalk.bold.white('t'), 'to toggle the throttling or',
-        chalk.bold.white('o'), 'to change endpoint settings according "overrides"',
-        chalk.bold.white('q'), 'to stop and quit the service.',
+        chalk.bold.white('c'),
+        'to toggle the connection,',
+        chalk.bold.white('t'),
+        'to toggle the throttling or',
+        chalk.bold.white('o'),
+        'to change endpoint settings according "overrides"',
+        chalk.bold.white('q'),
+        'to stop and quit the service.'
       );
 
       linebreak();
@@ -106,25 +108,38 @@ export function createUIManager(proxyManager: ProxyManager, throttlingManager: T
      * @param {express.Response} res - The route response object.
      * @param {express.Request} next - The express next function.
      */
-    drawRequest(req: express.Request, res: express.Response, next: Function): void {
+    drawRequest(
+      req: express.Request,
+      res: express.Response,
+      next: Function
+    ): void {
       const currentThrottling = throttlingManager.getCurrent();
       const currentThrottlingDelay = throttlingManager.getCurrentDelay();
 
       line(chalk.bold.white(req.path));
       line(
-        currentThrottling && chalk.blackBright(
-          '[' + currentThrottlingDelay + 'ms]'
-        ),
+        currentThrottling &&
+          chalk.blackBright('[' + currentThrottlingDelay + 'ms]')
       );
 
       next();
     },
 
-    writeEndpointChanged: (routePath: string, routeMethodType: string, overrideNameSelected: string) => {
-      const endpoint = chalk.magenta(`(${routeMethodType.toUpperCase()}) ${routePath}`);
+    writeEndpointChanged: (
+      routePath: string,
+      routeMethodType: string,
+      overrideNameSelected: string
+    ) => {
+      const endpoint = chalk.magenta(
+        `(${routeMethodType.toUpperCase()}) ${routePath}`
+      );
 
-      display.write(`Endpoint ${endpoint} changed to response ${chalk.magenta(overrideNameSelected)}`);
+      display.write(
+        `Endpoint ${endpoint} changed to response ${chalk.magenta(
+          overrideNameSelected
+        )}`
+      );
       linebreak();
-    }
-  }
+    },
+  };
 }
