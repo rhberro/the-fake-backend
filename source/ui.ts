@@ -73,7 +73,7 @@ export function createUIManager(
       line(chalk.blackBright('Connection:'));
       paragraph(
         (currentProxy && chalk.bold.white(currentProxy.name)) || 'Local',
-        currentProxy && chalk.bold.blackBright(currentProxy.host)
+        (currentProxy && chalk.bold.blackBright(currentProxy.host)) || ''
       );
 
       line(chalk.blackBright('Throttling:'));

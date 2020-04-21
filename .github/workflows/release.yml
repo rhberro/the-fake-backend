@@ -1,14 +1,14 @@
-name: build
+name: release
 
 on:
   push:
     branches:
-    - master
+      - master
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-    name: Testing
+    name: Release
     steps:
       - name: Checkout
         uses: actions/checkout@v2.1.0
