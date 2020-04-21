@@ -38,10 +38,7 @@ export default function createSearchableResponse(
   content: Array<any>,
   method: Method
 ) {
-  const {
-    search,
-    search: { parameter = 'search' },
-  } = method;
+  const { search, search: { parameter = 'search' } = {} } = method;
   const { query } = req;
 
   const bindedFilterContent = filterContent.bind(null, search, query);
