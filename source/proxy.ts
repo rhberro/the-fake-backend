@@ -1,6 +1,7 @@
 import Proxy from './interfaces/Proxy';
 import ProxyManager from './interfaces/ProxyManager';
 import ProxyProperties from './interfaces/ProxyProperties';
+import ProxyResult from "./interfaces/ProxyResult";
 import httpProxyMiddleware from 'http-proxy-middleware';
 
 /**
@@ -10,7 +11,7 @@ import httpProxyMiddleware from 'http-proxy-middleware';
  *
  * @return {Proxy} The proxy with the proxy middleware.
  */
-function createProxyMiddleware(proxy: ProxyProperties): Proxy {
+function createProxyMiddleware(proxy: ProxyProperties): ProxyResult {
   const { name, host } = proxy;
 
   return {
@@ -52,7 +53,7 @@ export function createProxyManager(
      *
      * @return {Proxy} The current proxy.
      */
-    getCurrent(): Proxy | null {
+    getCurrent(): ProxyResult | null {
       if (currentProxyIndex !== null) {
         return proxyMiddlewares[currentProxyIndex];
       }
