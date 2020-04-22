@@ -1,4 +1,5 @@
 import { Method, Route, Server, ServerOptions } from './interfaces';
+
 import cors from 'cors';
 import { createInputManager } from './input';
 import createPaginatedResponse from './response/paginated';
@@ -7,10 +8,10 @@ import createSearchableResponse from './response/searchable';
 import { createThrottlingManager } from './throttling';
 import { createUIManager } from './ui';
 import express from 'express';
-import { readFixtureSync } from './files';
 import { overridesListener } from './overridesListener';
+import { readFixtureSync } from './files';
 
-const isSuccessfulStatusCode = (code: number) => code >= 200 && code <= 299
+const isSuccessfulStatusCode = (code: number) => code >= 200 && code <= 299;
 
 export function createServer(options: ServerOptions): Server {
   const { middlewares, proxies, throttlings } = options || {};
@@ -56,11 +57,16 @@ export function createServer(options: ServerOptions): Server {
    * @param {express.Request} req The request object.
    * @param {express.Response} res The response object.
    */
-  function getContent(method: Method, req: express.Request, res: express.Response) {
+  function getContent(
+    method: Method,
+    req: express.Request,
+    res: express.Response
+  ) {
     const { data, file, paginated, search } = method;
     const { path } = req;
 
-    let content = data || readFixtureSync(file || path);
+    const resolvedData = typeof data === 'function' ? data(req) : data;
+    let content = resolvedData || readFixtureSync(file || path);
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
@@ -81,7 +87,10 @@ export function createServer(options: ServerOptions): Server {
    * @param {express.Response} res The response object.
    */
   function sendContent(res: express.Response, code: number, content: any) {
-    setTimeout(() => res.status(code).send(content), throttlingManager.getCurrentDelay());
+    setTimeout(
+      () => res.status(code).send(content),
+      throttlingManager.getCurrentDelay()
+    );
   }
 
   /**
@@ -91,7 +100,11 @@ export function createServer(options: ServerOptions): Server {
    * @param {express.Request} req The request object.
    * @param {express.Response} res The response object.
    */
-  function createMethodResponse(method: Method, req: express.Request, res: express.Response): void {
+  function createMethodResponse(
+    method: Method,
+    req: express.Request,
+    res: express.Response
+  ): void {
     const parsedMethod = parseMethod(method);
     const { code = 200 } = parsedMethod;
     const proxy = proxyManager.getCurrent();
@@ -101,7 +114,7 @@ export function createServer(options: ServerOptions): Server {
     }
 
     if (isSuccessfulStatusCode(code)) {
-      const content = getContent(parsedMethod, req, res)
+      const content = getContent(parsedMethod, req, res);
 
       sendContent(res, code, content);
     } else {
