@@ -3,7 +3,7 @@ import Search from './Search';
 
 export default interface MethodProperties {
   code?: number;
-  data?: ((req: Request) => any) | string | object | number | boolean;
+  data?: any;
   file?: string;
   paginated?: boolean;
   search?: Search;
