@@ -12,6 +12,8 @@ inquirer.registerPrompt(
   require('inquirer-autocomplete-prompt')
 );
 
+const OVERRIDE_DEFAULT_OPTION = 'Default';
+
 const isNotEmpty = <T>(array: T[]) => array.length > 0;
 
 const filterMethodsWithOverrides = (methods: Method[]) =>
@@ -95,7 +97,10 @@ const selectMethodType = (route: Route) => {
 };
 
 const selectOverride = (overrides: MethodOverride[]) => {
-  const methodsTypes = getOverridesNames(overrides);
+  const methodsTypes = [
+    OVERRIDE_DEFAULT_OPTION,
+    ...getOverridesNames(overrides),
+  ];
   const filter = filterByPredicate(methodsTypes);
 
   return inquirer.prompt([
