@@ -80,7 +80,7 @@ export function readFixturePathSync(path: string): any {
  *
  * @return {any} The file content.
  */
-export function readFixtureSync(path: string, fallbackPath: string): any {
+export function readFixtureSync(path: string, fallbackPath?: string): any {
   const extension = extname(path);
 
   try {
