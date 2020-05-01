@@ -7,6 +7,7 @@ export default interface MethodProperties {
   data?: any;
   file?: string;
   headers?: ResponseHeaders;
+  delay?: number;
   paginated?: boolean;
   search?: Search;
 }

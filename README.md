@@ -123,6 +123,7 @@ The script above generates the following two endpoints.
 | data      | no       |         |
 | file      | no       |         |
 | headers   | no       |         |
+| delay     | no       |         |
 | search    | no       |         |
 | paginated | no       | false   |
 | overrides | no       |         |
@@ -138,6 +139,7 @@ The same [Methods](#methods) properties but requires a `name` and does not have 
 | data      | no       |         |
 | file      | no       |         |
 | headers   | no       |         |
+| delay     | no       |         |
 | search    | no       |         |
 | paginated | no       | false   |
 | selected  | no       | false   |
