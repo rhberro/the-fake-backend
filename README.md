@@ -122,6 +122,7 @@ The script above generates the following two endpoints.
 | code      | no       | 200     |
 | data      | no       |         |
 | file      | no       |         |
+| headers   | no       |         |
 | search    | no       |         |
 | paginated | no       | false   |
 | overrides | no       |         |
