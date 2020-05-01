@@ -5,6 +5,7 @@ export default interface MethodProperties {
   code?: number;
   data?: any;
   file?: string;
+  delay?: number;
   paginated?: boolean;
   search?: Search;
 }

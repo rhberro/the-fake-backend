@@ -82,14 +82,20 @@ export function createServer(options: ServerOptions): Server {
   /**
    * Response the url with the content.
    *
-   * @param {Method} method The method object.
    * @param {express.Request} req The request object.
    * @param {express.Response} res The response object.
+   * @param {any} content The response content.
+   * @param {number} delay The response delay.
    */
-  function sendContent(res: express.Response, code: number, content: any) {
+  function sendContent(
+    res: express.Response,
+    code: number,
+    content: any,
+    delay?: number
+  ) {
     setTimeout(
       () => res.status(code).send(content),
-      throttlingManager.getCurrentDelay()
+      delay || throttlingManager.getCurrentDelay()
     );
   }
 
@@ -116,7 +122,7 @@ export function createServer(options: ServerOptions): Server {
     if (isSuccessfulStatusCode(code)) {
       const content = getContent(parsedMethod, req, res);
 
-      sendContent(res, code, content);
+      sendContent(res, code, content, parsedMethod.delay);
     } else {
       sendContent(res, code, null);
     }
