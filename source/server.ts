@@ -10,6 +10,7 @@ import { createUIManager } from './ui';
 import express from 'express';
 import { overridesListener } from './overridesListener';
 import { readFixtureSync } from './files';
+import { ResponseHeaders } from './types';
 
 const isSuccessfulStatusCode = (code: number) => code >= 200 && code <= 299;
 
@@ -86,9 +87,14 @@ export function createServer(options: ServerOptions): Server {
    * @param {express.Request} req The request object.
    * @param {express.Response} res The response object.
    */
-  function sendContent(res: express.Response, code: number, content: any) {
+  function sendContent(
+    res: express.Response,
+    code: number,
+    content: any,
+    headers: ResponseHeaders = {}
+  ) {
     setTimeout(
-      () => res.status(code).send(content),
+      () => res.status(code).set(headers).send(content),
       throttlingManager.getCurrentDelay()
     );
   }
@@ -116,7 +122,7 @@ export function createServer(options: ServerOptions): Server {
     if (isSuccessfulStatusCode(code)) {
       const content = getContent(parsedMethod, req, res);
 
-      sendContent(res, code, content);
+      sendContent(res, code, content, parsedMethod.headers);
     } else {
       sendContent(res, code, null);
     }
