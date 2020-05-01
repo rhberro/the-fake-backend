@@ -8,15 +8,15 @@
 
 Build a fake backend by providing the content of files or JavaScript objects through configurable routes. This service allows the developer to work on a new feature or an existing one using fake data while the real service is in development.
 
-* [**Installing**](#installing)
-* [**Getting Started**](#getting-started)
-  * [**Files**](#files)
-* [**Properties**](#properties)
-  * [**Server**](#server)
-  * [**Routes**](#routes)
-  * [**Methods**](#methods)
-  * [**Overrides**](#overrides)
-* [**Searching**](#searching)
+- [**Installing**](#installing)
+- [**Getting Started**](#getting-started)
+  - [**Files**](#files)
+- [**Properties**](#properties)
+  - [**Server**](#server)
+  - [**Routes**](#routes)
+  - [**Methods**](#methods)
+  - [**Overrides**](#overrides)
+- [**Searching**](#searching)
 
 ## Installing
 
@@ -41,19 +41,17 @@ const { createServer } = require('the-fake-backend');
 
 const server = createServer();
 
-server.routes(
-  [
-    {
-      path: '/example',
-      methods: [
-        {
-          type: 'get', // or MethodType.GET with Typescript
-          data: 'you-response-data-here',
-        },
-      ],
-    },
-  ]
-);
+server.routes([
+  {
+    path: '/example',
+    methods: [
+      {
+        type: 'get', // or MethodType.GET with Typescript
+        data: 'you-response-data-here',
+      },
+    ],
+  },
+]);
 
 server.listen(8080);
 ```
@@ -69,67 +67,64 @@ const { createServer } = require('the-fake-backend');
 
 const server = createServer();
 
-server.routes(
-  [
-    {
-      path: '/cats',
-      methods: [
-        {
-          type: 'get', // or MethodType.GET with Typescript
-        },
-      ],
-    },
-    {
-      path: '/dogs',
-      methods: [
-        {
-          type: 'get', // or MethodType.GET with Typescript
-          file: 'data/my/custom/path/to/dogs.txt',
-        },
-      ],
-    },
-  ]
-);
+server.routes([
+  {
+    path: '/cats',
+    methods: [
+      {
+        type: 'get', // or MethodType.GET with Typescript
+      },
+    ],
+  },
+  {
+    path: '/dogs',
+    methods: [
+      {
+        type: 'get', // or MethodType.GET with Typescript
+        file: 'data/my/custom/path/to/dogs.txt',
+      },
+    ],
+  },
+]);
 
 server.listen(8080);
 ```
 
 The script above generates the following two endpoints.
 
-| Method | Path                              | Response                                            |
-|--------|-----------------------------------|-----------------------------------------------------|
-| GET    | http://localhost:8080/cats        | The `data/cats.json` file content.                  |
-| GET    | http://localhost:8080/dogs        | The `data/my/custom/path/to/dogs.txt` file content. |
+| Method | Path                       | Response                                            |
+| ------ | -------------------------- | --------------------------------------------------- |
+| GET    | http://localhost:8080/cats | The `data/cats.json` file content.                  |
+| GET    | http://localhost:8080/dogs | The `data/my/custom/path/to/dogs.txt` file content. |
 
 ## Properties
 
 ### Server
 
-| Property    | Required | Description                                                             |
-|-------------|----------|-------------------------------------------------------------------------|
-| middlewares | no       | An array of functions compatible with [express's middlewares](https://expressjs.com/en/guide/writing-middleware.html).            |
-| proxies     | no       | The server proxies.                                                     |
-| throttlings | no       | The server throttlings.                                                 |
+| Property    | Required | Description                                                                                                            |
+| ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| middlewares | no       | An array of functions compatible with [express's middlewares](https://expressjs.com/en/guide/writing-middleware.html). |
+| proxies     | no       | The server proxies.                                                                                                    |
+| throttlings | no       | The server throttlings.                                                                                                |
 
 ### Routes
 
-| Property  | Required | Description                                                        |
-|-----------|----------|--------------------------------------------------------------------|
-| path      | yes      | The endpoint address (URI).                                        |
-| method    | yes      | The route methods, check the method's properties table below.      |
+| Property | Required | Description                                                   |
+| -------- | -------- | ------------------------------------------------------------- |
+| path     | yes      | The endpoint address (URI).                                   |
+| method   | yes      | The route methods, check the method's properties table below. |
 
 ### Methods
 
-| Property  | Required | Default  |
-|-----------|----------|----------|
-| type      | yes      |          |
-| code      | no       | 200      |
-| data      | no       |          |
-| file      | no       |          |
-| search    | no       |          |
-| paginated | no       | false    |
-| overrides | no       |          |
-
+| Property  | Required | Default |
+| --------- | -------- | ------- |
+| type      | yes      |         |
+| code      | no       | 200     |
+| data      | no       |         |
+| file      | no       |         |
+| search    | no       |         |
+| paginated | no       | false   |
+| overrides | no       |         |
 
 ### Overrides
 
@@ -141,6 +136,7 @@ The same [Methods](#methods) properties but requires a `name` and does not have 
 | code      | no       | 200     |
 | data      | no       |         |
 | file      | no       |         |
+| headers   | no       |         |
 | search    | no       |         |
 | paginated | no       | false   |
 | selected  | no       | false   |
@@ -189,7 +185,6 @@ Press 'o' on terminal and change the URl '/user' with method 'get' with override
 // Returns `data/my/custom/path/to/super-admin-user.json` file content.
 ```
 
-
 ## Searching
 
 You can make an endpoint searchable by declaring the search property.
@@ -210,22 +205,20 @@ const { createServer } = require('the-fake-backend');
 
 const server = createServer();
 
-server.routes(
-  [
-    {
-      path: '/dogs',
-      methods: [
-        {
-          type: 'get', // or MethodType.GET with Typescript
-          search: {
-            parameter: 'search',
-            properties: ['name'],
-          },
+server.routes([
+  {
+    path: '/dogs',
+    methods: [
+      {
+        type: 'get', // or MethodType.GET with Typescript
+        search: {
+          parameter: 'search',
+          properties: ['name'],
         },
-      ],
-    },
-  ]
-);
+      },
+    ],
+  },
+]);
 
 server.listen(8080);
 ```
