@@ -76,19 +76,32 @@ export function readFixturePathSync(path: string): any {
  * Read a fixture file using the extension when available or by reading the whole directory.
  *
  * @param {string} path The file path.
+ * @param {string} fallbackPath The fallback file path.
  *
  * @return {any} The file content.
  */
-export function readFixtureSync(path: string): any {
+export function readFixtureSync(path: string, fallbackPath: string): any {
   const extension = extname(path);
 
   try {
     return extension ? readFixtureFileSync(path) : readFixturePathSync(path);
   } catch (error) {
-    console.error(
-      'You probably forgot to create the fixture file.',
-      path,
-      error
-    );
+    if (fallbackPath) {
+      try {
+        return readFixturePathSync(fallbackPath);
+      } catch (fallbackError) {
+        console.error(
+          'You probably forgot to create the fallback fixture file',
+          fallbackPath,
+          fallbackError
+        );
+      }
+    } else {
+      console.error(
+        'You probably forgot to create the fixture file.',
+        path,
+        error
+      );
+    }
   }
 }

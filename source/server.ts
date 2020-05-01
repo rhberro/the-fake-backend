@@ -68,10 +68,7 @@ export function createServer(options: ServerOptions): Server {
     const { path } = req;
 
     const resolvedData = typeof data === 'function' ? data(req) : data;
-    let content =
-      resolvedData ||
-      readFixtureSync(file || path) ||
-      readFixtureSync(routePath);
+    let content = resolvedData || readFixtureSync(file || path, routePath);
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
