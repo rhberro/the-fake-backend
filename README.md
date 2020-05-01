@@ -122,6 +122,7 @@ The script above generates the following two endpoints.
 | code      | no       | 200     |
 | data      | no       |         |
 | file      | no       |         |
+| headers   | no       |         |
 | delay     | no       |         |
 | search    | no       |         |
 | paginated | no       | false   |
@@ -137,6 +138,8 @@ The same [Methods](#methods) properties but requires a `name` and does not have 
 | code      | no       | 200     |
 | data      | no       |         |
 | file      | no       |         |
+| headers   | no       |         |
+| delay     | no       |         |
 | search    | no       |         |
 | paginated | no       | false   |
 | selected  | no       | false   |

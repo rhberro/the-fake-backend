@@ -6,6 +6,7 @@ import {
   Route,
 } from './interfaces';
 import inquirer from 'inquirer';
+import fuzzy from 'fuzzy';
 
 inquirer.registerPrompt(
   'autocomplete',
@@ -64,8 +65,8 @@ const getRouteMethodsTypes = (route: Route) => {
 const getOverridesNames = (overrides: MethodOverride[]) =>
   overrides.map(({ name }) => name);
 
-const filterByPredicate = (list: string[]) => (predicate: string) =>
-  predicate ? list.filter((item) => item.includes(predicate)) : list;
+const filterByPredicate = (list: string[]) => (predicate: string = '') =>
+  fuzzy.filter(predicate, list).map(({ original }) => original);
 
 const selectEndpointUrl = (routePaths: string[]) => {
   const filter = filterByPredicate(routePaths);
