@@ -60,6 +60,7 @@ export function createServer(options: ServerOptions): Server {
    */
   function getContent(
     method: Method,
+    routePath: string,
     req: express.Request,
     res: express.Response
   ) {
@@ -67,7 +68,7 @@ export function createServer(options: ServerOptions): Server {
     const { path } = req;
 
     const resolvedData = typeof data === 'function' ? data(req) : data;
-    let content = resolvedData || readFixtureSync(file || path);
+    let content = resolvedData || readFixtureSync(file || path, routePath);
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
@@ -110,6 +111,7 @@ export function createServer(options: ServerOptions): Server {
    */
   function createMethodResponse(
     method: Method,
+    routePath: string,
     req: express.Request,
     res: express.Response
   ): void {
@@ -122,7 +124,7 @@ export function createServer(options: ServerOptions): Server {
     }
 
     if (isSuccessfulStatusCode(code)) {
-      const content = getContent(parsedMethod, req, res);
+      const content = getContent(parsedMethod, routePath, req, res);
 
       sendContent(res, code, content, parsedMethod.headers, parsedMethod.delay);
     } else {
@@ -140,7 +142,7 @@ export function createServer(options: ServerOptions): Server {
     const { path } = route;
     const { type } = method;
 
-    const response = createMethodResponse.bind(null, method);
+    const response = createMethodResponse.bind(null, method, path);
 
     expressServer[type](path, response);
   }
