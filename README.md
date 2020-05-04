@@ -13,11 +13,12 @@ Build a fake backend by providing the content of files or JavaScript objects thr
   - [**Files**](#files)
 - [**Properties**](#properties)
   - [**Server**](#server)
-  - [**Pagination**](#pagination)
+    - [**Throttlings**](#throttlings)
+    - [**Pagination**](#pagination)
   - [**Routes**](#routes)
-  - [**Methods**](#methods)
-  - [**Search**](#search)
-  - [**Overrides**](#overrides)
+    - [**Methods**](#methods)
+    - [**Search**](#search)
+    - [**Overrides**](#overrides)
 - [**Guides**](#guides)
   - [**Overriding responses**](#overriding-responses)
   - [**Searching**](#searching)
@@ -99,41 +100,50 @@ server.listen(8080);
 
 The script above generates the following two endpoints.
 
-| Method | Path                       | Response                                            |
-| ------ | -------------------------- | --------------------------------------------------- |
-| GET    | http://localhost:8080/cats | The `data/cats.json` file content.                  |
-| GET    | http://localhost:8080/dogs | The `data/my/custom/path/to/dogs.txt` file content. |
+| Method | Path                       | Response                                           |
+| ------ | -------------------------- | -------------------------------------------------- |
+| GET    | http://localhost:8080/cats | The `data/cats.json` file content                  |
+| GET    | http://localhost:8080/dogs | The `data/my/custom/path/to/dogs.txt` file content |
 
 ## Properties
 
 ### Server
 
-| Property    | Required | Description                                                                                                            |
-| ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| middlewares | no       | An array of functions compatible with [express's middlewares](https://expressjs.com/en/guide/writing-middleware.html). |
-| proxies     | no       | The server proxies.                                                                                                    |
-| throttlings | no       | The server throttlings.                                                                                                |
-| pagination  | no       | The server pagination setup.                                                                                           |
+| Property                    | Required | Description                                                                                 |
+| --------------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| middlewares                 | no       | An array of [express's middlewares](https://expressjs.com/en/guide/writing-middleware.html) |
+| proxies                     | no       | The server proxies                                                                          |
+| [throttlings](#throttlings) | no       | The server throttlings                                                                      |
+| [pagination](#pagination)   | no       | The server pagination setup                                                                 |
 
-### Pagination
+#### Throttlings
 
-Pagination attributes/parameters names. Response attributes may be printed in response payload (wrapping the given fixture) or headers. Request parameters are read from URL query string.
+This property allows responses to be throttled.
+
+| Property             | Required | Description                                       |
+| -------------------- | -------- | ------------------------------------------------- |
+| throttlings[].name   | yes      | Custom throttling name                            |
+| throttlings[].values | yes      | Custom throttling range (array of numbers, in ms) |
+
+#### Pagination
+
+This property allows routes to be paginated. Response attributes may be printed in response payload (wrapping the given fixture) or headers. Request parameters are read from URL query string.
 
 | Property        | Required | Default    | Type               | Description                                            |
 | --------------- | -------- | ---------- | ------------------ | ------------------------------------------------------ |
-| count           | No       | `'count'`  | Response attribute | Current page items count                               |
-| data            | No       | `'data'`   | Response attribute | Current page data                                      |
-| empty           | No       | `'empty'`  | Response attribute | Whether if current page is empty                       |
-| first           | No       | `'first'`  | Response attribute | Whether if current page is the first one               |
-| headers         | No       | `false`    | Configuration      | Whether response attributes will be present in headers |
-| last            | No       | `'last'`   | Response attribute | Whether if current page is the last one                |
-| next            | No       | `'next'`   | Response attribute | Whether if there is a next page                        |
-| offsetParameter | No       | `'offset'` | Request parameter  | Requested offset                                       |
-| page            | No       | `'page'`   | Response attribute | Current page                                           |
-| pageParameter   | No       | `'page'`   | Request parameter  | Requested page                                         |
-| pages           | No       | `'pages'`  | Response attribute | Pages count                                            |
-| sizeParameter   | No       | `'size'`   | Request parameter  | Requested page size                                    |
-| total           | No       | `'total'`  | Response attribute | Total items count                                      |
+| count           | no       | `'count'`  | Response attribute | Current page items count                               |
+| data            | no       | `'data'`   | Response attribute | Current page data                                      |
+| empty           | no       | `'empty'`  | Response attribute | Whether if current page is empty                       |
+| first           | no       | `'first'`  | Response attribute | Whether if current page is the first one               |
+| headers         | no       | `false`    | Configuration      | Whether response attributes will be present in headers |
+| last            | no       | `'last'`   | Response attribute | Whether if current page is the last one                |
+| next            | no       | `'next'`   | Response attribute | Whether if there is a next page                        |
+| offsetParameter | no       | `'offset'` | Request parameter  | Requested offset                                       |
+| page            | no       | `'page'`   | Response attribute | Current page                                           |
+| pageParameter   | no       | `'page'`   | Request parameter  | Requested page                                         |
+| pages           | no       | `'pages'`  | Response attribute | Pages count                                            |
+| sizeParameter   | no       | `'size'`   | Request parameter  | Requested page size                                    |
+| total           | no       | `'total'`  | Response attribute | Total items count                                      |
 
 ### Routes
 
@@ -142,7 +152,7 @@ Pagination attributes/parameters names. Response attributes may be printed in re
 | routes[].path                | yes      | The endpoint address (URI).                                   |
 | [routes[].methods](#methods) | yes      | The route methods, check the method's properties table below. |
 
-### Methods
+#### Methods
 
 | Property                            | Required | Default | Description                                                       |
 | ----------------------------------- | -------- | ------- | ----------------------------------------------------------------- |
@@ -151,21 +161,23 @@ Pagination attributes/parameters names. Response attributes may be printed in re
 | methods[].data                      | no       |         | HTTP response data. May be a function with request or arguments   |
 | methods[].file                      | no       |         | HTTP response data fixture file (when data is not given)          |
 | methods[].headers                   | no       |         | HTTP response headers                                             |
-| methods[].delay                     | no       |         | HTTP response delay/timeout                                       |
+| methods[].delay                     | no       |         | HTTP response delay/timeout, in milliseconds                      |
 | [methods[].search](#search)         | no       |         | Search parameters                                                 |
 | [methods[].pagination](#pagination) | no       | `false` | Whether data is paginated or not. May also be a pagination object |
 | [methods[].overrides](#overrides)   | no       |         | Custom response scenarios (switchable in CLI)                     |
 
-### Search
+#### Search
+
+This property allows routes to be searchable.
 
 | Property   | Required | Default | Description                                |
 | ---------- | -------- | ------- | ------------------------------------------ |
 | parameter  | yes      |         | Query string parameter name                |
 | properties | yes      |         | An array of properties to apply the search |
 
-### Overrides
+#### Overrides
 
-The same [methods](#methods) properties but requires a `name` and does not have `type` and `overrides` properties.
+This property allows you to create an array of options that will override the current `method` option.
 
 | Property               | Required | Default | Description     |
 | ---------------------- | -------- | ------- | --------------- |
@@ -178,8 +190,6 @@ The same [methods](#methods) properties but requires a `name` and does not have 
 | overrides[].search     | no       |         | Described above |
 | overrides[].pagination | no       | `false` | Described above |
 | overrides[].selected   | no       | `false` | Described above |
-
-This property allows you to create an array of options that will override the current `method` option.
 
 ## Guides
 
@@ -327,12 +337,12 @@ Then, given a `http://localhost:8080/dogs?page=1&size=2` request, the following 
   "last": false,
   "next": true,
   "page": 0,
-  "pages": 3, // Doogo,Dogger | Dog,Doggernaut | Dogging
+  "pages": 3,
   "total": 5,
   "data": [
     { "id": 3, "name": "Dog" },
     { "id": 4, "name": "Doggernaut" }
-  ] // first page content
+  ]
 }
 ```
 
