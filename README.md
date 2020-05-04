@@ -119,7 +119,7 @@ The script above generates the following two endpoints.
 
 Pagination attributes/parameters names. Response attributes may be printed in response payload (wrapping the given fixture) or headers. Request parameters are read from URL query string.
 
-| Property        | Required | Default    | type               | Description                                            |
+| Property        | Required | Default    | Type               | Description                                            |
 | --------------- | -------- | ---------- | ------------------ | ------------------------------------------------------ |
 | count           | No       | `'count'`  | Response attribute | Current page items count                               |
 | data            | No       | `'data'`   | Response attribute | Current page data                                      |
