@@ -60,15 +60,16 @@
     "cz-conventional-changelog": "^3.1.0",
     "husky": "^4.2.5",
     "jest": "^25.2.7",
+    "mock-fs": "^4.12.0",
     "prettier": "2.0.4",
     "pretty-quick": "^2.0.1",
     "rollup": "^1.31.0",
     "rollup-plugin-cleaner": "^1.0.0",
     "rollup-plugin-terser": "^5.2.0",
     "rollup-plugin-typescript2": "^0.25.3",
+    "semantic-release": "^17.0.6",
     "ts-jest": "^25.3.1",
-    "typescript": "^3.8.3",
-    "semantic-release": "^17.0.6"
+    "typescript": "^3.8.3"
   },
   "config": {
     "commitizen": {
