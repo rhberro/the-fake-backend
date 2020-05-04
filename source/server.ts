@@ -14,8 +14,8 @@ import { ResponseHeaders } from './types';
 
 const isSuccessfulStatusCode = (code: number) => code >= 200 && code <= 299;
 
-export function createServer(options: ServerOptions): Server {
-  const { middlewares, proxies, throttlings } = options || {};
+export function createServer(options = {} as ServerOptions): Server {
+  const { middlewares, proxies, throttlings } = options;
 
   const proxyManager = createProxyManager(proxies);
   const throttlingManager = createThrottlingManager(throttlings);
@@ -64,7 +64,7 @@ export function createServer(options: ServerOptions): Server {
     req: express.Request,
     res: express.Response
   ) {
-    const { data, file, paginated, search } = method;
+    const { data, file, pagination, search } = method;
     const { path } = req;
 
     const resolvedData = typeof data === 'function' ? data(req) : data;
@@ -74,8 +74,8 @@ export function createServer(options: ServerOptions): Server {
       content = createSearchableResponse(req, res, content, method);
     }
 
-    if (paginated) {
-      content = createPaginatedResponse(req, res, content, options);
+    if (pagination) {
+      content = createPaginatedResponse(req, res, content, method, options);
     }
 
     return content;
@@ -178,12 +178,12 @@ export function createServer(options: ServerOptions): Server {
    * Sets the current override methods selected.
    * @param routePath The route path that will be updated.
    * @param routeMethodType The route method type that will be updated.
-   * @param overrideNameSelected The override name selected.
+   * @param selectedOverrideName The selected override name.
    */
   function selectMethodOverride(
     routePath: string,
     routeMethodType: string,
-    overrideNameSelected?: string
+    selectedOverrideName?: string
   ) {
     const route = allRoutes.find(({ path }) => path === routePath);
     const routeMethod = route?.methods.find(
@@ -191,13 +191,13 @@ export function createServer(options: ServerOptions): Server {
     );
 
     routeMethod?.overrides?.forEach((override) => {
-      override.selected = override.name === overrideNameSelected;
+      override.selected = override.name === selectedOverrideName;
     });
 
     uiManager.writeEndpointChanged(
       routePath,
       routeMethodType,
-      overrideNameSelected
+      selectedOverrideName
     );
   }
 

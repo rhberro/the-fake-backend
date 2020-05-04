@@ -1,44 +1,53 @@
-import { PaginationProperties, ServerOptions } from '../interfaces';
+import {
+  PaginationProperties,
+  ServerOptions,
+  Method,
+  ResolvedPaginationProperties,
+} from '../interfaces';
 
 import express from 'express';
 
 function getPaginationProperties(
-  options?: ServerOptions
-): PaginationProperties {
-  const pagination = options?.pagination;
-
+  properties?: PaginationProperties
+): ResolvedPaginationProperties {
   return {
-    count: pagination?.count || 'count',
-    data: pagination?.data || 'data',
-    empty: pagination?.empty || 'empty',
-    first: pagination?.first || 'first',
-    headers: pagination?.headers || false,
-    last: pagination?.last || 'last',
-    next: pagination?.next || 'next',
-    offsetParameter: pagination?.offsetParameter || 'offset',
-    page: pagination?.page || 'page',
-    pageParameter: pagination?.pageParameter || 'page',
-    pages: pagination?.pages || 'pages',
-    sizeParameter: pagination?.sizeParameter || 'size',
-    total: pagination?.total || 'total',
+    count: properties?.count || 'count',
+    data: properties?.data || 'data',
+    empty: properties?.empty || 'empty',
+    first: properties?.first || 'first',
+    headers: properties?.headers || false,
+    last: properties?.last || 'last',
+    next: properties?.next || 'next',
+    offsetParameter: properties?.offsetParameter || 'offset',
+    page: properties?.page || 'page',
+    pageParameter: properties?.pageParameter || 'page',
+    pages: properties?.pages || 'pages',
+    sizeParameter: properties?.sizeParameter || 'size',
+    total: properties?.total || 'total',
   };
 }
 
 /**
  * Create a paginated content.
  *
- * @param {express.Request} req -
- * @param {express.Response} res -
- * @param {Array<any>} content -
- * @param {ServerOptions} options -
+ * @param {express.Request} req Request
+ * @param {express.Response} res Response
+ * @param {Array<any>} content Content
+ * @param {ServerOptions} options Server options
  */
 export default function createPaginatedResponse(
   req: express.Request,
   res: express.Response,
   content: Array<any>,
-  options?: ServerOptions
+  method: Method,
+  options: ServerOptions
 ) {
   const { query } = req;
+  const properties =
+    typeof method.pagination === 'boolean'
+      ? options.pagination
+      : { ...options.pagination, ...method.pagination };
+
   const {
     count,
     data,
@@ -53,7 +62,7 @@ export default function createPaginatedResponse(
     pages,
     sizeParameter,
     total,
-  } = getPaginationProperties(options);
+  } = getPaginationProperties(properties);
 
   const requestedSize = Number(query[sizeParameter]) || 5;
   const requestedPage = query[offsetParameter]

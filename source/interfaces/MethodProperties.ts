@@ -1,6 +1,6 @@
-import { Request } from 'express';
 import Search from './Search';
 import { ResponseHeaders } from '../types';
+import PaginationProperties from './PaginationProperties';
 
 export default interface MethodProperties {
   code?: number;
@@ -8,6 +8,6 @@ export default interface MethodProperties {
   file?: string;
   headers?: ResponseHeaders;
   delay?: number;
-  paginated?: boolean;
+  pagination?: boolean | PaginationProperties;
   search?: Search;
 }

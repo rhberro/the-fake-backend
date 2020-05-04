@@ -4,7 +4,7 @@ import Throttling from './Throttling';
 
 export default interface ServerOptions {
   middlewares?: Array<any>;
-  pagination: PaginationProperties;
+  pagination?: PaginationProperties;
   proxies: Array<Proxy>;
   throttlings: Array<Throttling>;
 }
