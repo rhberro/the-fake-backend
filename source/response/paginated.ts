@@ -5,19 +5,22 @@ import express from 'express';
 function getPaginationProperties(
   options?: ServerOptions
 ): PaginationProperties {
-  const { pagination } = options || {};
-  const { count, data, empty, first, last, page, pages, total } =
-    pagination || {};
+  const pagination = options?.pagination;
 
   return {
-    count: count || 'count',
-    data: data || 'data',
-    empty: empty || 'empty',
-    first: first || 'first',
-    last: last || 'last',
-    page: page || 'page',
-    pages: pages || 'pages',
-    total: total || 'total',
+    count: pagination?.count || 'count',
+    data: pagination?.data || 'data',
+    empty: pagination?.empty || 'empty',
+    first: pagination?.first || 'first',
+    headers: pagination?.headers || false,
+    last: pagination?.last || 'last',
+    next: pagination?.next || 'next',
+    offsetParameter: pagination?.offsetParameter || 'offset',
+    page: pagination?.page || 'page',
+    pageParameter: pagination?.pageParameter || 'page',
+    pages: pagination?.pages || 'pages',
+    sizeParameter: pagination?.sizeParameter || 'size',
+    total: pagination?.total || 'total',
   };
 }
 
@@ -35,37 +38,57 @@ export default function createPaginatedResponse(
   content: Array<any>,
   options?: ServerOptions
 ) {
-  const {
-    query: { page: current = 1, size = 5 },
-  } = req;
-
+  const { query } = req;
   const {
     count,
     data,
     empty,
     first,
+    headers,
     last,
+    next,
+    offsetParameter,
+    pageParameter,
     page,
     pages,
+    sizeParameter,
     total,
   } = getPaginationProperties(options);
 
-  const currentPage = Number(current);
-  const currentSize = Number(size);
+  const requestedSize = Number(query[sizeParameter]) || 5;
+  const requestedPage = query[offsetParameter]
+    ? Number(query[offsetParameter]) / requestedSize
+    : Number(query[pageParameter]);
 
   const totalElements = content.length;
-  const totalPages = Math.ceil(totalElements / size);
+  const totalPages = Math.ceil(totalElements / requestedSize);
+  const lastPage = totalPages - 1;
 
-  const offset = currentPage * currentSize;
+  const currentOffset = requestedPage * requestedSize;
+  const currentPageData = content.slice(
+    currentOffset,
+    currentOffset + requestedSize
+  );
+
+  const currentMetadata = {
+    [empty]: currentPageData.length === 0,
+    [first]: requestedPage === 0,
+    [last]: requestedPage >= lastPage,
+    [next]: requestedPage < lastPage,
+    [page]: requestedPage,
+    [pages]: totalPages,
+    [count]: requestedSize,
+    [total]: totalElements,
+  };
+
+  if (headers) {
+    res.set(currentMetadata);
+
+    return currentPageData;
+  }
 
   return {
-    [data]: content.slice(offset, offset + currentSize),
-    [empty]: content.slice(offset, offset + currentSize).length === 0,
-    [first]: currentPage === 0,
-    [last]: currentPage >= totalPages - 1,
-    [page]: currentPage,
-    [pages]: totalPages,
-    [count]: currentSize,
-    [total]: totalElements,
+    [data]: currentPageData,
+    ...currentMetadata,
   };
 }
