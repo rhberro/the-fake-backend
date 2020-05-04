@@ -293,6 +293,8 @@ You can make an endpoint paginated by declaring the pagination options in the se
 
 Route pagination parameter may be a boolean (true) to use global pagination options, or [pagination](#pagination) object parts to override global ones.
 
+> Note: The pagination is zero-based, so 0 is the first page.
+
 #### Example
 
 ```json
@@ -336,7 +338,7 @@ Then, given a `http://localhost:8080/dogs?page=1&size=2` request, the following 
   "first": true,
   "last": false,
   "next": true,
-  "page": 0,
+  "page": 1,
   "pages": 3,
   "total": 5,
   "data": [
