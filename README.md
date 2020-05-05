@@ -91,6 +91,7 @@ server.routes([
       {
         type: 'get', // or MethodType.GET with Typescript
         file: 'data/my/custom/path/to/dogs.txt',
+        // file: req => `data/my/custom/path/to/dogs-${req.query.type}.txt`
       },
     ],
   },
