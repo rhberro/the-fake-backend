@@ -1,6 +1,7 @@
 import Search from './Search';
 import { ResponseHeaders } from '../types';
 import PaginationProperties from './PaginationProperties';
+import express from 'express';
 
 export default interface MethodProperties {
   code?: number;
@@ -9,5 +10,6 @@ export default interface MethodProperties {
   headers?: ResponseHeaders;
   delay?: number;
   pagination?: boolean | PaginationProperties;
+  overrideContent?: (req: express.Request, content: any) => any;
   search?: Search;
 }

@@ -21,6 +21,7 @@ Build a fake backend by providing the content of files or JavaScript objects thr
     - [**Overrides**](#overrides)
 - [**Guides**](#guides)
   - [**Overriding responses**](#overriding-responses)
+  - [**Overriding response content**](#overriding-response-content)
   - [**Searching**](#searching)
   - [**Paginating**](#paginating)
   - [**Dynamic params requests**](#dynamic-params-requests)
@@ -154,17 +155,18 @@ This property allows routes to be paginated. Response attributes may be printed 
 
 #### Methods
 
-| Property                            | Required | Default | Description                                                       |
-| ----------------------------------- | -------- | ------- | ----------------------------------------------------------------- |
-| methods[].type                      | yes      |         | HTTP request type                                                 |
-| methods[].code                      | no       | `200`   | HTTP response status code                                         |
-| methods[].data                      | no       |         | HTTP response data. May be a function with request or arguments   |
-| methods[].file                      | no       |         | HTTP response data fixture file (when data is not given)          |
-| methods[].headers                   | no       |         | HTTP response headers                                             |
-| methods[].delay                     | no       |         | HTTP response delay/timeout, in milliseconds                      |
-| [methods[].search](#search)         | no       |         | Search parameters                                                 |
-| [methods[].pagination](#pagination) | no       | `false` | Whether data is paginated or not. May also be a pagination object |
-| [methods[].overrides](#overrides)   | no       |         | Custom response scenarios (switchable in CLI)                     |
+| Property                            | Required | Default | Description                                                        |
+| ----------------------------------- | -------- | ------- | ------------------------------------------------------------------ |
+| methods[].type                      | yes      |         | HTTP request type                                                  |
+| methods[].code                      | no       | `200`   | HTTP response status code                                          |
+| methods[].data                      | no       |         | HTTP response data. May be a function with request or arguments    |
+| methods[].file                      | no       |         | HTTP response data fixture file (when data is not given)           |
+| methods[].headers                   | no       |         | HTTP response headers                                              |
+| methods[].delay                     | no       |         | HTTP response delay/timeout, in milliseconds                       |
+| [methods[].search](#search)         | no       |         | Search parameters                                                  |
+| [methods[].pagination](#pagination) | no       | `false` | Whether data is paginated or not. May also be a pagination object  |
+| [methods[].overrides](#overrides)   | no       |         | Custom response scenarios (switchable in CLI)                      |
+| methods[].overrideContent           | no       |         | A (req, content) function to override response content before send |
 
 #### Search
 
@@ -235,6 +237,46 @@ Press 'o' on terminal and change the URL '/user' with method 'get' with override
 
 // curl -XGET http://localhost:8080/user
 // Returns `data/my/custom/path/to/super-admin-user.json` file content.
+```
+
+### Overriding response content
+
+You can override the response content after all the processing (file/data content, pagination, search, etc.).
+
+### Example
+
+```json
+// /data/dogs.json
+[
+  { "id": 1, "name": "Doogo" },
+  { "id": 2, "name": "Dogger" },
+  { "id": 3, "name": "Dog" },
+  { "id": 4, "name": "Doggernaut" },
+  { "id": 5, "name": "Dogging" }
+]
+```
+
+```javascript
+const { createServer } = require('the-fake-backend');
+
+const server = createServer();
+
+server.routes([
+  {
+    path: '/dogs',
+    methods: [
+      {
+        type: 'get', // or MethodType.GET with Typescript
+        overrideContent: (req, content) => ({
+          ...content,
+          { id: 6, name: 'Bulldog' }
+        })
+      },
+    ],
+  },
+]);
+
+server.listen(8080);
 ```
 
 ### Searching

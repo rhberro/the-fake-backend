@@ -34,7 +34,7 @@ export function createServer(options = {} as ServerOptions): Server {
    * Merge method with current override selected.
    * @param method The method object.
    */
-  function parseMethod(method: Method) {
+  function parseMethod(method: Method): Method {
     if (method.overrides) {
       const overrideSelected = method.overrides.find(
         ({ selected }) => selected
@@ -57,14 +57,15 @@ export function createServer(options = {} as ServerOptions): Server {
    * @param {Method} method The method object.
    * @param {express.Request} req The request object.
    * @param {express.Response} res The response object.
+   * @return {any} The method content
    */
   function getContent(
     method: Method,
     routePath: string,
     req: express.Request,
     res: express.Response
-  ) {
-    const { data, file, pagination, search } = method;
+  ): any {
+    const { data, file, overrideContent, pagination, search } = method;
     const { path } = req;
 
     const resolvedData = typeof data === 'function' ? data(req) : data;
@@ -76,6 +77,10 @@ export function createServer(options = {} as ServerOptions): Server {
 
     if (pagination) {
       content = createPaginatedResponse(req, res, content, method, options);
+    }
+
+    if (overrideContent) {
+      content = overrideContent(req, content);
     }
 
     return content;
