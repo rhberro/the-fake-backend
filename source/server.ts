@@ -10,12 +10,12 @@ import { createUIManager } from './ui';
 import express from 'express';
 import { overridesListener } from './overridesListener';
 import { readFixtureSync } from './files';
-import { ResponseHeaders } from './types';
+import { ResponseHeaders, MethodAttribute } from './types';
 
 const isSuccessfulStatusCode = (code: number) => code >= 200 && code <= 299;
 
-export function createServer(options: ServerOptions): Server {
-  const { middlewares, proxies, throttlings } = options || {};
+export function createServer(options = {} as ServerOptions): Server {
+  const { middlewares, proxies, throttlings } = options;
 
   const proxyManager = createProxyManager(proxies);
   const throttlingManager = createThrottlingManager(throttlings);
@@ -34,7 +34,7 @@ export function createServer(options: ServerOptions): Server {
    * Merge method with current override selected.
    * @param method The method object.
    */
-  function parseMethod(method: Method) {
+  function parseMethod(method: Method): Method {
     if (method.overrides) {
       const overrideSelected = method.overrides.find(
         ({ selected }) => selected
@@ -52,30 +52,49 @@ export function createServer(options: ServerOptions): Server {
   }
 
   /**
+   * Resolve the attribute.
+   *
+   * @param req The request object.
+   * @param attribute The attribute.
+   */
+  function resolveMethodAttribute(
+    attribute: MethodAttribute<any>,
+    req: express.Request
+  ) {
+    return typeof attribute === 'function' ? attribute(req) : attribute;
+  }
+
+  /**
    * Get the method content.
    *
    * @param {Method} method The method object.
    * @param {express.Request} req The request object.
    * @param {express.Response} res The response object.
+   * @return {any} The method content
    */
   function getContent(
     method: Method,
     routePath: string,
     req: express.Request,
     res: express.Response
-  ) {
-    const { data, file, paginated, search } = method;
+  ): any {
+    const { overrideContent, pagination, search } = method;
     const { path } = req;
 
-    const resolvedData = typeof data === 'function' ? data(req) : data;
-    let content = resolvedData || readFixtureSync(file || path, routePath);
+    const data = resolveMethodAttribute(method.data, req);
+    const file = resolveMethodAttribute(method.file, req);
+    let content = data || readFixtureSync(file || path, routePath);
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
     }
 
-    if (paginated) {
-      content = createPaginatedResponse(req, res, content, options);
+    if (pagination) {
+      content = createPaginatedResponse(req, res, content, method, options);
+    }
+
+    if (overrideContent) {
+      content = overrideContent(req, content);
     }
 
     return content;
@@ -125,8 +144,9 @@ export function createServer(options: ServerOptions): Server {
 
     if (isSuccessfulStatusCode(code)) {
       const content = getContent(parsedMethod, routePath, req, res);
+      const headers = resolveMethodAttribute(parsedMethod.headers, req);
 
-      sendContent(res, code, content, parsedMethod.headers, parsedMethod.delay);
+      sendContent(res, code, content, headers, parsedMethod.delay);
     } else {
       sendContent(res, code, null);
     }
@@ -178,12 +198,12 @@ export function createServer(options: ServerOptions): Server {
    * Sets the current override methods selected.
    * @param routePath The route path that will be updated.
    * @param routeMethodType The route method type that will be updated.
-   * @param overrideNameSelected The override name selected.
+   * @param selectedOverrideName The selected override name.
    */
   function selectMethodOverride(
     routePath: string,
     routeMethodType: string,
-    overrideNameSelected?: string
+    selectedOverrideName?: string
   ) {
     const route = allRoutes.find(({ path }) => path === routePath);
     const routeMethod = route?.methods.find(
@@ -191,13 +211,13 @@ export function createServer(options: ServerOptions): Server {
     );
 
     routeMethod?.overrides?.forEach((override) => {
-      override.selected = override.name === overrideNameSelected;
+      override.selected = override.name === selectedOverrideName;
     });
 
     uiManager.writeEndpointChanged(
       routePath,
       routeMethodType,
-      overrideNameSelected
+      selectedOverrideName
     );
   }
 

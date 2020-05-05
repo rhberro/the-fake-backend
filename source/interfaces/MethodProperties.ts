@@ -1,13 +1,15 @@
-import { Request } from 'express';
 import Search from './Search';
-import { ResponseHeaders } from '../types';
+import { MethodAttribute, ResponseHeaders } from '../types';
+import PaginationProperties from './PaginationProperties';
+import express from 'express';
 
 export default interface MethodProperties {
   code?: number;
-  data?: any;
-  file?: string;
-  headers?: ResponseHeaders;
+  data?: MethodAttribute<any>;
+  file?: MethodAttribute<string>;
+  headers?: MethodAttribute<ResponseHeaders>;
   delay?: number;
-  paginated?: boolean;
+  pagination?: boolean | PaginationProperties;
+  overrideContent?: (req: express.Request, content: any) => any;
   search?: Search;
 }

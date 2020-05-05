@@ -6,6 +6,7 @@ export { default as MethodOverride } from './MethodOverride';
 export { default as MethodProperties } from './MethodProperties';
 export { default as OverrideListenerOptions } from './OverrideListenerOptions';
 export { default as PaginationProperties } from './PaginationProperties';
+export { default as ResolvedPaginationProperties } from './ResolvedPaginationProperties';
 export { default as Proxy } from './Proxy';
 export { default as ProxyManager } from './ProxyManager';
 export { default as ProxyProperties } from './ProxyProperties';

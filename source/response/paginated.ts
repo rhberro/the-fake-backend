@@ -1,71 +1,103 @@
-import { PaginationProperties, ServerOptions } from '../interfaces';
+import {
+  PaginationProperties,
+  ServerOptions,
+  Method,
+  ResolvedPaginationProperties,
+} from '../interfaces';
 
 import express from 'express';
 
 function getPaginationProperties(
-  options?: ServerOptions
-): PaginationProperties {
-  const { pagination } = options || {};
-  const { count, data, empty, first, last, page, pages, total } =
-    pagination || {};
-
+  properties?: PaginationProperties
+): ResolvedPaginationProperties {
   return {
-    count: count || 'count',
-    data: data || 'data',
-    empty: empty || 'empty',
-    first: first || 'first',
-    last: last || 'last',
-    page: page || 'page',
-    pages: pages || 'pages',
-    total: total || 'total',
+    count: properties?.count || 'count',
+    data: properties?.data || 'data',
+    empty: properties?.empty || 'empty',
+    first: properties?.first || 'first',
+    headers: properties?.headers || false,
+    last: properties?.last || 'last',
+    next: properties?.next || 'next',
+    offsetParameter: properties?.offsetParameter || 'offset',
+    page: properties?.page || 'page',
+    pageParameter: properties?.pageParameter || 'page',
+    pages: properties?.pages || 'pages',
+    sizeParameter: properties?.sizeParameter || 'size',
+    total: properties?.total || 'total',
   };
 }
 
 /**
  * Create a paginated content.
  *
- * @param {express.Request} req -
- * @param {express.Response} res -
- * @param {Array<any>} content -
- * @param {ServerOptions} options -
+ * @param {express.Request} req Request
+ * @param {express.Response} res Response
+ * @param {Array<any>} content Content
+ * @param {ServerOptions} options Server options
  */
 export default function createPaginatedResponse(
   req: express.Request,
   res: express.Response,
   content: Array<any>,
-  options?: ServerOptions
+  method: Method,
+  options: ServerOptions
 ) {
-  const {
-    query: { page: current = 1, size = 5 },
-  } = req;
+  const { query } = req;
+  const properties =
+    typeof method.pagination === 'boolean'
+      ? options.pagination
+      : { ...options.pagination, ...method.pagination };
 
   const {
     count,
     data,
     empty,
     first,
+    headers,
     last,
+    next,
+    offsetParameter,
+    pageParameter,
     page,
     pages,
+    sizeParameter,
     total,
-  } = getPaginationProperties(options);
+  } = getPaginationProperties(properties);
 
-  const currentPage = Number(current);
-  const currentSize = Number(size);
+  const requestedSize = Number(query[sizeParameter]) || 5;
+  const requestedPage = query[offsetParameter]
+    ? Number(query[offsetParameter]) / requestedSize
+    : Number(query[pageParameter]);
 
   const totalElements = content.length;
-  const totalPages = Math.ceil(totalElements / size);
+  const totalPages = Math.ceil(totalElements / requestedSize);
+  const lastPage = totalPages - 1;
 
-  const offset = currentPage * currentSize;
+  const currentOffset = requestedPage * requestedSize;
+  const currentPageData = content.slice(
+    currentOffset,
+    currentOffset + requestedSize
+  );
+
+  const currentMetadata = {
+    [empty]: currentPageData.length === 0,
+    [first]: requestedPage === 0,
+    [last]: requestedPage >= lastPage,
+    [next]: requestedPage < lastPage,
+    [page]: requestedPage,
+    [pages]: totalPages,
+    [count]: requestedSize,
+    [total]: totalElements,
+  };
+
+  if (headers) {
+    res.set(currentMetadata);
+
+    return currentPageData;
+  }
 
   return {
-    [data]: content.slice(offset, offset + currentSize),
-    [empty]: content.slice(offset, offset + currentSize).length === 0,
-    [first]: currentPage === 0,
-    [last]: currentPage >= totalPages - 1,
-    [page]: currentPage,
-    [pages]: totalPages,
-    [count]: currentSize,
-    [total]: totalElements,
+    [data]: currentPageData,
+    ...currentMetadata,
   };
 }
