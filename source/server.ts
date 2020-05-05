@@ -101,26 +101,6 @@ export function createServer(options = {} as ServerOptions): Server {
   }
 
   /**
-   * Get the method headers.
-   *
-   * @param {Method} method The method object.
-   * @param {express.Request} req The request object.
-   * @return {ResponseHeaders} The method headers
-   */
-  function getHeaders(
-    method: Method,
-    req: express.Request
-  ): ResponseHeaders | undefined {
-    const { headers } = method;
-
-    if (typeof headers === 'function') {
-      return headers(req);
-    }
-
-    return headers;
-  }
-
-  /**
    * Response the url with the content.
    *
    * @param {express.Request} req The request object.
@@ -164,7 +144,7 @@ export function createServer(options = {} as ServerOptions): Server {
 
     if (isSuccessfulStatusCode(code)) {
       const content = getContent(parsedMethod, routePath, req, res);
-      const headers = getHeaders(parsedMethod, req);
+      const headers = resolveMethodAttribute(parsedMethod.headers, req);
 
       sendContent(res, code, content, headers, parsedMethod.delay);
     } else {
