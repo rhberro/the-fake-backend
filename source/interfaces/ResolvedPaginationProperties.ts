@@ -1,4 +1,5 @@
 export default interface ResolvedPaginationProperties {
+  additionalMetadata: Record<string, any>;
   count: string;
   data: string;
   empty: string;

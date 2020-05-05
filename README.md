@@ -129,21 +129,22 @@ This property allows responses to be throttled.
 
 This property allows routes to be paginated. Response attributes may be printed in response payload (wrapping the given fixture) or headers. Request parameters are read from URL query string.
 
-| Property        | Required | Default    | Type               | Description                                            |
-| --------------- | -------- | ---------- | ------------------ | ------------------------------------------------------ |
-| count           | no       | `'count'`  | Response attribute | Current page items count                               |
-| data            | no       | `'data'`   | Response attribute | Current page data                                      |
-| empty           | no       | `'empty'`  | Response attribute | Whether if current page is empty                       |
-| first           | no       | `'first'`  | Response attribute | Whether if current page is the first one               |
-| headers         | no       | `false`    | Configuration      | Whether response attributes will be present in headers |
-| last            | no       | `'last'`   | Response attribute | Whether if current page is the last one                |
-| next            | no       | `'next'`   | Response attribute | Whether if there is a next page                        |
-| offsetParameter | no       | `'offset'` | Request parameter  | Requested offset                                       |
-| page            | no       | `'page'`   | Response attribute | Current page                                           |
-| pageParameter   | no       | `'page'`   | Request parameter  | Requested page                                         |
-| pages           | no       | `'pages'`  | Response attribute | Pages count                                            |
-| sizeParameter   | no       | `'size'`   | Request parameter  | Requested page size                                    |
-| total           | no       | `'total'`  | Response attribute | Total items count                                      |
+| Property           | Required | Default    | Type                    | Description                                            |
+| ------------------ | -------- | ---------- | ----------------------- | ------------------------------------------------------ |
+| additionalMetadata | no       | `{}`       | Response metadata       | Additional response metadata                           |
+| count              | no       | `'count'`  | Response attribute name | Current page items count                               |
+| data               | no       | `'data'`   | Response attribute name | Current page data                                      |
+| empty              | no       | `'empty'`  | Response attribute name | Whether if current page is empty                       |
+| first              | no       | `'first'`  | Response attribute name | Whether if current page is the first one               |
+| headers            | no       | `false`    | Configuration           | Whether response attributes will be present in headers |
+| last               | no       | `'last'`   | Response attribute name | Whether if current page is the last one                |
+| next               | no       | `'next'`   | Response attribute name | Whether if there is a next page                        |
+| offsetParameter    | no       | `'offset'` | Request parameter name  | Requested offset                                       |
+| page               | no       | `'page'`   | Response attribute name | Current page                                           |
+| pageParameter      | no       | `'page'`   | Request parameter name  | Requested page                                         |
+| pages              | no       | `'pages'`  | Response attribute name | Pages count                                            |
+| sizeParameter      | no       | `'size'`   | Request parameter name  | Requested page size                                    |
+| total              | no       | `'total'`  | Response attribute name | Total items count                                      |
 
 ### Routes
 

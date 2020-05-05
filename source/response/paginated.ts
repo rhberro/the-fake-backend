@@ -11,6 +11,7 @@ function getPaginationProperties(
   properties?: PaginationProperties
 ): ResolvedPaginationProperties {
   return {
+    additionalMetadata: properties?.additionalMetadata || {},
     count: properties?.count || 'count',
     data: properties?.data || 'data',
     empty: properties?.empty || 'empty',
@@ -49,6 +50,7 @@ export default function createPaginatedResponse(
       : { ...options.pagination, ...method.pagination };
 
   const {
+    additionalMetadata,
     count,
     data,
     empty,
@@ -88,6 +90,7 @@ export default function createPaginatedResponse(
     [pages]: totalPages,
     [count]: requestedSize,
     [total]: totalElements,
+    ...additionalMetadata,
   };
 
   if (headers) {
