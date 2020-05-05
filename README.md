@@ -155,43 +155,44 @@ This property allows routes to be paginated. Response attributes may be printed 
 
 #### Methods
 
-| Property                            | Required | Default | Description                                                        |
-| ----------------------------------- | -------- | ------- | ------------------------------------------------------------------ |
-| methods[].type                      | yes      |         | HTTP request type                                                  |
-| methods[].code                      | no       | `200`   | HTTP response status code                                          |
-| methods[].data                      | no       |         | HTTP response data. May be a function with request or arguments    |
-| methods[].file                      | no       |         | HTTP response data fixture file (when data is not given)           |
-| methods[].headers                   | no       |         | HTTP response headers                                              |
-| methods[].delay                     | no       |         | HTTP response delay/timeout, in milliseconds                       |
-| [methods[].search](#search)         | no       |         | Search parameters                                                  |
-| [methods[].pagination](#pagination) | no       | `false` | Whether data is paginated or not. May also be a pagination object  |
-| [methods[].overrides](#overrides)   | no       |         | Custom response scenarios (switchable in CLI)                      |
-| methods[].overrideContent           | no       |         | A (req, content) function to override response content before send |
+| Property                            | Type                      | Required | Default             | Description                                                                                   |
+| ----------------------------------- | ------------------------- | -------- | ------------------- | --------------------------------------------------------------------------------------------- |
+| methods[].type                      | string                    | yes      |                     | HTTP request type                                                                             |
+| methods[].code                      | number                    | no       | `200`               | HTTP response status code                                                                     |
+| methods[].data                      | any \| (req) => any       | no       |                     | HTTP response data. May also be a function with request                                       |
+| methods[].file                      | string \| (req) => string | no       | `/data/${req.path}` | HTTP response data fixture file (when data is not given). May also be a function with request |
+| methods[].headers                   | object \| (req) => object | no       |                     | HTTP response headers. May also be a function with request                                    |
+| methods[].delay                     | number                    | no       |                     | HTTP response delay/timeout, in milliseconds                                                  |
+| [methods[].search](#search)         | object                    | no       |                     | Search parameters                                                                             |
+| [methods[].pagination](#pagination) | boolean \| object         | no       | `false`             | Whether data is paginated or not. May also be a pagination object                             |
+| [methods[].overrides](#overrides)   | object[]                  | no       |                     | Custom response scenarios (switchable in CLI)                                                 |
+| methods[].overrideContent           | (req, content) => any     | no       |                     | A function to override response content before send                                           |
 
 #### Search
 
 This property allows routes to be searchable.
 
-| Property   | Required | Default | Description                                |
-| ---------- | -------- | ------- | ------------------------------------------ |
-| parameter  | yes      |         | Query string parameter name                |
-| properties | yes      |         | An array of properties to apply the search |
+| Property   | Type     | Required | Default    | Description                                |
+| ---------- | -------- | -------- | ---------- | ------------------------------------------ |
+| parameter  | string   | yes      | `'search'` | Query string parameter name                |
+| properties | string[] | yes      |            | An array of properties to apply the search |
 
 #### Overrides
 
 This property allows you to create an array of options that will override the current `method` option.
 
-| Property               | Required | Default | Description     |
-| ---------------------- | -------- | ------- | --------------- |
-| overrides[].name       | yes      |         | Scenario name   |
-| overrides[].code       | no       | `200`   | Described above |
-| overrides[].data       | no       |         | Described above |
-| overrides[].file       | no       |         | Described above |
-| overrides[].headers    | no       |         | Described above |
-| overrides[].delay      | no       |         | Described above |
-| overrides[].search     | no       |         | Described above |
-| overrides[].pagination | no       | `false` | Described above |
-| overrides[].selected   | no       | `false` | Described above |
+| Property                    | Type                      | Required | Default | Description     |
+| --------------------------- | ------------------------- | -------- | ------- | --------------- |
+| overrides[].name            | string                    | yes      |         | Scenario name   |
+| overrides[].code            | number                    | no       | `200`   | Described above |
+| overrides[].data            | any \| (req) => any       | no       |         | Described above |
+| overrides[].file            | string \| (req) => string | no       |         | Described above |
+| overrides[].headers         | object \| (req) => object | no       |         | Described above |
+| overrides[].delay           | number                    | no       |         | Described above |
+| overrides[].search          | object                    | no       |         | Described above |
+| overrides[].pagination      | boolean \| object         | no       | `false` | Described above |
+| overrides[].overrideContent | (req, content) => any     | no       |         | Described above |
+| overrides[].selected        | boolean                   | no       | `false` | Described above |
 
 ## Guides
 

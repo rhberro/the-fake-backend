@@ -10,7 +10,7 @@ import { createUIManager } from './ui';
 import express from 'express';
 import { overridesListener } from './overridesListener';
 import { readFixtureSync } from './files';
-import { ResponseHeaders } from './types';
+import { ResponseHeaders, MethodAttribute } from './types';
 
 const isSuccessfulStatusCode = (code: number) => code >= 200 && code <= 299;
 
@@ -52,6 +52,19 @@ export function createServer(options = {} as ServerOptions): Server {
   }
 
   /**
+   * Resolve the attribute.
+   *
+   * @param req The request object.
+   * @param attribute The attribute.
+   */
+  function resolveMethodAttribute(
+    attribute: MethodAttribute<any>,
+    req: express.Request
+  ) {
+    return typeof attribute === 'function' ? attribute(req) : attribute;
+  }
+
+  /**
    * Get the method content.
    *
    * @param {Method} method The method object.
@@ -65,11 +78,12 @@ export function createServer(options = {} as ServerOptions): Server {
     req: express.Request,
     res: express.Response
   ): any {
-    const { data, file, overrideContent, pagination, search } = method;
+    const { overrideContent, pagination, search } = method;
     const { path } = req;
 
-    const resolvedData = typeof data === 'function' ? data(req) : data;
-    let content = resolvedData || readFixtureSync(file || path, routePath);
+    const data = resolveMethodAttribute(method.data, req);
+    const file = resolveMethodAttribute(method.file, req);
+    let content = data || readFixtureSync(file || path, routePath);
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
