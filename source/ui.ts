@@ -1,7 +1,13 @@
-import { ProxyManager, ThrottlingManager, UIManager } from './interfaces';
+import {
+  ProxyManager,
+  ThrottlingManager,
+  UIManager,
+  Route,
+} from './interfaces';
 import chalk from 'chalk';
 import express from 'express';
 import readline from 'readline';
+import { getFormattedOverrides } from './overrides';
 
 /**
  * Create a new UI manager.
@@ -12,6 +18,7 @@ import readline from 'readline';
  * @return {UIManager} The UI manager.
  */
 export function createUIManager(
+  routes: Route[],
   proxyManager: ProxyManager,
   throttlingManager: ThrottlingManager
 ): UIManager {
@@ -84,6 +91,11 @@ export function createUIManager(
         currentThrottling && chalk.bold.black('-'),
         currentThrottling && chalk.bold.black(currentThrottling.values[1]),
         currentThrottling && chalk.bold.black('ms')
+      );
+
+      line(chalk.blackBright('Overrides:'));
+      getFormattedOverrides(routes).forEach((override) =>
+        paragraph(`- ${override}`)
       );
 
       line(

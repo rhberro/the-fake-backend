@@ -8,7 +8,7 @@ import createSearchableResponse from './response/searchable';
 import { createThrottlingManager } from './throttling';
 import { createUIManager } from './ui';
 import express from 'express';
-import { overridesListener } from './overridesListener';
+import { overridesListener } from './overrides';
 import { readFixtureSync } from './files';
 import { ResponseHeaders, MethodAttribute } from './types';
 
@@ -17,12 +17,13 @@ const isSuccessfulStatusCode = (code: number) => code >= 200 && code <= 299;
 export function createServer(options = {} as ServerOptions): Server {
   const { middlewares, proxies, throttlings } = options;
 
+  const allRoutes: Array<Route> = [];
+
   const proxyManager = createProxyManager(proxies);
   const throttlingManager = createThrottlingManager(throttlings);
-  const uiManager = createUIManager(proxyManager, throttlingManager);
+  const uiManager = createUIManager(allRoutes, proxyManager, throttlingManager);
 
   const expressServer = express();
-  const allRoutes: Array<Route> = [];
 
   expressServer.use(middlewares || cors());
   expressServer.use(
@@ -213,6 +214,8 @@ export function createServer(options = {} as ServerOptions): Server {
     routeMethod?.overrides?.forEach((override) => {
       override.selected = override.name === selectedOverrideName;
     });
+
+    uiManager.drawDashboard();
 
     uiManager.writeEndpointChanged(
       routePath,

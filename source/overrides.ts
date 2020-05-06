@@ -25,6 +25,9 @@ const filterRoutesWithOverrides = (routes: Route[]) =>
     isNotEmpty(filterMethodsWithOverrides(methods))
   );
 
+const getSelectedMethodOverride = (method: Method) =>
+  method.overrides?.find(({ selected }) => selected);
+
 const getRoutesPaths = (routes: Route[]) => routes.map(({ path }) => path);
 
 const getRouteByUrl = (routes: Route[], url: string) => {
@@ -124,6 +127,25 @@ const overrideUrl = async (options: OverrideListenerOptions) => {
 
   options.selectMethodOverride(url, type, name);
 };
+
+const formatOverride = (
+  route: Route,
+  method: Method,
+  override: MethodOverride
+) => `${method.type.toUpperCase()} ${route.path}: ${override.name}`;
+
+export const getFormattedOverrides = (routes: Route[]): string[] =>
+  routes.reduce<string[]>((acc, route) => {
+    route.methods.forEach((method) => {
+      const selectedOverride = getSelectedMethodOverride(method);
+
+      if (selectedOverride) {
+        acc.push(formatOverride(route, method, selectedOverride));
+      }
+    });
+
+    return acc;
+  }, []);
 
 export const overridesListener = (
   options: OverrideListenerOptions
