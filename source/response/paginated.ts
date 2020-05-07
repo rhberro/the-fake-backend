@@ -2,14 +2,14 @@ import {
   PaginationProperties,
   ServerOptions,
   Method,
-  ResolvedPaginationProperties,
+  PaginationPropertiesResult,
 } from '../interfaces';
 
 import express from 'express';
 
 function getPaginationProperties(
   properties?: PaginationProperties
-): ResolvedPaginationProperties {
+): PaginationPropertiesResult {
   return {
     count: properties?.count || 'count',
     data: properties?.data || 'data',

@@ -1,5 +1,3 @@
-import InputListenerPromiseResponse from './InputListenerPromiseResponse';
-
 export default interface InputManager {
   /**
    * Register an event listener to a key.
@@ -12,11 +10,11 @@ export default interface InputManager {
     /**
      * The event callback.
      */
-    event: () => Promise<InputListenerPromiseResponse> | void,
+    event: () => Promise<void> | void,
     /**
      * The control key state.
      */
     control?: boolean
   ) => void;
-  init: Function;
+  init: (raw: boolean) => void;
 }

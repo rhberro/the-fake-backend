@@ -1,4 +1,6 @@
+import Route from './Route';
+
 export default interface Server {
-  routes: Function;
-  listen: Function;
+  routes: (routes: Route[]) => void;
+  listen: (port?: number | string) => void;
 }

@@ -1,153 +1,81 @@
 import {
-  InputListenerPromiseResponse,
   Method,
   MethodOverride,
-  OverrideListenerOptions,
+  OverrideOptions,
   Route,
+  OverrideManager,
+  OverrideSelectResult,
 } from './interfaces';
-import inquirer from 'inquirer';
-import fuzzy from 'fuzzy';
-
-inquirer.registerPrompt(
-  'autocomplete',
-  require('inquirer-autocomplete-prompt')
-);
+import { selectEndpointUrl, selectMethodType, selectOverride } from './prompts';
+import {
+  findRouteByUrl,
+  getRoutesPaths,
+  findRouteMethodByType,
+} from './routes';
 
 const OVERRIDE_DEFAULT_OPTION = 'Default';
 
-const isNotEmpty = <T>(array: T[]) => array.length > 0;
+function getOverridesNames(overrides: MethodOverride[]) {
+  return overrides.map(({ name }) => name);
+}
 
-const filterMethodsWithOverrides = (methods: Method[]) =>
-  methods.filter(({ overrides }) => overrides && isNotEmpty(overrides));
+function getOverridesNamesWithDefault(overrides: MethodOverride[]) {
+  return [OVERRIDE_DEFAULT_OPTION, ...getOverridesNames(overrides)];
+}
 
-const filterRoutesWithOverrides = (routes: Route[]) =>
-  routes.filter(({ methods }) =>
-    isNotEmpty(filterMethodsWithOverrides(methods))
-  );
+function getMethodOverridesByType({ methods }: Route, routeMethodType: string) {
+  const method = findRouteMethodByType(methods, routeMethodType);
 
-const getSelectedMethodOverride = (method: Method) =>
-  method.overrides?.find(({ selected }) => selected);
+  const { overrides } = method;
 
-const getRoutesPaths = (routes: Route[]) => routes.map(({ path }) => path);
-
-const getRouteByUrl = (routes: Route[], url: string) => {
-  const route = routes.find(({ path }) => path === url);
-
-  if (route) {
-    return route;
+  if (overrides) {
+    return overrides;
   }
 
-  throw new Error(`Route with url "${url}" not found`);
-};
+  throw new Error(`Method with type "${routeMethodType}" has no "overrides"`);
+}
 
-const getMethodOverridesByType = (
-  { methods }: Route,
-  routeMethodType: string
-) => {
-  const method = methods.find(({ type }) => type === routeMethodType);
+export function findSelectedMethodOverride(method: Method) {
+  return method.overrides?.find(({ selected }) => selected);
+}
 
-  if (method) {
-    const { overrides } = method;
+export function createOverrideManager(
+  options: OverrideOptions
+): OverrideManager {
+  return {
+    getSelected() {
+      return options.routeManager
+        .getAll()
+        .reduce<OverrideSelectResult[]>((acc, route) => {
+          route.methods.forEach((method) => {
+            const selectedOverride = findSelectedMethodOverride(method);
 
-    if (overrides) {
-      return overrides;
-    }
+            if (selectedOverride) {
+              acc.push({ route, method, name: selectedOverride.name });
+            }
+          });
 
-    throw new Error(`Method with type "${routeMethodType}" has no "overrides"`);
-  }
-
-  throw new Error(`Method with type "${routeMethodType}" not found`);
-};
-
-const getRouteMethodsTypes = (route: Route) => {
-  return filterMethodsWithOverrides(route.methods).map(({ type }) =>
-    type.toUpperCase()
-  );
-};
-
-const getOverridesNames = (overrides: MethodOverride[]) =>
-  overrides.map(({ name }) => name);
-
-const filterByPredicate = (list: string[]) => (predicate: string = '') =>
-  fuzzy.filter(predicate, list).map(({ original }) => original);
-
-const selectEndpointUrl = (routePaths: string[]) => {
-  const filter = filterByPredicate(routePaths);
-
-  return inquirer.prompt([
-    {
-      type: 'autocomplete',
-      name: 'url',
-      message: 'Search for the endpoint URL:',
-      source: (_: any, input: string) => Promise.resolve(filter(input)),
+          return acc;
+        }, []);
     },
-  ]);
-};
 
-const selectMethodType = (route: Route) => {
-  const methodsTypes = getRouteMethodsTypes(route);
-  const filter = filterByPredicate(methodsTypes);
+    async select() {
+      const routes = options.routeManager.getWithOverrides();
+      const { url } = await selectEndpointUrl(getRoutesPaths(routes));
+      const route = findRouteByUrl(routes, url);
+      const { type } = await selectMethodType(route);
+      const overrides = getMethodOverridesByType(route, type);
+      const { name } = await selectOverride(
+        getOverridesNamesWithDefault(overrides)
+      );
 
-  return inquirer
-    .prompt([
-      {
-        type: 'autocomplete',
-        name: 'type',
-        message: 'Select the type:',
-        source: (_: any, input: string) => Promise.resolve(filter(input)),
-      },
-    ])
-    .then(({ type }) => ({ type: type.toLowerCase() }));
-};
+      const method = findRouteMethodByType(route.methods, type);
 
-const selectOverride = (overrides: MethodOverride[]) => {
-  const methodsTypes = [
-    OVERRIDE_DEFAULT_OPTION,
-    ...getOverridesNames(overrides),
-  ];
-  const filter = filterByPredicate(methodsTypes);
+      method.overrides?.forEach((override) => {
+        override.selected = override.name === name;
+      });
 
-  return inquirer.prompt([
-    {
-      type: 'autocomplete',
-      name: 'name',
-      message: 'Select the override settings:',
-      source: (_: any, input: string) => Promise.resolve(filter(input)),
+      return { route, method, name };
     },
-  ]);
-};
-
-const overrideUrl = async (options: OverrideListenerOptions) => {
-  const routes = filterRoutesWithOverrides(options.getAllRoutes());
-  const { url } = await selectEndpointUrl(getRoutesPaths(routes));
-  const route = getRouteByUrl(routes, url);
-  const { type } = await selectMethodType(route);
-  const overrides = getMethodOverridesByType(route, type);
-  const { name } = await selectOverride(overrides);
-
-  options.selectMethodOverride(url, type, name);
-};
-
-const formatOverride = (
-  route: Route,
-  method: Method,
-  override: MethodOverride
-) => `${method.type.toUpperCase()} ${route.path}: ${override.name}`;
-
-export const getFormattedOverrides = (routes: Route[]): string[] =>
-  routes.reduce<string[]>((acc, route) => {
-    route.methods.forEach((method) => {
-      const selectedOverride = getSelectedMethodOverride(method);
-
-      if (selectedOverride) {
-        acc.push(formatOverride(route, method, selectedOverride));
-      }
-    });
-
-    return acc;
-  }, []);
-
-export const overridesListener = (
-  options: OverrideListenerOptions
-) => (): Promise<InputListenerPromiseResponse> =>
-  overrideUrl(options).then(() => ({ usingInquirer: true }));
+  };
+}

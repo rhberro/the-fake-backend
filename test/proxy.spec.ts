@@ -12,7 +12,12 @@ describe('source/proxy.ts', () => {
   ];
 
   beforeEach(() => {
-    proxyManager = createProxyManager(proxies);
+    proxyManager = createProxyManager(proxies, {
+      routeManager: {
+        getAll: jest.fn(),
+        setAll: jest.fn(),
+      },
+    });
   });
 
   describe('createProxyManager', () => {

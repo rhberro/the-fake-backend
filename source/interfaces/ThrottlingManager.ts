@@ -1,6 +1,8 @@
+import Throttling from './Throttling';
+
 export default interface ThrottlingManager {
-  getAll: Function;
-  getCurrent: Function;
-  getCurrentDelay: Function;
-  toggleCurrent: Function;
+  getAll: () => Throttling[];
+  getCurrent: () => Throttling | null;
+  getCurrentDelay: () => number;
+  toggleCurrent: () => void;
 }

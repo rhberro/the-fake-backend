@@ -1,8 +1,4 @@
-import {
-  InputListener,
-  InputListenerPromiseResponse,
-  InputManager,
-} from './interfaces';
+import { InputListener, InputManager } from './interfaces';
 import readline from 'readline';
 
 /**
@@ -47,10 +43,8 @@ export function createInputManager(): InputManager {
     const eventResult = listener.event();
 
     if (eventResult && isPromise(eventResult)) {
-      eventResult.then((data) => {
-        if (data && data.usingInquirer) {
-          reopenStdinAfterInquirer();
-        }
+      eventResult.then(() => {
+        reopenStdinAfterInquirer();
       });
     } else {
       bindKeypress();
@@ -82,7 +76,7 @@ export function createInputManager(): InputManager {
      *
      * @param {boolean} raw - The raw mode state.
      */
-    init(raw: boolean = true): void {
+    init(raw = true): void {
       readline.emitKeypressEvents(process.stdin);
 
       if (typeof process.stdin.setRawMode === 'function') {
@@ -99,11 +93,7 @@ export function createInputManager(): InputManager {
      * @param {Function} event - The event callback.
      * @param {boolean} control - The control key state.
      */
-    addListener(
-      key: string,
-      event: () => Promise<InputListenerPromiseResponse> | void,
-      control: boolean = false
-    ): void {
+    addListener(key, event, control = false): void {
       const listener: InputListener = { key, event, control };
       listeners.push(listener);
     },
