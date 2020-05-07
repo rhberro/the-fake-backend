@@ -30,10 +30,12 @@ function getPaginationProperties(
 /**
  * Create a paginated content.
  *
- * @param {express.Request} req Request
- * @param {express.Response} res Response
- * @param {Array<any>} content Content
- * @param {ServerOptions} options Server options
+ * @param req The request object
+ * @param res The response object
+ * @param content The content
+ * @param method The route method
+ * @param options The server options
+ * @return The paginated content
  */
 export default function createPaginatedResponse(
   req: express.Request,

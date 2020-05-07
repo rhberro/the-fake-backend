@@ -6,6 +6,6 @@ export default interface ProxyManager {
   getAll: () => Proxy[];
   getCurrent: () => ProxyResult | null;
   toggleCurrent: () => void;
-  getOverriddenRoutesProxies: () => RouteResult[];
-  selectRouteProxy: () => Promise<RouteResult>;
+  getOverriddenProxyRoutes: () => RouteResult[];
+  chooseRouteProxy: () => Promise<RouteResult>;
 }

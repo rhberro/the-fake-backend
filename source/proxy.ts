@@ -6,17 +6,16 @@ import {
   ProxyOptions,
 } from './interfaces';
 import httpProxyMiddleware from 'http-proxy-middleware';
-import { selectEndpointUrl, selectProxy } from './prompts';
+import { promptRoutePath, promptProxy } from './prompts';
 import { getRoutesPaths, findRouteByUrl } from './routes';
 
 const PROXY_DEFAULT_OPTION = 'Local';
 
 /**
- * Add a proxy property to the proxy properties
+ * Add a httpProxy to a proxy properties
  *
- * @param {ProxyProperties} proxy - The proxy properties object.
- *
- * @return {Proxy} The proxy with the proxy middleware.
+ * @param proxy The proxy properties object
+ * @return The proxy with the proxy middleware
  */
 function createProxyMiddleware(proxy: ProxyProperties): ProxyResult {
   const { name, host } = proxy;
@@ -34,9 +33,8 @@ function createProxyMiddleware(proxy: ProxyProperties): ProxyResult {
 /**
  * Create a new proxy manager.
  *
- * @param {Array<ProxyProperties>} proxies - The current list of proxies.
- *
- * @return {ProxyManager} The proxy manager.
+ * @param proxies The current list of proxies
+ * @return The proxy manager
  */
 export function createProxyManager(
   proxies: Array<ProxyProperties> = [],
@@ -62,7 +60,7 @@ export function createProxyManager(
     /**
      * Get all proxies.
      *
-     * @return {Array<Proxy>} An array containing all the proxies.
+     * @return An array containing all the proxies
      */
     getAll() {
       return proxyMiddlewares;
@@ -71,13 +69,28 @@ export function createProxyManager(
     /**
      * Get current proxy.
      *
-     * @return {Proxy} The current proxy.
+     * @return The current proxy.
      */
     getCurrent() {
       if (currentProxyIndex !== null) {
         return proxyMiddlewares[currentProxyIndex];
       }
       return null;
+    },
+
+    /**
+     * Get the routes with overridden proxy.
+     *
+     * @return Overridden proxy routes
+     */
+    getOverriddenProxyRoutes() {
+      const current = this.getCurrent();
+
+      return options.routeManager
+        .getAll()
+        .filter(
+          ({ proxy }) => proxy !== undefined && proxy?.name !== current?.name
+        );
     },
 
     /**
@@ -93,20 +106,15 @@ export function createProxyManager(
       }
     },
 
-    getOverriddenRoutesProxies() {
-      const current = this.getCurrent();
-
-      return options.routeManager
-        .getAll()
-        .filter(
-          ({ proxy }) => proxy !== undefined && proxy?.name !== current?.name
-        );
-    },
-
-    async selectRouteProxy() {
+    /**
+     * Prompt and select a route proxy.
+     *
+     * @return The updated route
+     */
+    async chooseRouteProxy() {
       const routes = getRoutesPaths(options.routeManager.getAll());
-      const { url } = await selectEndpointUrl(routes);
-      const { proxy } = await selectProxy(getAllNamesWithDefault());
+      const { url } = await promptRoutePath(routes);
+      const { proxy } = await promptProxy(getAllNamesWithDefault());
 
       const route = findRouteByUrl(options.routeManager.getAll(), url);
       route.proxy = findByName(proxy) || null;

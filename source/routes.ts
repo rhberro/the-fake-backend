@@ -38,20 +38,40 @@ export function findRouteMethodByType(methods: Method[], type: string) {
   throw new Error(`Method with type "${type}" not found`);
 }
 
+/**
+ * Create a new route manager.
+ *
+ * @return The route manager
+ */
 export function createRouteManager(): RouteManager {
   let allRoutes: Array<RouteResult> = [];
 
   return {
+    /**
+     * Get all routes.
+     *
+     * @return An array containing all the routes
+     */
     getAll() {
       return allRoutes;
     },
 
+    /**
+     * Get routes with overrides.
+     *
+     * @return An array containing all the routes with overrides
+     */
     getWithOverrides() {
       return allRoutes.filter(({ methods }) =>
         isNotEmpty(filterMethodsWithOverrides(methods))
       );
     },
 
+    /**
+     * Set all the routes.
+     *
+     * @param routes The routes
+     */
     setAll(routes) {
       while (allRoutes.length > 0) {
         allRoutes.pop();

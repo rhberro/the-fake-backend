@@ -1,7 +1,5 @@
 import * as inquirer from 'inquirer';
 import fuzzy from 'fuzzy';
-import { Route } from './interfaces';
-import { getRouteMethodsTypes } from './routes';
 
 inquirer.registerPrompt(
   'autocomplete',
@@ -11,8 +9,14 @@ inquirer.registerPrompt(
 const filterByPredicate = (list: string[]) => (predicate: string = '') =>
   fuzzy.filter(predicate, list).map(({ original }) => original);
 
-export const selectEndpointUrl = (routePaths: string[]) => {
-  const filter = filterByPredicate(routePaths);
+/**
+ * Prompts a route path.
+ *
+ * @param paths The routes paths
+ * @return The selected proxy
+ */
+export function promptRoutePath(paths: string[]) {
+  const filter = filterByPredicate(paths);
 
   return inquirer.prompt([
     {
@@ -22,11 +26,16 @@ export const selectEndpointUrl = (routePaths: string[]) => {
       source: (_: any, input: string) => Promise.resolve(filter(input)),
     },
   ]);
-};
+}
 
-export const selectMethodType = (route: Route) => {
-  const methodsTypes = getRouteMethodsTypes(route);
-  const filter = filterByPredicate(methodsTypes);
+/**
+ * Prompts a route method type.
+ *
+ * @param types The route method types
+ * @return The selected type
+ */
+export function promptRouteMethodType(types: string[]) {
+  const filter = filterByPredicate(types);
 
   return inquirer
     .prompt([
@@ -38,12 +47,18 @@ export const selectMethodType = (route: Route) => {
       },
     ])
     .then(({ type }) => ({ type: type.toLowerCase() }));
-};
+}
 
-export const selectOverride = (overrides: string[]) => {
+/**
+ * Prompts a route method override.
+ *
+ * @param overrides The route method overrides
+ * @return The selected override
+ */
+export async function promptRouteMethodOverride(overrides: string[]) {
   const filter = filterByPredicate(overrides);
 
-  return inquirer.prompt([
+  return await inquirer.prompt([
     {
       type: 'autocomplete',
       name: 'name',
@@ -51,9 +66,15 @@ export const selectOverride = (overrides: string[]) => {
       source: (_: any, input: string) => Promise.resolve(filter(input)),
     },
   ]);
-};
+}
 
-export const selectProxy = (proxies: string[]) => {
+/**
+ * Prompts a proxy.
+ *
+ * @param proxies The current list of proxies
+ * @return The selected proxy
+ */
+export function promptProxy(proxies: string[]) {
   const filter = filterByPredicate(proxies);
 
   return inquirer.prompt([
@@ -64,4 +85,4 @@ export const selectProxy = (proxies: string[]) => {
       source: (_: any, input: string) => Promise.resolve(filter(input)),
     },
   ]);
-};
+}

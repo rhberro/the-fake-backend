@@ -27,10 +27,10 @@ function filterContent(search: Search, query: any, item: any) {
 /**
  * Filters the content using the search properties and returns a filtered content.
  *
- * @param {express.Request} req -
- * @param {express.Response} res -
- * @param {Array<any>} content -
- * @param {Method} method -
+ * @param req The request object
+ * @param res The response object
+ * @param content The content
+ * @param method The route method
  */
 export default function createSearchableResponse(
   req: express.Request,

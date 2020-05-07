@@ -10,10 +10,10 @@ import readline from 'readline';
 /**
  * Create a new UI manager.
  *
- * @param {ProxyManager} proxyManager - The proxy manager.
- * @param {ThrottlingManager} throttlingManager - The throttling manager.
- *
- * @return {UIManager} The UI manager.
+ * @param proxyManager The proxy manager
+ * @param throttlingManager The throttling manager
+ * @param overrideManager The routes overrides manager
+ * @return The UI manager
  */
 export function createUIManager(
   proxyManager: ProxyManager,
@@ -47,7 +47,7 @@ export function createUIManager(
   /**
    * Write a message to the user screen followed by a line break.
    *
-   * @param {Array<string>} parameters - An array of text to display.
+   * @param parameters An array of text to display
    */
   function line(...parameters: Array<string>): void {
     write(parameters.join('\x20'));
@@ -57,20 +57,20 @@ export function createUIManager(
   /**
    * Add two empty spaces before writing a message to the user screen followed by a line break.
    *
-   * @param {Array<string>} parameters - An array of text to display.
+   * @param parameters An array of text to display
    */
   function paragraph(...parameters: Array<string>): void {
     line(' ', ...parameters);
   }
 
   function printConnection() {
-    const currentProxy = proxyManager.getCurrent();
+    const connection = proxyManager.getCurrent();
 
     line(chalk.blackBright('Connection:'));
-    if (currentProxy) {
+    if (connection) {
       paragraph(
-        chalk.bold.white(currentProxy.name),
-        chalk.bold.blackBright(currentProxy.host)
+        chalk.bold.white(connection.name),
+        chalk.bold.blackBright(connection.host)
       );
     } else {
       paragraph('Local');
@@ -79,10 +79,10 @@ export function createUIManager(
 
   function printConnectionOverrides() {
     line(chalk.blackBright('Connection overrides:'));
-    const overriddenRoutesProxies = proxyManager.getOverriddenRoutesProxies();
+    const connectionOverrides = proxyManager.getOverriddenProxyRoutes();
 
-    if (overriddenRoutesProxies.length) {
-      overriddenRoutesProxies.forEach((route) =>
+    if (connectionOverrides.length) {
+      connectionOverrides.forEach((route) =>
         paragraph(`- ${`${route.path}: ${route.proxy?.name || 'Local'}`}`)
       );
     } else {
@@ -160,9 +160,9 @@ export function createUIManager(
     /**
      * Draw the request information to the user screen.
      *
-     * @param {express.Request} req - The route request object.
-     * @param {express.Response} res - The route response object.
-     * @param {express.Request} next - The express next function.
+     * @param req The route request object
+     * @param res The route response object
+     * @param next The express next function
      */
     drawRequest(req, res, next) {
       const currentThrottling = throttlingManager.getCurrent();

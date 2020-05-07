@@ -45,8 +45,10 @@ export function createServer(options = {} as ServerOptions): Server {
   );
 
   /**
-   * Merge method with current override selected.
-   * @param method The method object.
+   * Merge method with current selected override.
+   *
+   * @param method The method object
+   * @return The parsed method
    */
   function parseMethod(method: Method): Method {
     if (method.overrides) {
@@ -64,10 +66,11 @@ export function createServer(options = {} as ServerOptions): Server {
   }
 
   /**
-   * Resolve the attribute.
+   * Resolve the attribute by applying request argument if it is a function.
    *
-   * @param req The request object.
-   * @param attribute The attribute.
+   * @param attribute The attribute
+   * @param req The request object
+   * @return The resolved attribute
    */
   function resolveMethodAttribute(
     attribute: MethodAttribute<any>,
@@ -76,6 +79,12 @@ export function createServer(options = {} as ServerOptions): Server {
     return typeof attribute === 'function' ? attribute(req) : attribute;
   }
 
+  /**
+   * Get the route current proxy.
+   *
+   * @param route The route
+   * @return Current proxy
+   */
   function getProxy(route: RouteResult) {
     if (route.proxy !== undefined) {
       return route.proxy;
@@ -87,10 +96,11 @@ export function createServer(options = {} as ServerOptions): Server {
   /**
    * Get the method content.
    *
-   * @param {Method} method The method object.
-   * @param {express.Request} req The request object.
-   * @param {express.Response} res The response object.
-   * @return {any} The method content
+   * @param method The method object
+   * @param routePath The route path
+   * @param req The request object
+   * @param res The response object
+   * @return The method content
    */
   function getContent(
     method: Method,
@@ -123,10 +133,11 @@ export function createServer(options = {} as ServerOptions): Server {
   /**
    * Response the url with the content.
    *
-   * @param {express.Request} req The request object.
-   * @param {express.Response} res The response object.
-   * @param {any} content The response content.
-   * @param {number} delay The response delay.
+   * @param res The response object
+   * @param code The response code
+   * @param content The response content
+   * @param headers The response headers
+   * @param delay The response delay
    */
   function sendContent(
     res: express.Response,
@@ -144,9 +155,9 @@ export function createServer(options = {} as ServerOptions): Server {
   /**
    * Create the method response object.
    *
-   * @param {Method} method The method object.
-   * @param {express.Request} req The request object.
-   * @param {express.Response} res The response object.
+   * @param method The method object
+   * @param req The request object
+   * @param res The response object
    */
   function createMethodResponse(
     method: Method,
@@ -175,8 +186,8 @@ export function createServer(options = {} as ServerOptions): Server {
   /**
    * Create a new route's method.
    *
-   * @param {Route} route The route object.
-   * @param {Method} method The method object.
+   * @param route The route object
+   * @param method The method object
    */
   function createMethod(route: RouteResult, method: Method): void {
     const { path } = route;
@@ -190,7 +201,7 @@ export function createServer(options = {} as ServerOptions): Server {
   /**
    * Create a new route.
    *
-   * @param {Route} route The route object.
+   * @param route The route object
    */
   function createRoute(route: Route): void {
     const { methods } = route;
@@ -204,7 +215,7 @@ export function createServer(options = {} as ServerOptions): Server {
     /**
      * Register the server routes.
      *
-     * @param {Array<Route>} routes The server routes.
+     * @param routes The server routes
      */
     routes(routes): void {
       routeManager.setAll(routes);
@@ -214,7 +225,7 @@ export function createServer(options = {} as ServerOptions): Server {
     /**
      * Start listening on port.
      *
-     * @param {number} port The server port.
+     * @param port The server port
      */
     listen(port = 8080): void {
       const inputManager = createInputManager();
@@ -234,14 +245,14 @@ export function createServer(options = {} as ServerOptions): Server {
       }
 
       async function onOverride() {
-        const { route, method, name } = await overrideManager.select();
+        const { route, method, name } = await overrideManager.choose();
 
         uiManager.drawDashboard();
         uiManager.writeMethodOverrideChanged(route.path, method.type, name);
       }
 
       async function onRouteProxy() {
-        const route = await proxyManager.selectRouteProxy();
+        const route = await proxyManager.chooseRouteProxy();
 
         uiManager.drawDashboard();
         uiManager.writeRouteProxyChanged(

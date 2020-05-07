@@ -4,7 +4,7 @@ import readline from 'readline';
 /**
  * Create a new input manager.
  *
- * @return {InputManager} The input manager.
+ * @return The input manager
  */
 export function createInputManager(): InputManager {
   const listeners: Array<InputListener> = [
@@ -15,7 +15,7 @@ export function createInputManager(): InputManager {
   /**
    * Filter a listener using its name and control key.
    *
-   * @param {InputListener} listener - The input listener.
+   * @param listener The input listener
    */
   function filterInputListener(
     this: readline.Key,
@@ -27,8 +27,8 @@ export function createInputManager(): InputManager {
   /**
    * Filter and apply listeners that matches the event's properties.
    *
-   * @param {any} chunk
-   * @param {readline.key} key - The event key.
+   * @param chunk Chunk
+   * @param key The event key
    */
   function onKeyPress(chunk: any, key: readline.Key): void {
     listeners.filter(filterInputListener, key).map(executeEvent);
@@ -74,7 +74,7 @@ export function createInputManager(): InputManager {
     /**
      * Start listening to user inputs.
      *
-     * @param {boolean} raw - The raw mode state.
+     * @param raw The raw mode state
      */
     init(raw = true): void {
       readline.emitKeypressEvents(process.stdin);
@@ -89,9 +89,9 @@ export function createInputManager(): InputManager {
     /**
      * Register an event listener to a key.
      *
-     * @param {string} key - The target key.
-     * @param {Function} event - The event callback.
-     * @param {boolean} control - The control key state.
+     * @param key The target key
+     * @param event The event callback
+     * @param control The control key state
      */
     addListener(key, event, control = false): void {
       const listener: InputListener = { key, event, control };

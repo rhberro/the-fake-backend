@@ -6,11 +6,16 @@ import {
   OverrideManager,
   OverrideSelectResult,
 } from './interfaces';
-import { selectEndpointUrl, selectMethodType, selectOverride } from './prompts';
+import {
+  promptRoutePath,
+  promptRouteMethodType,
+  promptRouteMethodOverride,
+} from './prompts';
 import {
   findRouteByUrl,
   getRoutesPaths,
   findRouteMethodByType,
+  getRouteMethodsTypes,
 } from './routes';
 
 const OVERRIDE_DEFAULT_OPTION = 'Default';
@@ -39,10 +44,20 @@ export function findSelectedMethodOverride(method: Method) {
   return method.overrides?.find(({ selected }) => selected);
 }
 
+/**
+ * Create a new override manager.
+ *
+ * @return The override manager
+ */
 export function createOverrideManager(
   options: OverrideOptions
 ): OverrideManager {
   return {
+    /**
+     * Get the selected route method overrides.
+     *
+     * @return An array containing all the selected overrides.
+     */
     getSelected() {
       return options.routeManager
         .getAll()
@@ -59,13 +74,16 @@ export function createOverrideManager(
         }, []);
     },
 
-    async select() {
+    /**
+     * Prompt and select a route method override.
+     */
+    async choose() {
       const routes = options.routeManager.getWithOverrides();
-      const { url } = await selectEndpointUrl(getRoutesPaths(routes));
+      const { url } = await promptRoutePath(getRoutesPaths(routes));
       const route = findRouteByUrl(routes, url);
-      const { type } = await selectMethodType(route);
+      const { type } = await promptRouteMethodType(getRouteMethodsTypes(route));
       const overrides = getMethodOverridesByType(route, type);
-      const { name } = await selectOverride(
+      const { name } = await promptRouteMethodOverride(
         getOverridesNamesWithDefault(overrides)
       );
 
