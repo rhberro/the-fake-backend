@@ -1,11 +1,12 @@
+import chalk from 'chalk';
+import readline from 'readline';
+
 import {
   ProxyManager,
   ThrottlingManager,
   UIManager,
   OverrideManager,
 } from './interfaces';
-import * as chalk from 'chalk';
-import * as readline from 'readline';
 import { formatMethodType } from './routes';
 
 /**

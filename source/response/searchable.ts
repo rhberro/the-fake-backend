@@ -1,6 +1,6 @@
-import { Method, Search } from '../interfaces';
-
 import express from 'express';
+
+import { Method, Search } from '../interfaces';
 
 function filterProperty(
   query: any,

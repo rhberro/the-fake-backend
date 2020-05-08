@@ -1,3 +1,5 @@
+import httpProxyMiddleware from 'http-proxy-middleware';
+
 import {
   Proxy,
   ProxyManager,
@@ -5,7 +7,6 @@ import {
   ProxyResult,
   ProxyOptions,
 } from './interfaces';
-import httpProxyMiddleware from 'http-proxy-middleware';
 import { promptRoutePath, promptProxy } from './prompts';
 import { getRoutesPaths, findRouteByUrl } from './routes';
 

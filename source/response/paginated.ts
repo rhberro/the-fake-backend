@@ -1,11 +1,11 @@
+import express from 'express';
+
 import {
   PaginationProperties,
   ServerOptions,
   Method,
   PaginationPropertiesResult,
 } from '../interfaces';
-
-import express from 'express';
 
 function getPaginationProperties(
   properties?: PaginationProperties
