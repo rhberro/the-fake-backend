@@ -1,6 +1,6 @@
-import createPaginatedResponse from '../../source/response/paginated';
-import { Method, ServerOptions } from '../../source/interfaces';
-import { MethodType } from '../../source/enums';
+import createPaginatedResponse from './paginated';
+import { Method, ServerOptions } from '../interfaces';
+import { MethodType } from '../enums';
 import { getMockReq, getMockRes } from '@jest-mock/express';
 
 describe('source/response/paginated.ts', () => {

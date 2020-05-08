@@ -1,11 +1,11 @@
-import { RouteManager, Route, Method } from '../source/interfaces';
+import { RouteManager, Route, Method } from './interfaces';
 
 import {
   createRouteManager,
   findRouteMethodByType,
   findRouteByUrl,
-} from '../source/routes';
-import { MethodType } from '../source/enums';
+} from './routes';
+import { MethodType } from './enums';
 
 describe('source/routes.ts', () => {
   describe('findRouteByUrl', () => {

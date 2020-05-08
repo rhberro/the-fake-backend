@@ -10,5 +10,5 @@
     "strict": true,
     "target": "es5"
   },
-  "include": ["source", "test"]
+  "include": ["source"]
 }

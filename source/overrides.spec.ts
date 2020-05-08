@@ -1,14 +1,14 @@
 import { mocked } from 'ts-jest/utils';
 
-import { OverrideManager, Route } from '../source/interfaces';
+import { OverrideManager, Route } from './interfaces';
 
-import { createOverrideManager } from '../source/overrides';
-import { MethodType } from '../source/enums';
+import { createOverrideManager } from './overrides';
+import { MethodType } from './enums';
 import {
   promptRoutePath,
   promptRouteMethodType,
   promptRouteMethodOverride,
-} from '../source/prompts';
+} from './prompts';
 
 jest.mock('../source/prompts');
 

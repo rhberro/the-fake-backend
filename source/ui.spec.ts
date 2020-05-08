@@ -4,10 +4,10 @@ import {
   OverrideSelectResult,
   Throttling,
   ProxyResult,
-} from '../source/interfaces';
+} from './interfaces';
 
-import { createUIManager } from '../source/ui';
-import { MethodType } from '../source/enums';
+import { createUIManager } from './ui';
+import { MethodType } from './enums';
 const stripAnsi = require('strip-ansi');
 
 const write = jest.fn((text) => stripAnsi(text).trim());

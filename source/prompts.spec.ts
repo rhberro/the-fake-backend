@@ -6,7 +6,7 @@ import {
   promptRouteMethodType,
   promptRouteMethodOverride,
   promptProxy,
-} from '../source/prompts';
+} from './prompts';
 
 jest.mock('inquirer', () => ({
   registerPrompt: jest.fn(),

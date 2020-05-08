@@ -1,14 +1,10 @@
 import { mocked } from 'ts-jest/utils';
 
-import {
-  ProxyManager,
-  ProxyProperties,
-  RouteResult,
-} from '../source/interfaces';
+import { ProxyManager, ProxyProperties, RouteResult } from './interfaces';
 
-import { createProxyManager } from '../source/proxy';
-import { MethodType } from '../source/enums';
-import { promptProxy } from '../source/prompts';
+import { createProxyManager } from './proxy';
+import { MethodType } from './enums';
+import { promptProxy } from './prompts';
 
 jest.mock('../source/prompts', () => ({
   promptProxy: jest.fn(),

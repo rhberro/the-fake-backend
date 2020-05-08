@@ -1,12 +1,12 @@
-import { createServer } from '../source/server';
+import { createServer } from './server';
 import {
   Server,
   InputManager,
   RouteManager,
   Route,
   UIManager,
-} from '../source/interfaces';
-import { MethodType } from '../source/enums';
+} from './interfaces';
+import { MethodType } from './enums';
 
 jest.mock('../source/ui', () => ({
   createUIManager: (): UIManager => ({

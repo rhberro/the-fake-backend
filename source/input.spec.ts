@@ -1,5 +1,5 @@
-import { createInputManager } from '../source/input';
-import { InputManager } from '../source/interfaces';
+import { createInputManager } from './input';
+import { InputManager } from './interfaces';
 
 describe('source/input.ts', () => {
   describe('InputManager', () => {

@@ -1,6 +1,6 @@
-import createSearchableResponse from '../../source/response/searchable';
-import { Method } from '../../source/interfaces';
-import { MethodType } from '../../source/enums';
+import createSearchableResponse from './searchable';
+import { Method } from '../interfaces';
+import { MethodType } from '../enums';
 import { getMockReq, getMockRes } from '@jest-mock/express';
 
 describe('source/response/searchable.ts', () => {

@@ -5,7 +5,7 @@ import {
   readFixtureFileSync,
   readFixturePathSync,
   readFixtureSync,
-} from '../source/files';
+} from './files';
 
 const mock = require('mock-fs');
 
@@ -53,7 +53,7 @@ describe('source/files.ts', () => {
 
   describe('readJSONFileSync', () => {
     it('returns JSON content if file exists', () => {
-      const data = readJSONFileSync('./test/data/success.json');
+      const data = readJSONFileSync('./__fixtures__/success.json');
 
       expect(data).toEqual({
         success: true,
@@ -63,7 +63,7 @@ describe('source/files.ts', () => {
 
   describe('readFixtureFileSync', () => {
     it('returns JSON content if extension is JSON', () => {
-      const data = readFixtureFileSync('./test/data/success.json');
+      const data = readFixtureFileSync('./__fixtures__/success.json');
 
       expect(data).toEqual({
         success: true,
@@ -71,7 +71,7 @@ describe('source/files.ts', () => {
     });
 
     it('returns raw file if extension is not JSON', () => {
-      const data = readFixtureFileSync('./test/data/success.txt');
+      const data = readFixtureFileSync('./__fixtures__/success.txt');
 
       expect(data).toBeInstanceOf(Buffer);
     });
