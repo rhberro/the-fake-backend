@@ -1,3 +1,6 @@
+import * as cors from 'cors';
+import * as express from 'express';
+
 import {
   Method,
   Route,
@@ -5,15 +8,12 @@ import {
   ServerOptions,
   RouteResult,
 } from './interfaces';
-
-import cors from 'cors';
 import { createInputManager } from './input';
 import createPaginatedResponse from './response/paginated';
 import { createProxyManager } from './proxy';
 import createSearchableResponse from './response/searchable';
 import { createThrottlingManager } from './throttling';
 import { createUIManager } from './ui';
-import express from 'express';
 import { findSelectedMethodOverride, createOverrideManager } from './overrides';
 import { readFixtureSync } from './files';
 import { ResponseHeaders, MethodAttribute } from './types';
@@ -245,10 +245,10 @@ export function createServer(options = {} as ServerOptions): Server {
       }
 
       async function onOverride() {
-        const { route, method, name } = await overrideManager.choose();
+        const { routePath, methodType, name } = await overrideManager.choose();
 
         uiManager.drawDashboard();
-        uiManager.writeMethodOverrideChanged(route.path, method.type, name);
+        uiManager.writeMethodOverrideChanged(routePath, methodType, name);
       }
 
       async function onRouteProxy() {

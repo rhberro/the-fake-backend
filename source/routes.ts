@@ -1,21 +1,11 @@
 import { Route, Method, RouteResult, RouteManager } from './interfaces';
 
-function isNotEmpty<T>(array: T[]) {
-  return array.length > 0;
-}
-
 export function getRoutesPaths(routes: Route[]) {
   return routes.map(({ path }) => path);
 }
 
-export function getRouteMethodsTypes(route: Route) {
-  return filterMethodsWithOverrides(route.methods).map(({ type }) =>
-    type.toUpperCase()
-  );
-}
-
-function filterMethodsWithOverrides(methods: Method[]) {
-  return methods.filter(({ overrides }) => overrides && isNotEmpty(overrides));
+export function formatMethodType(methodType: string) {
+  return methodType.toUpperCase();
 }
 
 export function findRouteByUrl(routes: Route[], url: string): RouteResult {
@@ -54,17 +44,6 @@ export function createRouteManager(): RouteManager {
      */
     getAll() {
       return allRoutes;
-    },
-
-    /**
-     * Get routes with overrides.
-     *
-     * @return An array containing all the routes with overrides
-     */
-    getWithOverrides() {
-      return allRoutes.filter(({ methods }) =>
-        isNotEmpty(filterMethodsWithOverrides(methods))
-      );
     },
 
     /**

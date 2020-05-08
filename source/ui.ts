@@ -4,8 +4,9 @@ import {
   UIManager,
   OverrideManager,
 } from './interfaces';
-import chalk from 'chalk';
-import readline from 'readline';
+import * as chalk from 'chalk';
+import * as readline from 'readline';
+import { formatMethodType } from './routes';
 
 /**
  * Create a new UI manager.
@@ -63,6 +64,10 @@ export function createUIManager(
     line(' ', ...parameters);
   }
 
+  function formatEndpoint(routePath: string, methodType: string) {
+    return `${formatMethodType(methodType)} ${routePath}`;
+  }
+
   function printConnection() {
     const connection = proxyManager.getCurrent();
 
@@ -110,15 +115,11 @@ export function createUIManager(
   function printOverrides() {
     line(chalk.blackBright('Overrides:'));
 
-    const selectedOverrides = overrideManager.getSelected();
+    const selectedOverrides = overrideManager.getAllSelected();
 
     if (selectedOverrides.length) {
-      selectedOverrides.forEach((override) =>
-        paragraph(
-          `- ${override.method.type.toUpperCase()} ${override.route.path}: ${
-            override.name
-          }`
-        )
+      selectedOverrides.forEach(({ routePath, methodType, name }) =>
+        paragraph(`- ${formatEndpoint(routePath, methodType)}: ${name}`)
       );
     } else {
       paragraph('None');
@@ -182,23 +183,20 @@ export function createUIManager(
       selectedOverrideName
     ) {
       const endpoint = chalk.magenta(
-        `(${routeMethodType.toUpperCase()}) ${routePath}`
+        formatEndpoint(routePath, routeMethodType)
       );
 
-      display.write(
-        `Endpoint ${endpoint} changed to response ${chalk.magenta(
-          selectedOverrideName
-        )}`
-      );
+      const override = chalk.magenta(selectedOverrideName);
+
+      display.write(`Endpoint ${endpoint} changed to response ${override}`);
       linebreak();
     },
 
     writeRouteProxyChanged(routePath, selectedProxyName) {
       const route = chalk.magenta(routePath);
+      const proxy = chalk.magenta(selectedProxyName);
 
-      display.write(
-        `Route ${route} changed to proxy ${chalk.magenta(selectedProxyName)}`
-      );
+      display.write(`Route ${route} changed to proxy ${proxy}`);
       linebreak();
     },
   };

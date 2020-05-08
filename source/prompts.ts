@@ -15,7 +15,7 @@ const filterByPredicate = (list: string[]) => (predicate: string = '') =>
  * @param paths The routes paths
  * @return The selected proxy
  */
-export function promptRoutePath(paths: string[]) {
+export function promptRoutePath(paths: string[]): Promise<{ url: string }> {
   const filter = filterByPredicate(paths);
 
   return inquirer.prompt([
@@ -34,19 +34,19 @@ export function promptRoutePath(paths: string[]) {
  * @param types The route method types
  * @return The selected type
  */
-export function promptRouteMethodType(types: string[]) {
+export function promptRouteMethodType(
+  types: string[]
+): Promise<{ type: string }> {
   const filter = filterByPredicate(types);
 
-  return inquirer
-    .prompt([
-      {
-        type: 'autocomplete',
-        name: 'type',
-        message: 'Select the type:',
-        source: (_: any, input: string) => Promise.resolve(filter(input)),
-      },
-    ])
-    .then(({ type }) => ({ type: type.toLowerCase() }));
+  return inquirer.prompt([
+    {
+      type: 'autocomplete',
+      name: 'type',
+      message: 'Select the type:',
+      source: (_: any, input: string) => Promise.resolve(filter(input)),
+    },
+  ]);
 }
 
 /**
@@ -55,10 +55,12 @@ export function promptRouteMethodType(types: string[]) {
  * @param overrides The route method overrides
  * @return The selected override
  */
-export async function promptRouteMethodOverride(overrides: string[]) {
+export function promptRouteMethodOverride(
+  overrides: string[]
+): Promise<{ name: string }> {
   const filter = filterByPredicate(overrides);
 
-  return await inquirer.prompt([
+  return inquirer.prompt([
     {
       type: 'autocomplete',
       name: 'name',
@@ -74,7 +76,7 @@ export async function promptRouteMethodOverride(overrides: string[]) {
  * @param proxies The current list of proxies
  * @return The selected proxy
  */
-export function promptProxy(proxies: string[]) {
+export function promptProxy(proxies: string[]): Promise<{ proxy: string }> {
   const filter = filterByPredicate(proxies);
 
   return inquirer.prompt([
