@@ -83,6 +83,7 @@ describe('source/server.ts', () => {
           },
         ];
         server.routes(routes);
+        expect(expressServer.get).toHaveBeenCalled();
       });
     });
 
