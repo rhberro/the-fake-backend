@@ -1,6 +1,6 @@
-import { Throttling, ThrottlingManager } from '../source/interfaces';
+import { Throttling, ThrottlingManager } from './interfaces';
 
-import { createThrottlingManager } from '../source/throttling';
+import { createThrottlingManager } from './throttling';
 
 describe('source/throttling.ts', () => {
   let throttlingManager: ThrottlingManager;
@@ -46,9 +46,8 @@ describe('source/throttling.ts', () => {
     });
 
     it('returns a number between the first throttling values', () => {
-      const currentDelay =
-        throttlingManager.toggleCurrent() ||
-        throttlingManager.getCurrentDelay();
+      throttlingManager.toggleCurrent();
+      const currentDelay = throttlingManager.getCurrentDelay();
       expect(currentDelay).toBeGreaterThanOrEqual(throttlings[0].values[0]);
       expect(currentDelay).toBeLessThanOrEqual(throttlings[0].values[1]);
     });

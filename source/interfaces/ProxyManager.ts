@@ -1,7 +1,11 @@
+import Proxy from './Proxy';
 import ProxyResult from './ProxyResult';
+import RouteResult from './RouteResult';
 
 export default interface ProxyManager {
-  getAll: Function;
+  getAll: () => Proxy[];
   getCurrent: () => ProxyResult | null;
-  toggleCurrent: Function;
+  toggleCurrent: () => void;
+  getOverriddenProxyRoutes: () => RouteResult[];
+  chooseRouteProxy: () => Promise<RouteResult>;
 }

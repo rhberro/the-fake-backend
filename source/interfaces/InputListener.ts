@@ -1,7 +1,5 @@
-import InputListenerPromiseResponse from './InputListenerPromiseResponse';
-
 export default interface InputListener {
   key: string;
+  event: () => Promise<void> | void;
   control: boolean;
-  event: () => Promise<InputListenerPromiseResponse> | void;
 }

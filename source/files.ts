@@ -4,9 +4,8 @@ import { basename, dirname, extname, join, parse } from 'path';
 /**
  * Return a boolean indicating that given dirent is a file or not.
  *
- * @param {Dirent} dirent The dirent object.
- *
- * @return {boolean} A boolean indicating that the dirent name matches the text.
+ * @param dirent The dirent object
+ * @return A boolean indicating that the dirent name matches the text
  */
 export function direntIsFile(dirent: Dirent): boolean {
   return dirent.isFile();
@@ -15,10 +14,9 @@ export function direntIsFile(dirent: Dirent): boolean {
 /**
  * Return a boolean indicating that the dirent name includes the text.
  *
- * @param {string} text The text to match.
- * @param {Dirent} dirent The dirent object.
- *
- * @return {boolean} A boolean indicating that the dirent name includes the text.
+ * @param text The text to match
+ * @param dirent The dirent object
+ * @return A boolean indicating that the dirent name includes the text
  */
 export function direntIncludes(text: string, dirent: Dirent): boolean {
   return parse(dirent.name).name === text;
@@ -27,9 +25,8 @@ export function direntIncludes(text: string, dirent: Dirent): boolean {
 /**
  * Read the file and parse its content as json.
  *
- * @param {string} path The file path.
- *
- * @return {any} The file content.
+ * @param path The file path
+ * @return The file content
  */
 export function readJSONFileSync(path: string): any {
   return JSON.parse(readFileSync(path).toString());
@@ -38,9 +35,8 @@ export function readJSONFileSync(path: string): any {
 /**
  * Read the fixture file.
  *
- * @param {string} path The fixture path.
- *
- * @return {any} The fixture content.
+ * @param path The fixture path
+ * @return The fixture content
  */
 export function readFixtureFileSync(path: string): any {
   if (extname(path) === '.json') {
@@ -53,9 +49,8 @@ export function readFixtureFileSync(path: string): any {
 /**
  * Read the first fixture file using path's dirname that matches the path's basename.
  *
- * @param {string} path The file path.
- *
- * @return {any} The file content.
+ * @param path The file path
+ * @return The file content
  */
 export function readFixturePathSync(path: string): any {
   const folder = dirname(path);
@@ -75,10 +70,9 @@ export function readFixturePathSync(path: string): any {
 /**
  * Read a fixture file using the extension when available or by reading the whole directory.
  *
- * @param {string} path The file path.
- * @param {string} fallbackPath The fallback file path.
- *
- * @return {any} The file content.
+ * @param path The file path
+ * @param fallbackPath The fallback file path
+ * @return The file content.
  */
 export function readFixtureSync(path: string, fallbackPath?: string): any {
   const extension = extname(path);
