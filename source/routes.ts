@@ -41,13 +41,20 @@ function cloneOverrides(overrides: MethodOverride[]) {
 
 function mergeMethodWithGlobalOverrides(globalOverrides: MethodOverride[]) {
   return function (method: Method) {
-    const methodOverrides = method.overrides || [];
-    const overrides = [...methodOverrides, ...cloneOverrides(globalOverrides)];
+    if (globalOverrides.length) {
+      const methodOverrides = method.overrides || [];
+      const overrides = [
+        ...methodOverrides,
+        ...cloneOverrides(globalOverrides),
+      ];
 
-    return {
-      ...method,
-      overrides,
-    };
+      return {
+        ...method,
+        overrides,
+      };
+    }
+
+    return method;
   };
 }
 
