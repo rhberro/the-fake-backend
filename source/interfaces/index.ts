@@ -14,6 +14,7 @@ export { default as ProxyResult } from './ProxyResult';
 export { default as PaginationPropertiesResult } from './PaginationPropertiesResult';
 export { default as Route } from './Route';
 export { default as RouteManager } from './RouteManager';
+export { default as RouteOptions } from './RouteOptions';
 export { default as ProxyOptions } from './ProxyOptions';
 export { default as RouteResult } from './RouteResult';
 export { default as Search } from './Search';

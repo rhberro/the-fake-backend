@@ -18,6 +18,7 @@ import { findSelectedMethodOverride, createOverrideManager } from './overrides';
 import { readFixtureSync } from './files';
 import { ResponseHeaders, MethodAttribute } from './types';
 import { createRouteManager } from './routes';
+import { reduceEachTrailingCommentRange } from 'typescript';
 
 function isSuccessfulStatusCode(code: number) {
   return code >= 200 && code <= 299;
@@ -26,7 +27,9 @@ function isSuccessfulStatusCode(code: number) {
 export function createServer(options = {} as ServerOptions): Server {
   const { middlewares, proxies, throttlings } = options;
 
-  const routeManager = createRouteManager();
+  const routeManager = createRouteManager({
+    globalOverrides: options.overrides,
+  });
   const overrideManager = createOverrideManager({ routeManager });
   const proxyManager = createProxyManager(proxies, { routeManager });
   const throttlingManager = createThrottlingManager(throttlings);
