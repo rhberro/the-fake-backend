@@ -18,7 +18,6 @@ import { findSelectedMethodOverride, createOverrideManager } from './overrides';
 import { readFixtureSync } from './files';
 import { ResponseHeaders, MethodAttribute } from './types';
 import { createRouteManager } from './routes';
-import { reduceEachTrailingCommentRange } from 'typescript';
 
 function isSuccessfulStatusCode(code: number) {
   return code >= 200 && code <= 299;

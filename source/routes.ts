@@ -36,32 +36,29 @@ export function findRouteMethodByType(methods: Method[], type: string) {
 }
 
 function cloneOverrides(overrides: MethodOverride[]) {
-  return overrides.map((override) => ({ ...override }));
+  return overrides.map((override) => ({
+    ...override,
+    name: `${override.name} (Global)`,
+  }));
 }
 
 function mergeMethodWithGlobalOverrides(globalOverrides: MethodOverride[]) {
   return function (method: Method) {
-    if (globalOverrides.length) {
-      const methodOverrides = method.overrides || [];
-      const overrides = [
-        ...methodOverrides,
-        ...cloneOverrides(globalOverrides),
-      ];
+    const methodOverrides = method.overrides || [];
+    const overrides = [...methodOverrides, ...cloneOverrides(globalOverrides)];
 
-      return {
-        ...method,
-        overrides,
-      };
-    }
-
-    return method;
+    return {
+      ...method,
+      overrides,
+    };
   };
 }
 
 function mergeRoutesWithGlobalOverrides(
+  routes: Route[],
   globalOverrides: MethodOverride[] = []
 ) {
-  return function (routes: Route[]) {
+  if (globalOverrides.length) {
     return routes.map((route) => {
       const methods = route.methods.map(
         mergeMethodWithGlobalOverrides(globalOverrides)
@@ -72,7 +69,9 @@ function mergeRoutesWithGlobalOverrides(
         methods,
       };
     });
-  };
+  }
+
+  return routes;
 }
 
 /**
@@ -81,9 +80,6 @@ function mergeRoutesWithGlobalOverrides(
  * @return The route manager
  */
 export function createRouteManager(options: RouteOptions): RouteManager {
-  const updateRoutesWithGlobalOverrides = mergeRoutesWithGlobalOverrides(
-    options.globalOverrides
-  );
   let allRoutes: Array<RouteResult> = [];
 
   return {
@@ -102,11 +98,16 @@ export function createRouteManager(options: RouteOptions): RouteManager {
      * @param routes The routes
      */
     setAll(routes) {
+      const routesWithOverrides = mergeRoutesWithGlobalOverrides(
+        routes,
+        options.globalOverrides
+      );
+
       while (allRoutes.length > 0) {
         allRoutes.pop();
       }
 
-      updateRoutesWithGlobalOverrides(routes).forEach((route) => {
+      routesWithOverrides.forEach((route) => {
         allRoutes.push(route);
       });
     },
