@@ -123,11 +123,11 @@ The script above generates the following two endpoints.
 
 This property allows to proxy requests.
 
-| Property                 | Required | Default | Description                                       |
-| ------------------------ | -------- | ------- | ------------------------------------------------- |
-| proxies[].name           | yes      |         | Custom throttling name                            |
-| proxies[].host           | yes      |         | Custom throttling range (array of numbers, in ms) |
-| proxies[].appendBasePath | No       | `false` | Whether basePath should be appended in target     |
+| Property                 | Required | Default | Description                                     |
+| ------------------------ | -------- | ------- | ----------------------------------------------- |
+| proxies[].name           | yes      |         | The proxy name                                  |
+| proxies[].host           | yes      |         | The proxy host (e.g.: `http://api.dev.com/api`) |
+| proxies[].appendBasePath | No       | `false` | Whether `basePath` should be appended in target |
 
 #### Throttlings
 
