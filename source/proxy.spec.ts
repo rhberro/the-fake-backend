@@ -1,6 +1,6 @@
 import { mocked } from 'ts-jest/utils';
 
-import { ProxyManager, ProxyProperties, RouteResult } from './interfaces';
+import { ProxyManager, ProxyProperties, Route } from './interfaces';
 
 import { createProxyManager } from './proxy';
 import { MethodType } from './enums';
@@ -16,7 +16,7 @@ jest.mock('../source/prompts', () => ({
 describe('source/proxy.ts', () => {
   describe('ProxyManager', () => {
     let proxyManager: ProxyManager;
-    let routes: RouteResult[] = [];
+    let routes: Route[] = [];
 
     const proxies: ProxyProperties[] = [
       { name: 'First', host: 'firsthost.com' },

@@ -1,8 +1,8 @@
-import OverrideSelectResult from './OverrideSelectResult';
-import RouteResult from './RouteResult';
+import Override from './Override';
+import Route from './Route';
 
 export default interface OverrideManager {
-  getAll: () => RouteResult[];
-  getAllSelected: () => OverrideSelectResult[];
-  choose: () => Promise<OverrideSelectResult>;
+  getAll: () => Route[];
+  getAllSelected: () => Override[];
+  choose: () => Promise<Override>;
 }

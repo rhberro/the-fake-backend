@@ -1,10 +1,10 @@
 import PaginationProperties from './PaginationProperties';
-import Proxy from './Proxy';
+import ProxyProperties from './ProxyProperties';
 import Throttling from './Throttling';
 
 export default interface ServerOptions {
   middlewares?: Array<any>;
   pagination?: PaginationProperties;
-  proxies: Array<Proxy>;
+  proxies: Array<ProxyProperties>;
   throttlings: Array<Throttling>;
 }

@@ -1,11 +1,10 @@
 import Proxy from './Proxy';
-import ProxyResult from './ProxyResult';
-import RouteResult from './RouteResult';
+import Route from './Route';
 
 export default interface ProxyManager {
   getAll: () => Proxy[];
-  getCurrent: () => ProxyResult | null;
+  getCurrent: () => Proxy | null;
+  getOverriddenProxyRoutes: () => Route[];
   toggleCurrent: () => void;
-  getOverriddenProxyRoutes: () => RouteResult[];
-  chooseRouteProxy: () => Promise<RouteResult>;
+  chooseRouteProxy: () => Promise<Route>;
 }

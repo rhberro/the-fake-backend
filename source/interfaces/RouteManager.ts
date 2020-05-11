@@ -1,6 +1,6 @@
-import RouteResult from './RouteResult';
+import Route from './Route';
 
 export default interface RouteManager {
-  getAll: () => RouteResult[];
-  setAll: (routes: RouteResult[]) => void;
+  getAll: () => Route[];
+  setAll: (routes: Route[]) => void;
 }

@@ -1,4 +1,4 @@
-import { RouteManager, Route, Method } from './interfaces';
+import { RouteManager, RouteProperties, Method } from './interfaces';
 
 import {
   createRouteManager,
@@ -9,7 +9,7 @@ import { MethodType } from './enums';
 
 describe('source/routes.ts', () => {
   describe('findRouteByUrl', () => {
-    const routes: Route[] = [
+    const routes: RouteProperties[] = [
       { path: '/users', methods: [{ type: MethodType.GET }] },
       { path: '/dogs', methods: [{ type: MethodType.GET }] },
     ];
@@ -49,7 +49,7 @@ describe('source/routes.ts', () => {
   describe('RouteManager', () => {
     let routeManager: RouteManager;
 
-    const routes: Route[] = [
+    const routes: RouteProperties[] = [
       { path: '/users', methods: [{ type: MethodType.GET }] },
       { path: '/dogs', methods: [{ type: MethodType.GET }] },
     ];

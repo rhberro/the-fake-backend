@@ -50,10 +50,10 @@ export function createProxyManager(
   }
 
   function getAllNamesWithDefault() {
-    return [PROXY_DEFAULT_OPTION, ...getProxyNames(proxies)];
+    return [PROXY_DEFAULT_OPTION, ...getProxyNames(proxyMiddlewares)];
   }
 
-  function findByName(name: string): ProxyResult | undefined {
+  function findByName(name: string): Proxy | undefined {
     return proxyMiddlewares.find((proxy) => proxy.name === name);
   }
 
