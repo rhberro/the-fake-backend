@@ -162,7 +162,7 @@ describe('source/routes.ts', () => {
                     type: MethodType.GET,
                     overrides: [
                       {
-                        name: 'Error 500',
+                        name: 'Error 500 (Global)',
                         code: 500,
                       },
                     ],
@@ -180,7 +180,7 @@ describe('source/routes.ts', () => {
                         code: 404,
                       },
                       {
-                        name: 'Error 500',
+                        name: 'Error 500 (Global)',
                         code: 500,
                       },
                     ],
