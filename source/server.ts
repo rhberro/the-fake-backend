@@ -18,11 +18,11 @@ function isSuccessfulStatusCode(code: number) {
 }
 
 export function createServer(options = {} as ServerOptions): Server {
-  const { middlewares, proxies, throttlings } = options;
+  const { basePath = '', middlewares, proxies, throttlings } = options;
 
   const routeManager = createRouteManager();
   const overrideManager = createOverrideManager({ routeManager });
-  const proxyManager = createProxyManager(proxies, { routeManager });
+  const proxyManager = createProxyManager(proxies, { basePath, routeManager });
   const throttlingManager = createThrottlingManager(throttlings);
   const uiManager = createUIManager(
     proxyManager,
@@ -189,7 +189,7 @@ export function createServer(options = {} as ServerOptions): Server {
 
     const response = createMethodResponse.bind(null, method, route);
 
-    expressServer[type](path, response);
+    expressServer[type](`${basePath}${path}`, response);
   }
 
   /**
