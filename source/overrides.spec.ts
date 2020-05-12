@@ -1,6 +1,6 @@
 import { mocked } from 'ts-jest/utils';
 
-import { OverrideManager, Route } from './interfaces';
+import { OverrideManager, RouteProperties, Route } from './interfaces';
 
 import { createOverrideManager } from './overrides';
 import { MethodType } from './enums';
@@ -16,7 +16,7 @@ describe('source/override.ts', () => {
   describe('OverrideManager', () => {
     let overrideManager: OverrideManager;
 
-    const routes: Route[] = [
+    const routes: RouteProperties[] = [
       { path: '/users', methods: [{ type: MethodType.GET }] },
       {
         path: '/cats',

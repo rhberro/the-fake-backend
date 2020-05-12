@@ -1,4 +1,4 @@
-export default interface PaginationPropertiesResult {
+export default interface Pagination {
   count: string;
   data: string;
   empty: string;

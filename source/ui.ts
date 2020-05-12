@@ -170,7 +170,7 @@ export function createUIManager(
       const currentThrottling = throttlingManager.getCurrent();
       const currentThrottlingDelay = throttlingManager.getCurrentDelay();
 
-      line(chalk.bold.white(req.path));
+      line(chalk.bold.white(`${req.method} ${req.path}`));
       if (currentThrottling) {
         line(chalk.blackBright('[' + currentThrottlingDelay + 'ms]'));
       }

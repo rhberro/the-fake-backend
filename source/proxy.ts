@@ -4,7 +4,6 @@ import {
   Proxy,
   ProxyManager,
   ProxyProperties,
-  ProxyResult,
   ProxyOptions,
 } from './interfaces';
 import { promptRoutePath, promptProxy } from './prompts';
@@ -16,16 +15,22 @@ const PROXY_DEFAULT_OPTION = 'Local';
  * Add a httpProxy to a proxy properties
  *
  * @param proxy The proxy properties object
+ * @param basePath The server basePath
  * @return The proxy with the proxy middleware
  */
-function createProxyMiddleware(proxy: ProxyProperties): ProxyResult {
-  const { name, host } = proxy;
+function createProxyMiddleware(
+  proxy: ProxyProperties,
+  basePath?: string
+): Proxy {
+  const { appendBasePath, name, host } = proxy;
 
   return {
     host,
     name,
     proxy: httpProxyMiddleware({
       target: host,
+      pathRewrite: (path) =>
+        appendBasePath ? path : path.replace(basePath || '', ''),
       changeOrigin: true,
     }),
   };
@@ -43,17 +48,19 @@ export function createProxyManager(
 ): ProxyManager {
   let currentProxyIndex: number | null = null;
 
-  const proxyMiddlewares = proxies.map(createProxyMiddleware);
+  const proxyMiddlewares = proxies.map((proxy) =>
+    createProxyMiddleware(proxy, options.basePath)
+  );
 
   function getProxyNames(proxies: Proxy[]) {
     return proxies.map((proxy) => proxy.name);
   }
 
   function getAllNamesWithDefault() {
-    return [PROXY_DEFAULT_OPTION, ...getProxyNames(proxies)];
+    return [PROXY_DEFAULT_OPTION, ...getProxyNames(proxyMiddlewares)];
   }
 
-  function findByName(name: string): ProxyResult | undefined {
+  function findByName(name: string): Proxy | undefined {
     return proxyMiddlewares.find((proxy) => proxy.name === name);
   }
 

@@ -1,6 +1,6 @@
-import Route from './Route';
+import RouteProperties from './RouteProperties';
 
 export default interface Server {
-  routes: (routes: Route[]) => void;
+  routes: (routes: RouteProperties[]) => void;
   listen: (port?: number | string) => void;
 }

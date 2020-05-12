@@ -4,12 +4,10 @@ import {
   PaginationProperties,
   ServerOptions,
   Method,
-  PaginationPropertiesResult,
+  Pagination,
 } from '../interfaces';
 
-function getPaginationProperties(
-  properties?: PaginationProperties
-): PaginationPropertiesResult {
+function getPagination(properties?: PaginationProperties): Pagination {
   return {
     count: properties?.count || 'count',
     data: properties?.data || 'data',
@@ -64,7 +62,7 @@ export default function createPaginatedResponse(
     pages,
     sizeParameter,
     total,
-  } = getPaginationProperties(properties);
+  } = getPagination(properties);
 
   const requestedSize = Number(query[sizeParameter]) || 5;
   const requestedPage = query[offsetParameter]

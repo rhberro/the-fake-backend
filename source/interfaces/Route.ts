@@ -1,6 +1,6 @@
-import Method from './Method';
+import RouteProperties from './RouteProperties';
+import Proxy from './Proxy';
 
-export default interface Route {
-  path: string;
-  methods: Array<Method>;
+export default interface Route extends RouteProperties {
+  proxy?: Proxy | null;
 }

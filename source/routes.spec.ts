@@ -1,4 +1,4 @@
-import { RouteManager, Route, Method } from './interfaces';
+import { RouteManager, RouteProperties, Method } from './interfaces';
 
 import {
   createRouteManager,
@@ -9,7 +9,7 @@ import { MethodType } from './enums';
 
 describe('source/routes.ts', () => {
   describe('findRouteByUrl', () => {
-    const routes: Route[] = [
+    const routes: RouteProperties[] = [
       { path: '/users', methods: [{ type: MethodType.GET }] },
       { path: '/dogs', methods: [{ type: MethodType.GET }] },
     ];
@@ -50,7 +50,7 @@ describe('source/routes.ts', () => {
     let routeManager: RouteManager;
 
     describe('when has not global overrides', () => {
-      const routes: Route[] = [
+      const routes: RouteProperties[] = [
         { path: '/users', methods: [{ type: MethodType.GET }] },
         { path: '/dogs', methods: [{ type: MethodType.GET }] },
       ];
@@ -113,7 +113,7 @@ describe('source/routes.ts', () => {
     });
 
     describe('when has global overrides', () => {
-      const routes: Route[] = [
+      const routes: RouteProperties[] = [
         { path: '/users', methods: [{ type: MethodType.GET }] },
         {
           path: '/dogs',

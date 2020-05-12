@@ -3,7 +3,7 @@ import {
   Server,
   InputManager,
   RouteManager,
-  Route,
+  RouteProperties,
   UIManager,
 } from './interfaces';
 import { MethodType } from './enums';
@@ -66,7 +66,7 @@ describe('source/server.ts', () => {
 
     describe('routes', () => {
       it('defines the server routes', () => {
-        const routes: Route[] = [
+        const routes: RouteProperties[] = [
           {
             path: '/users',
             methods: [{ type: MethodType.GET, data: 'Users' }],

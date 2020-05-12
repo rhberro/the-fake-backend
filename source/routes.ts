@@ -1,7 +1,6 @@
 import {
   Route,
   Method,
-  RouteResult,
   RouteManager,
   RouteOptions,
   MethodOverride,
@@ -15,7 +14,7 @@ export function formatMethodType(methodType: string) {
   return methodType.toUpperCase();
 }
 
-export function findRouteByUrl(routes: Route[], url: string): RouteResult {
+export function findRouteByUrl(routes: Route[], url: string): Route {
   const route = routes.find(({ path }) => path === url);
 
   if (route) {
@@ -80,7 +79,7 @@ function mergeRoutesWithGlobalOverrides(
  * @return The route manager
  */
 export function createRouteManager(options: RouteOptions): RouteManager {
-  let allRoutes: Array<RouteResult> = [];
+  let allRoutes: Array<Route> = [];
 
   return {
     /**

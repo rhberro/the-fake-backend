@@ -4,7 +4,7 @@ import {
   OverrideOptions,
   Route,
   OverrideManager,
-  OverrideSelectResult,
+  Override,
 } from './interfaces';
 import {
   promptRoutePath,
@@ -84,23 +84,21 @@ export function createOverrideManager(
      * @return An array containing all the selected overrides.
      */
     getAllSelected() {
-      return options.routeManager
-        .getAll()
-        .reduce<OverrideSelectResult[]>((acc, route) => {
-          route.methods.forEach((method) => {
-            const selectedOverride = findSelectedMethodOverride(method);
+      return options.routeManager.getAll().reduce<Override[]>((acc, route) => {
+        route.methods.forEach((method) => {
+          const selectedOverride = findSelectedMethodOverride(method);
 
-            if (selectedOverride) {
-              acc.push({
-                routePath: route.path,
-                methodType: method.type,
-                name: selectedOverride.name,
-              });
-            }
-          });
+          if (selectedOverride) {
+            acc.push({
+              routePath: route.path,
+              methodType: method.type,
+              name: selectedOverride.name,
+            });
+          }
+        });
 
-          return acc;
-        }, []);
+        return acc;
+      }, []);
     },
 
     /**
