@@ -113,10 +113,21 @@ The script above generates the following two endpoints.
 
 | Property                    | Required | Description                                                                                 |
 | --------------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| basePath                    | no       | An API context prefix (e.g. `/v1`)                                                          |
 | middlewares                 | no       | An array of [express's middlewares](https://expressjs.com/en/guide/writing-middleware.html) |
-| proxies                     | no       | The server proxies                                                                          |
+| [proxies](#proxies)         | no       | The server proxies                                                                          |
 | [throttlings](#throttlings) | no       | The server throttlings                                                                      |
 | [pagination](#pagination)   | no       | The server pagination setup                                                                 |
+
+#### Proxies
+
+This property allows to proxy requests.
+
+| Property                 | Required | Default | Description                                     |
+| ------------------------ | -------- | ------- | ----------------------------------------------- |
+| proxies[].name           | yes      |         | The proxy name                                  |
+| proxies[].host           | yes      |         | The proxy host (e.g.: `http://api.dev.com/api`) |
+| proxies[].appendBasePath | No       | `false` | Whether `basePath` should be appended in target |
 
 #### Throttlings
 

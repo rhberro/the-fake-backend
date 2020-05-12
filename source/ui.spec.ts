@@ -1,10 +1,4 @@
-import {
-  UIManager,
-  RouteResult,
-  OverrideSelectResult,
-  Throttling,
-  ProxyResult,
-} from './interfaces';
+import { UIManager, Route, Override, Throttling, Proxy } from './interfaces';
 
 import { createUIManager } from './ui';
 import { MethodType } from './enums';
@@ -24,12 +18,12 @@ describe('source/ui.ts', () => {
 
     const proxyManager = {
       getAll: jest.fn(() => [
-        { name: 'First', host: 'firsthost.com' },
-        { name: 'Second', host: 'secondhost.com' },
-        { name: 'Third', host: 'thirdhost.com' },
+        { name: 'First', host: 'firsthost.com', proxy: () => 'proxy' },
+        { name: 'Second', host: 'secondhost.com', proxy: () => 'proxy' },
+        { name: 'Third', host: 'thirdhost.com', proxy: () => 'proxy' },
       ]),
       getCurrent: jest.fn(),
-      getOverriddenProxyRoutes: jest.fn((): RouteResult[] => []),
+      getOverriddenProxyRoutes: jest.fn((): Route[] => []),
       toggleCurrent: jest.fn(),
       chooseRouteProxy: jest.fn(),
     };
@@ -43,7 +37,7 @@ describe('source/ui.ts', () => {
 
     const overrideManager = {
       getAll: jest.fn(),
-      getAllSelected: jest.fn((): OverrideSelectResult[] => []),
+      getAllSelected: jest.fn((): Override[] => []),
       choose: jest.fn(),
     };
 
@@ -110,7 +104,7 @@ describe('source/ui.ts', () => {
         describe('when local is selected as route proxy and it is not the current server proxy', () => {
           beforeEach(() => {
             proxyManager.getCurrent.mockImplementation(
-              (): ProxyResult => ({
+              (): Proxy => ({
                 name: 'Second',
                 host: 'secondhost.com',
                 proxy: () => 'proxy',

@@ -1,13 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 
-import {
-  Method,
-  Route,
-  Server,
-  ServerOptions,
-  RouteResult,
-} from './interfaces';
+import { Method, Server, ServerOptions, Route } from './interfaces';
 import { createInputManager } from './input';
 import createPaginatedResponse from './response/paginated';
 import { createProxyManager } from './proxy';
@@ -24,11 +18,11 @@ function isSuccessfulStatusCode(code: number) {
 }
 
 export function createServer(options = {} as ServerOptions): Server {
-  const { middlewares, proxies, throttlings } = options;
+  const { basePath = '', middlewares, proxies, throttlings } = options;
 
   const routeManager = createRouteManager();
   const overrideManager = createOverrideManager({ routeManager });
-  const proxyManager = createProxyManager(proxies, { routeManager });
+  const proxyManager = createProxyManager(proxies, { basePath, routeManager });
   const throttlingManager = createThrottlingManager(throttlings);
   const uiManager = createUIManager(
     proxyManager,
@@ -85,7 +79,7 @@ export function createServer(options = {} as ServerOptions): Server {
    * @param route The route
    * @return Current proxy
    */
-  function getProxy(route: RouteResult) {
+  function getRouteProxy(route: Route) {
     if (route.proxy !== undefined) {
       return route.proxy;
     }
@@ -161,16 +155,16 @@ export function createServer(options = {} as ServerOptions): Server {
    */
   function createMethodResponse(
     method: Method,
-    route: RouteResult,
+    route: Route,
     req: express.Request,
     res: express.Response
   ): void {
     const parsedMethod = parseMethod(method);
     const { code = 200 } = parsedMethod;
-    const proxy = getProxy(route);
+    const routeProxy = getRouteProxy(route);
 
-    if (proxy) {
-      return proxy.proxy(req, res);
+    if (routeProxy) {
+      return routeProxy.proxy(req, res);
     }
 
     if (isSuccessfulStatusCode(code)) {
@@ -189,13 +183,13 @@ export function createServer(options = {} as ServerOptions): Server {
    * @param route The route object
    * @param method The method object
    */
-  function createMethod(route: RouteResult, method: Method): void {
+  function createMethod(route: Route, method: Method): void {
     const { path } = route;
     const { type } = method;
 
     const response = createMethodResponse.bind(null, method, route);
 
-    expressServer[type](path, response);
+    expressServer[type](`${basePath}${path}`, response);
   }
 
   /**

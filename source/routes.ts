@@ -1,4 +1,4 @@
-import { Route, Method, RouteResult, RouteManager } from './interfaces';
+import { Method, Route, RouteManager } from './interfaces';
 
 export function getRoutesPaths(routes: Route[]) {
   return routes.map(({ path }) => path);
@@ -8,7 +8,7 @@ export function formatMethodType(methodType: string) {
   return methodType.toUpperCase();
 }
 
-export function findRouteByUrl(routes: Route[], url: string): RouteResult {
+export function findRouteByUrl(routes: Route[], url: string): Route {
   const route = routes.find(({ path }) => path === url);
 
   if (route) {
@@ -34,7 +34,7 @@ export function findRouteMethodByType(methods: Method[], type: string) {
  * @return The route manager
  */
 export function createRouteManager(): RouteManager {
-  let allRoutes: Array<RouteResult> = [];
+  let allRoutes: Array<Route> = [];
 
   return {
     /**
