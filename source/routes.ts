@@ -1,4 +1,4 @@
-import { Method, Route, RouteManager } from './interfaces';
+import { Method, Route } from './interfaces';
 
 export function getRoutesPaths(routes: Route[]) {
   return routes.map(({ path }) => path);
@@ -28,37 +28,37 @@ export function findRouteMethodByType(methods: Method[], type: string) {
   throw new Error(`Method with type "${type}" not found`);
 }
 
-/**
- * Create a new route manager.
- *
- * @return The route manager
- */
-export function createRouteManager(): RouteManager {
-  let allRoutes: Array<Route> = [];
+export class RouteManager {
+  private routes: Route[];
 
-  return {
-    /**
-     * Get all routes.
-     *
-     * @return An array containing all the routes
-     */
-    getAll() {
-      return allRoutes;
-    },
+  /**
+   * Create a new route manager.
+   */
+  constructor() {
+    this.routes = [];
+  }
 
-    /**
-     * Set all the routes.
-     *
-     * @param routes The routes
-     */
-    setAll(routes) {
-      while (allRoutes.length > 0) {
-        allRoutes.pop();
-      }
+  /**
+   * Get all routes.
+   *
+   * @return An array containing all the routes
+   */
+  getAll() {
+    return this.routes;
+  }
 
-      routes.forEach((route) => {
-        allRoutes.push(route);
-      });
-    },
-  };
+  /**
+   * Set all the routes.
+   *
+   * @param routes The routes
+   */
+  setAll(routes: Route[]) {
+    while (this.routes.length > 0) {
+      this.routes.pop();
+    }
+
+    routes.forEach((route) => {
+      this.routes.push(route);
+    });
+  }
 }

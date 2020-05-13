@@ -1,12 +1,11 @@
-import { createInputManager } from './input';
-import { InputManager } from './interfaces';
+import { InputManager } from './input';
 
 describe('source/input.ts', () => {
   describe('InputManager', () => {
     let inputManager: InputManager;
 
     beforeEach(() => {
-      inputManager = createInputManager();
+      inputManager = new InputManager();
     });
 
     describe('createProxyManager', () => {

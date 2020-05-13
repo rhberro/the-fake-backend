@@ -1,27 +1,19 @@
 import httpProxyMiddleware from 'http-proxy-middleware';
 
-import {
-  Proxy,
-  ProxyManager,
-  ProxyProperties,
-  ProxyOptions,
-} from './interfaces';
+import { Proxy, ProxyProperties, Route } from './interfaces';
 import { promptRoutePath, promptProxy } from './prompts';
-import { getRoutesPaths, findRouteByUrl } from './routes';
+import { getRoutesPaths, findRouteByUrl, RouteManager } from './routes';
 
 const PROXY_DEFAULT_OPTION = 'Local';
 
 /**
- * Add a httpProxy to a proxy properties
+ * Add a httpProxy to a proxy properties.
  *
  * @param proxy The proxy properties object
  * @param basePath The server basePath
  * @return The proxy with the proxy middleware
  */
-function createProxyMiddleware(
-  proxy: ProxyProperties,
-  basePath?: string
-): Proxy {
+function buildProxy(proxy: ProxyProperties, basePath?: string): Proxy {
   const { appendBasePath, name, host } = proxy;
 
   return {
@@ -36,98 +28,114 @@ function createProxyMiddleware(
   };
 }
 
-/**
- * Create a new proxy manager.
- *
- * @param proxies The current list of proxies
- * @return The proxy manager
- */
-export function createProxyManager(
-  proxies: Array<ProxyProperties> = [],
-  options: ProxyOptions
-): ProxyManager {
-  let currentProxyIndex: number | null = null;
+export class ProxyManager {
+  private routeManager: RouteManager;
+  private currentProxyIndex: number | null;
+  private proxies: Proxy[];
 
-  const proxyMiddlewares = proxies.map((proxy) =>
-    createProxyMiddleware(proxy, options.basePath)
-  );
-
-  function getProxyNames(proxies: Proxy[]) {
-    return proxies.map((proxy) => proxy.name);
+  /**
+   * Creates a new proxy manager.
+   *
+   * @param proxies The proxies properties
+   * @param routeManager An instance of route manager
+   * @param basePath The server basePath
+   */
+  constructor(
+    proxies: ProxyProperties[] = [],
+    routeManager: RouteManager,
+    basePath?: string
+  ) {
+    this.routeManager = routeManager;
+    this.currentProxyIndex = null;
+    this.proxies = proxies.map((proxy) => buildProxy(proxy, basePath));
   }
 
-  function getAllNamesWithDefault() {
-    return [PROXY_DEFAULT_OPTION, ...getProxyNames(proxyMiddlewares)];
+  /**
+   * Get all proxy names.
+   */
+  private getProxyNames() {
+    return this.proxies.map((proxy) => proxy.name);
   }
 
-  function findByName(name: string): Proxy | undefined {
-    return proxyMiddlewares.find((proxy) => proxy.name === name);
+  /**
+   * Get all proxy names including default one.
+   */
+  private getAllNamesWithDefault() {
+    return [PROXY_DEFAULT_OPTION, ...this.getProxyNames()];
   }
 
-  return {
-    /**
-     * Get all proxies.
-     *
-     * @return An array containing all the proxies
-     */
-    getAll() {
-      return proxyMiddlewares;
-    },
+  /**
+   * Find a proxy by name.
+   *
+   * @param name Name
+   */
+  private findByName(name: string) {
+    return this.proxies.find((proxy) => proxy.name === name);
+  }
 
-    /**
-     * Get current proxy.
-     *
-     * @return The current proxy.
-     */
-    getCurrent() {
-      if (currentProxyIndex !== null) {
-        return proxyMiddlewares[currentProxyIndex];
-      }
-      return null;
-    },
+  /**
+   * Get all proxies.
+   *
+   * @return An array containing all the proxies
+   */
+  getAll() {
+    return this.proxies;
+  }
 
-    /**
-     * Get the routes with overridden proxy.
-     *
-     * @return Overridden proxy routes
-     */
-    getOverriddenProxyRoutes() {
-      const current = this.getCurrent();
+  /**
+   * Get current proxy.
+   *
+   * @return The current proxy.
+   */
+  getCurrent() {
+    if (this.currentProxyIndex !== null) {
+      return this.proxies[this.currentProxyIndex];
+    }
 
-      return options.routeManager
-        .getAll()
-        .filter(
-          ({ proxy }) => proxy !== undefined && proxy?.name !== current?.name
-        );
-    },
+    return null;
+  }
 
-    /**
-     * Toggle current proxy moving to the next position on list.
-     */
-    toggleCurrent() {
-      if (currentProxyIndex === null) {
-        currentProxyIndex = 0;
-      } else if (currentProxyIndex === proxies.length - 1) {
-        currentProxyIndex = null;
-      } else {
-        currentProxyIndex += 1;
-      }
-    },
+  /**
+   * Get the routes with overridden proxy.
+   *
+   * @return Overridden proxy routes
+   */
+  getOverriddenProxyRoutes() {
+    const current = this.getCurrent();
 
-    /**
-     * Prompt and select a route proxy.
-     *
-     * @return The updated route
-     */
-    async chooseRouteProxy() {
-      const routes = getRoutesPaths(options.routeManager.getAll());
-      const { url } = await promptRoutePath(routes);
-      const { proxy } = await promptProxy(getAllNamesWithDefault());
+    return this.routeManager
+      .getAll()
+      .filter(
+        ({ proxy }) => proxy !== undefined && proxy?.name !== current?.name
+      );
+  }
 
-      const route = findRouteByUrl(options.routeManager.getAll(), url);
-      route.proxy = findByName(proxy) || null;
+  /**
+   * Toggle current proxy moving to the next position on list.
+   */
+  toggleCurrent() {
+    if (this.currentProxyIndex === null) {
+      this.currentProxyIndex = 0;
+    } else if (this.currentProxyIndex === this.proxies.length - 1) {
+      this.currentProxyIndex = null;
+    } else {
+      this.currentProxyIndex += 1;
+    }
+  }
 
-      return route;
-    },
-  };
+  /**
+   * Prompt and select a route proxy.
+   *
+   * @return The updated route
+   */
+  async chooseRouteProxy(): Promise<Route> {
+    const routes = getRoutesPaths(this.routeManager.getAll());
+    const { url } = await promptRoutePath(routes);
+    const { proxy } = await promptProxy(this.getAllNamesWithDefault());
+
+    const route = findRouteByUrl(this.routeManager.getAll(), url);
+    route.proxy = this.findByName(proxy) || null;
+
+    return route;
+  }
 }

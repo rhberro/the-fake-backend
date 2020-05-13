@@ -1,49 +1,44 @@
 import chalk from 'chalk';
-import readline from 'readline';
+import readline, { Interface as ReadLine } from 'readline';
 
-import {
-  ProxyManager,
-  ThrottlingManager,
-  UIManager,
-  OverrideManager,
-} from './interfaces';
+import { Request, Response } from './interfaces';
+import { OverrideManager } from './overrides';
+import { ProxyManager } from './proxy';
+import { ThrottlingManager } from './throttling';
 import { formatMethodType } from './routes';
 
-/**
- * Create a new UI manager.
- *
- * @param proxyManager The proxy manager
- * @param throttlingManager The throttling manager
- * @param overrideManager The routes overrides manager
- * @return The UI manager
- */
-export function createUIManager(
-  proxyManager: ProxyManager,
-  throttlingManager: ThrottlingManager,
-  overrideManager: OverrideManager
-): UIManager {
-  const display = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+function formatEndpoint(routePath: string, methodType: string) {
+  return `${formatMethodType(methodType)} ${routePath}`;
+}
 
-  function write(text: string) {
-    display.write(text);
+export class UIManager {
+  private display: ReadLine;
+  private proxyManager: ProxyManager;
+  private overrideManager: OverrideManager;
+  private throttlingManager: ThrottlingManager;
+
+  /**
+   * Write a text to the user screen.
+   *
+   * @param text The text
+   */
+  private write(text: string) {
+    this.display.write(text);
   }
 
   /**
    * Clear the user screen.
    */
-  function clear(): void {
-    write('\x1b[2J');
-    write('\x1b[0f');
+  private clear() {
+    this.write('\x1b[2J');
+    this.write('\x1b[0f');
   }
 
   /**
    * Write a line break to the user screen.
    */
-  function linebreak(): void {
-    write('\r\n');
+  private linebreak() {
+    this.write('\r\n');
   }
 
   /**
@@ -51,9 +46,9 @@ export function createUIManager(
    *
    * @param parameters An array of text to display
    */
-  function line(...parameters: Array<string>): void {
-    write(parameters.join('\x20'));
-    write('\r\n');
+  private line(...parameters: string[]) {
+    this.write(parameters.join('\x20'));
+    this.write('\r\n');
   }
 
   /**
@@ -61,47 +56,43 @@ export function createUIManager(
    *
    * @param parameters An array of text to display
    */
-  function paragraph(...parameters: Array<string>): void {
-    line(' ', ...parameters);
+  private paragraph(...parameters: string[]) {
+    this.line(' ', ...parameters);
   }
 
-  function formatEndpoint(routePath: string, methodType: string) {
-    return `${formatMethodType(methodType)} ${routePath}`;
-  }
+  private printConnection() {
+    const connection = this.proxyManager.getCurrent();
 
-  function printConnection() {
-    const connection = proxyManager.getCurrent();
-
-    line(chalk.blackBright('Connection:'));
+    this.line(chalk.blackBright('Connection:'));
     if (connection) {
-      paragraph(
+      this.paragraph(
         chalk.bold.white(connection.name),
         chalk.bold.blackBright(connection.host)
       );
     } else {
-      paragraph('Local');
+      this.paragraph('Local');
     }
   }
 
-  function printConnectionOverrides() {
-    line(chalk.blackBright('Connection overrides:'));
-    const connectionOverrides = proxyManager.getOverriddenProxyRoutes();
+  private printConnectionOverrides() {
+    this.line(chalk.blackBright('Connection overrides:'));
+    const connectionOverrides = this.proxyManager.getOverriddenProxyRoutes();
 
     if (connectionOverrides.length) {
       connectionOverrides.forEach((route) =>
-        paragraph(`- ${`${route.path}: ${route.proxy?.name || 'Local'}`}`)
+        this.paragraph(`- ${`${route.path}: ${route.proxy?.name || 'Local'}`}`)
       );
     } else {
-      paragraph('None');
+      this.paragraph('None');
     }
   }
 
-  function printThrottling() {
-    const currentThrottling = throttlingManager.getCurrent();
+  private printThrottling() {
+    const currentThrottling = this.throttlingManager.getCurrent();
 
-    line(chalk.blackBright('Throttling:'));
+    this.line(chalk.blackBright('Throttling:'));
     if (currentThrottling) {
-      paragraph(
+      this.paragraph(
         chalk.bold.white(currentThrottling.name),
         chalk.bold.black(currentThrottling.values[0]),
         chalk.bold.black('-'),
@@ -109,96 +100,127 @@ export function createUIManager(
         chalk.bold.black('ms')
       );
     } else {
-      paragraph('Disabled');
+      this.paragraph('Disabled');
     }
   }
 
-  function printOverrides() {
-    line(chalk.blackBright('Overrides:'));
+  private printOverrides() {
+    this.line(chalk.blackBright('Overrides:'));
 
-    const selectedOverrides = overrideManager.getAllSelected();
+    const selectedOverrides = this.overrideManager.getAllSelected();
 
     if (selectedOverrides.length) {
       selectedOverrides.forEach(({ routePath, methodType, name }) =>
-        paragraph(`- ${formatEndpoint(routePath, methodType)}: ${name}`)
+        this.paragraph(`- ${formatEndpoint(routePath, methodType)}: ${name}`)
       );
     } else {
-      paragraph('None');
+      this.paragraph('None');
     }
   }
 
-  function printAvailableCommands() {
-    line('Available commands:');
-    paragraph(`- ${chalk.bold.white('c')} to toggle the connection`);
-    paragraph(`- ${chalk.bold.white('t')} to toggle the throttling`);
-    paragraph(
+  private printAvailableCommands() {
+    this.line('Available commands:');
+    this.paragraph(`- ${chalk.bold.white('c')} to toggle the connection`);
+    this.paragraph(`- ${chalk.bold.white('t')} to toggle the throttling`);
+    this.paragraph(
       `- ${chalk.bold.white(
         'o'
       )} to change endpoint settings according to "overrides"`
     );
-    paragraph(
+    this.paragraph(
       `- ${chalk.bold.white('p')} to toggle the connection to an endpoint`
     );
-    paragraph(`- ${chalk.bold.white('q')} to stop and quit the service`);
-    linebreak();
+    this.paragraph(`- ${chalk.bold.white('q')} to stop and quit the service`);
+    this.linebreak();
   }
 
-  return {
-    /**
-     * Clear the screen and draw a new dashboard.
-     */
-    drawDashboard() {
-      clear();
+  /**
+   * Create a new UI manager.
+   *
+   * @param proxyManager The proxy manager
+   * @param throttlingManager The throttling manager
+   * @param overrideManager The routes overrides manager
+   * @return The UI manager
+   */
+  constructor(
+    proxyManager: ProxyManager,
+    throttlingManager: ThrottlingManager,
+    overrideManager: OverrideManager
+  ) {
+    this.display = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
 
-      line(chalk.bold.green('The service is running!'));
+    this.proxyManager = proxyManager;
+    this.throttlingManager = throttlingManager;
+    this.overrideManager = overrideManager;
+  }
 
-      printConnection();
-      printConnectionOverrides();
-      printThrottling();
-      printOverrides();
-      printAvailableCommands();
-    },
+  /**
+   * Clear the screen and draw a new dashboard.
+   */
+  drawDashboard() {
+    this.clear();
 
-    /**
-     * Draw the request information to the user screen.
-     *
-     * @param req The route request object
-     * @param res The route response object
-     * @param next The express next function
-     */
-    drawRequest(req, res, next) {
-      const currentThrottling = throttlingManager.getCurrent();
-      const currentThrottlingDelay = throttlingManager.getCurrentDelay();
+    this.line(chalk.bold.green('The service is running!'));
 
-      line(chalk.bold.white(`${req.method} ${req.path}`));
-      if (currentThrottling) {
-        line(chalk.blackBright('[' + currentThrottlingDelay + 'ms]'));
-      }
+    this.printConnection();
+    this.printConnectionOverrides();
+    this.printThrottling();
+    this.printOverrides();
+    this.printAvailableCommands();
+  }
 
-      next();
-    },
+  /**
+   * Draw the request information to the user screen.
+   *
+   * @param req The route request object
+   * @param res The route response object
+   * @param next The express next function
+   */
+  drawRequest(req: Request, res: Response, next: Function) {
+    const currentThrottling = this.throttlingManager.getCurrent();
+    const currentThrottlingDelay = this.throttlingManager.getCurrentDelay();
 
-    writeMethodOverrideChanged(
-      routePath,
-      routeMethodType,
-      selectedOverrideName
-    ) {
-      const endpoint = chalk.magenta(
-        formatEndpoint(routePath, routeMethodType)
-      );
+    this.line(chalk.bold.white(`${req.method} ${req.path}`));
+    if (currentThrottling) {
+      this.line(chalk.blackBright('[' + currentThrottlingDelay + 'ms]'));
+    }
 
-      const override = chalk.magenta(selectedOverrideName);
+    next();
+  }
 
-      display.write(`Endpoint ${endpoint} changed to response ${override}`);
-      linebreak();
-    },
+  /**
+   * Draw that a route method override was selected.
+   *
+   * @param routePath The overridden route path
+   * @param routeMethodType The overridden route method type
+   * @param selectedOverrideName The selected override name
+   */
+  drawMethodOverrideChanged(
+    routePath: string,
+    routeMethodType: string,
+    selectedOverrideName: string
+  ) {
+    const endpoint = chalk.magenta(formatEndpoint(routePath, routeMethodType));
+    const override = chalk.magenta(selectedOverrideName);
 
-    writeRouteProxyChanged(routePath, selectedProxyName) {
-      const route = chalk.magenta(routePath);
-      const proxy = chalk.magenta(selectedProxyName);
+    this.display.write(`Endpoint ${endpoint} changed to response ${override}`);
+    this.linebreak();
+  }
 
-      display.write(`Route ${route} changed to proxy ${proxy}`);
-      linebreak();
-    },
-  };
+  /**
+   * Draw that a route proxy was selected.
+   *
+   * @param routePath The route path
+   * @param selectedProxyName The selected proxy name
+   */
+  drawRouteProxyChanged(routePath: string, selectedProxyName: string) {
+    const route = chalk.magenta(routePath);
+    const proxy = chalk.magenta(selectedProxyName);
+
+    this.display.write(`Route ${route} changed to proxy ${proxy}`);
+    this.linebreak();
+  }
 }

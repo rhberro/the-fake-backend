@@ -1,5 +1,5 @@
-import express from 'express';
+import { Request } from '../interfaces';
 
-type MethodAttribute<P> = ((req: express.Request) => P) | P;
+type MethodAttribute<P> = ((req: Request) => P) | P;
 
 export default MethodAttribute;

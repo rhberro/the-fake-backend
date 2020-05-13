@@ -1,17 +1,24 @@
 import cors from 'cors';
 import express from 'express';
 
-import { Method, Server, ServerOptions, Route } from './interfaces';
-import { createInputManager } from './input';
-import createPaginatedResponse from './response/paginated';
-import { createProxyManager } from './proxy';
-import createSearchableResponse from './response/searchable';
-import { createThrottlingManager } from './throttling';
-import { createUIManager } from './ui';
-import { findSelectedMethodOverride, createOverrideManager } from './overrides';
 import { readFixtureSync } from './files';
+import { InputManager } from './input';
+import {
+  Method,
+  Server,
+  ServerOptions,
+  Route,
+  Request,
+  Response,
+} from './interfaces';
+import { findSelectedMethodOverride, OverrideManager } from './overrides';
+import { ProxyManager } from './proxy';
+import createPaginatedResponse from './response/paginated';
+import createSearchableResponse from './response/searchable';
+import { RouteManager } from './routes';
+import { ThrottlingManager } from './throttling';
 import { ResponseHeaders, MethodAttribute } from './types';
-import { createRouteManager } from './routes';
+import { UIManager } from './ui';
 
 function isSuccessfulStatusCode(code: number) {
   return code >= 200 && code <= 299;
@@ -20,11 +27,11 @@ function isSuccessfulStatusCode(code: number) {
 export function createServer(options = {} as ServerOptions): Server {
   const { basePath = '', middlewares, proxies, throttlings } = options;
 
-  const routeManager = createRouteManager();
-  const overrideManager = createOverrideManager({ routeManager });
-  const proxyManager = createProxyManager(proxies, { basePath, routeManager });
-  const throttlingManager = createThrottlingManager(throttlings);
-  const uiManager = createUIManager(
+  const routeManager = new RouteManager();
+  const overrideManager = new OverrideManager(routeManager);
+  const proxyManager = new ProxyManager(proxies, routeManager, basePath);
+  const throttlingManager = new ThrottlingManager(throttlings);
+  const uiManager = new UIManager(
     proxyManager,
     throttlingManager,
     overrideManager
@@ -33,9 +40,8 @@ export function createServer(options = {} as ServerOptions): Server {
   const expressServer = express();
 
   expressServer.use(middlewares || cors());
-  expressServer.use(
-    (req: express.Request, res: express.Response, next: Function) =>
-      uiManager.drawRequest(req, res, next)
+  expressServer.use((req: Request, res: Response, next: Function) =>
+    uiManager.drawRequest(req, res, next)
   );
 
   /**
@@ -68,7 +74,7 @@ export function createServer(options = {} as ServerOptions): Server {
    */
   function resolveMethodAttribute(
     attribute: MethodAttribute<any>,
-    req: express.Request
+    req: Request
   ) {
     return typeof attribute === 'function' ? attribute(req) : attribute;
   }
@@ -99,8 +105,8 @@ export function createServer(options = {} as ServerOptions): Server {
   function getContent(
     method: Method,
     routePath: string,
-    req: express.Request,
-    res: express.Response
+    req: Request,
+    res: Response
   ): any {
     const { overrideContent, pagination, search } = method;
     const { path } = req;
@@ -134,7 +140,7 @@ export function createServer(options = {} as ServerOptions): Server {
    * @param delay The response delay
    */
   function sendContent(
-    res: express.Response,
+    res: Response,
     code: number,
     content: any,
     headers: ResponseHeaders = {},
@@ -156,8 +162,8 @@ export function createServer(options = {} as ServerOptions): Server {
   function createMethodResponse(
     method: Method,
     route: Route,
-    req: express.Request,
-    res: express.Response
+    req: Request,
+    res: Response
   ): void {
     const parsedMethod = parseMethod(method);
     const { code = 200 } = parsedMethod;
@@ -222,7 +228,7 @@ export function createServer(options = {} as ServerOptions): Server {
      * @param port The server port
      */
     listen(port = 8080): void {
-      const inputManager = createInputManager();
+      const inputManager = new InputManager();
 
       inputManager.init(true);
 
@@ -242,14 +248,14 @@ export function createServer(options = {} as ServerOptions): Server {
         const { routePath, methodType, name } = await overrideManager.choose();
 
         uiManager.drawDashboard();
-        uiManager.writeMethodOverrideChanged(routePath, methodType, name);
+        uiManager.drawMethodOverrideChanged(routePath, methodType, name);
       }
 
       async function onRouteProxy() {
         const route = await proxyManager.chooseRouteProxy();
 
         uiManager.drawDashboard();
-        uiManager.writeRouteProxyChanged(
+        uiManager.drawRouteProxyChanged(
           route.path,
           route.proxy?.name || 'Local'
         );

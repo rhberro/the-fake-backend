@@ -1,27 +1,19 @@
-import { InputListener, InputManager } from './interfaces';
+import { InputListener } from './interfaces';
 import readline from 'readline';
 
-/**
- * Create a new input manager.
- *
- * @return The input manager
- */
-export function createInputManager(): InputManager {
-  const listeners: Array<InputListener> = [
-    { key: 'q', control: false, event: process.exit },
-    { key: 'c', control: true, event: process.exit },
-  ];
+export class InputManager {
+  private listeners: Array<InputListener>;
 
   /**
    * Filter a listener using its name and control key.
    *
    * @param listener The input listener
    */
-  function filterInputListener(
-    this: readline.Key,
+  private filterInputListener(
+    key: readline.Key,
     listener: InputListener
   ): boolean {
-    return listener.key === this.name && listener.control === this.ctrl;
+    return listener.key === key.name && listener.control === key.ctrl;
   }
 
   /**
@@ -30,28 +22,30 @@ export function createInputManager(): InputManager {
    * @param chunk Chunk
    * @param key The event key
    */
-  function onKeyPress(chunk: any, key: readline.Key): void {
-    listeners.filter(filterInputListener, key).map(executeEvent);
+  private onKeyPress(chunk: any, key: readline.Key): void {
+    this.listeners
+      .filter((listener) => this.filterInputListener(key, listener))
+      .map(this.executeEvent);
   }
 
-  function isPromise(obj: any) {
+  private isPromise(obj: any) {
     return Boolean(obj.then);
   }
 
-  function executeEvent(listener: InputListener) {
-    unbindKeypress();
+  private executeEvent(listener: InputListener) {
+    this.unbindKeypress();
     const eventResult = listener.event();
 
-    if (eventResult && isPromise(eventResult)) {
+    if (eventResult && this.isPromise(eventResult)) {
       eventResult.then(() => {
-        reopenStdinAfterInquirer();
+        this.reopenStdinAfterInquirer();
       });
     } else {
-      bindKeypress();
+      this.bindKeypress();
     }
   }
 
-  function reopenStdinAfterInquirer() {
+  private reopenStdinAfterInquirer() {
     readline.emitKeypressEvents(process.stdin);
 
     if (typeof process.stdin.setRawMode === 'function') {
@@ -59,43 +53,58 @@ export function createInputManager(): InputManager {
     }
 
     process.stdin.resume();
-    bindKeypress();
+    this.bindKeypress();
   }
 
-  function bindKeypress() {
-    process.stdin.on('keypress', onKeyPress);
+  private bindKeypress() {
+    process.stdin.on('keypress', this.onKeyPress);
   }
 
-  function unbindKeypress() {
-    process.stdin.off('keypress', onKeyPress);
+  private unbindKeypress() {
+    process.stdin.off('keypress', this.onKeyPress);
   }
 
-  return {
-    /**
-     * Start listening to user inputs.
-     *
-     * @param raw The raw mode state
-     */
-    init(raw = true): void {
-      readline.emitKeypressEvents(process.stdin);
+  /**
+   * Creates a new input manager.
+   */
+  constructor() {
+    this.executeEvent = this.executeEvent.bind(this);
+    this.onKeyPress = this.onKeyPress.bind(this);
 
-      if (typeof process.stdin.setRawMode === 'function') {
-        process.stdin.setRawMode(raw);
-      }
+    this.listeners = [
+      { key: 'q', control: false, event: process.exit },
+      { key: 'c', control: true, event: process.exit },
+    ];
+  }
 
-      bindKeypress();
-    },
+  /**
+   * Start listening to user inputs.
+   *
+   * @param raw The raw mode state
+   */
+  init(raw = true): void {
+    readline.emitKeypressEvents(process.stdin);
 
-    /**
-     * Register an event listener to a key.
-     *
-     * @param key The target key
-     * @param event The event callback
-     * @param control The control key state
-     */
-    addListener(key, event, control = false): void {
-      const listener: InputListener = { key, event, control };
-      listeners.push(listener);
-    },
-  };
+    if (typeof process.stdin.setRawMode === 'function') {
+      process.stdin.setRawMode(raw);
+    }
+
+    this.bindKeypress();
+  }
+
+  /**
+   * Register an event listener to a key.
+   *
+   * @param key The target key
+   * @param event The event callback
+   * @param control The control key state
+   */
+  addListener(
+    key: string,
+    event: () => Promise<void> | void,
+    control: boolean = false
+  ): void {
+    const listener: InputListener = { key, event, control };
+    this.listeners.push(listener);
+  }
 }

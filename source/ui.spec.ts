@@ -1,10 +1,49 @@
-import { UIManager, Route, Override, Throttling, Proxy } from './interfaces';
+import { Route, Override, Throttling, Proxy } from './interfaces';
 
-import { createUIManager } from './ui';
 import { MethodType } from './enums';
+import { UIManager } from './ui';
+import { ProxyManager } from './proxy';
+import { RouteManager } from './routes';
+import { ThrottlingManager } from './throttling';
+import { OverrideManager } from './overrides';
 const stripAnsi = require('strip-ansi');
 
 const write = jest.fn((text) => stripAnsi(text).trim());
+const getCurrentProxy = jest.fn();
+const getCurrentThrottling = jest.fn();
+const getOverriddenProxyRoutes = jest.fn((): Route[] => []);
+const getSelectedOverrides = jest.fn((): Override[] => []);
+
+jest.mock('./proxy', () => ({
+  ProxyManager: () => ({
+    getAll: jest.fn(() => [
+      { name: 'First', host: 'firsthost.com', proxy: () => 'proxy' },
+      { name: 'Second', host: 'secondhost.com', proxy: () => 'proxy' },
+      { name: 'Third', host: 'thirdhost.com', proxy: () => 'proxy' },
+    ]),
+    getCurrent: getCurrentProxy,
+    getOverriddenProxyRoutes,
+    toggleCurrent: jest.fn(),
+    chooseRouteProxy: jest.fn(),
+  }),
+}));
+
+jest.mock('./throttling', () => ({
+  ThrottlingManager: () => ({
+    getAll: jest.fn(),
+    getCurrent: getCurrentThrottling,
+    getCurrentDelay: jest.fn(),
+    toggleCurrent: jest.fn(),
+  }),
+}));
+
+jest.mock('./overrides', () => ({
+  OverrideManager: () => ({
+    getAll: jest.fn(),
+    getAllSelected: getSelectedOverrides,
+    choose: jest.fn(),
+  }),
+}));
 
 jest.mock('readline', () => ({
   createInterface: jest.fn(() => ({
@@ -15,34 +54,13 @@ jest.mock('readline', () => ({
 describe('source/ui.ts', () => {
   describe('UIManager', () => {
     let uiManager: UIManager;
-
-    const proxyManager = {
-      getAll: jest.fn(() => [
-        { name: 'First', host: 'firsthost.com', proxy: () => 'proxy' },
-        { name: 'Second', host: 'secondhost.com', proxy: () => 'proxy' },
-        { name: 'Third', host: 'thirdhost.com', proxy: () => 'proxy' },
-      ]),
-      getCurrent: jest.fn(),
-      getOverriddenProxyRoutes: jest.fn((): Route[] => []),
-      toggleCurrent: jest.fn(),
-      chooseRouteProxy: jest.fn(),
-    };
-
-    const throttlingManager = {
-      getAll: jest.fn(),
-      getCurrent: jest.fn(),
-      getCurrentDelay: jest.fn(),
-      toggleCurrent: jest.fn(),
-    };
-
-    const overrideManager = {
-      getAll: jest.fn(),
-      getAllSelected: jest.fn((): Override[] => []),
-      choose: jest.fn(),
-    };
+    const routeManager = new RouteManager();
+    const proxyManager = new ProxyManager([], routeManager);
+    const throttlingManager = new ThrottlingManager();
+    const overrideManager = new OverrideManager(routeManager);
 
     beforeEach(() => {
-      uiManager = createUIManager(
+      uiManager = new UIManager(
         proxyManager,
         throttlingManager,
         overrideManager
@@ -68,7 +86,7 @@ describe('source/ui.ts', () => {
 
         describe('when a proxy is selected', () => {
           beforeEach(() => {
-            proxyManager.getCurrent.mockImplementation(() => ({
+            getCurrentProxy.mockImplementation(() => ({
               name: 'First',
               host: 'firsthost.com',
             }));
@@ -82,7 +100,7 @@ describe('source/ui.ts', () => {
 
         describe('when a route proxy is selected', () => {
           beforeEach(() => {
-            proxyManager.getOverriddenProxyRoutes.mockImplementation(() => [
+            getOverriddenProxyRoutes.mockImplementation(() => [
               {
                 path: '/users',
                 methods: [{ type: MethodType.GET }],
@@ -103,14 +121,14 @@ describe('source/ui.ts', () => {
 
         describe('when local is selected as route proxy and it is not the current server proxy', () => {
           beforeEach(() => {
-            proxyManager.getCurrent.mockImplementation(
+            getCurrentProxy.mockImplementation(
               (): Proxy => ({
                 name: 'Second',
                 host: 'secondhost.com',
                 proxy: () => 'proxy',
               })
             );
-            proxyManager.getOverriddenProxyRoutes.mockImplementation(() => [
+            getOverriddenProxyRoutes.mockImplementation(() => [
               {
                 path: '/users',
                 methods: [{ type: MethodType.GET }],
@@ -127,7 +145,7 @@ describe('source/ui.ts', () => {
 
         describe('when a throttling is selected', () => {
           beforeEach(() => {
-            throttlingManager.getCurrent.mockImplementation(
+            getCurrentThrottling.mockImplementation(
               (): Throttling => ({
                 name: 'Slow',
                 values: [300, 500],
@@ -143,7 +161,7 @@ describe('source/ui.ts', () => {
 
         describe('when a route method override is selected', () => {
           beforeEach(() => {
-            overrideManager.getAllSelected.mockImplementation(() => [
+            getSelectedOverrides.mockImplementation(() => [
               {
                 routePath: '/dogs',
                 methodType: MethodType.GET,
@@ -159,13 +177,9 @@ describe('source/ui.ts', () => {
         });
       });
 
-      describe('writeMethodOverrideChanged', () => {
+      describe('drawMethodOverrideChanged', () => {
         it('prints that the route method override has changed', () => {
-          uiManager.writeMethodOverrideChanged(
-            '/dogs',
-            MethodType.GET,
-            'Dogoo'
-          );
+          uiManager.drawMethodOverrideChanged('/dogs', MethodType.GET, 'Dogoo');
 
           expect(write).toHaveReturnedWith(
             'Endpoint GET /dogs changed to response Dogoo'
@@ -173,9 +187,9 @@ describe('source/ui.ts', () => {
         });
       });
 
-      describe('writeRouteProxyChanged', () => {
+      describe('drawRouteProxyChanged', () => {
         it('prints that the route proxy has changed', () => {
-          uiManager.writeRouteProxyChanged('/dogs', 'Second');
+          uiManager.drawRouteProxyChanged('/dogs', 'Second');
 
           expect(write).toHaveReturnedWith(
             'Route /dogs changed to proxy Second'

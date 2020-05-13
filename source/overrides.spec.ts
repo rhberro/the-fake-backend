@@ -1,14 +1,15 @@
 import { mocked } from 'ts-jest/utils';
 
-import { OverrideManager, RouteProperties, Route } from './interfaces';
+import { RouteProperties } from './interfaces';
 
-import { createOverrideManager } from './overrides';
 import { MethodType } from './enums';
 import {
   promptRoutePath,
   promptRouteMethodType,
   promptRouteMethodOverride,
 } from './prompts';
+import { OverrideManager } from './overrides';
+import { RouteManager } from './routes';
 
 jest.mock('../source/prompts');
 
@@ -51,13 +52,11 @@ describe('source/override.ts', () => {
       },
     ];
 
-    const routeManager = {
-      getAll: jest.fn(() => routes),
-      setAll: jest.fn(),
-    };
+    const routeManager = new RouteManager();
+    routeManager.setAll(routes);
 
     beforeEach(() => {
-      overrideManager = createOverrideManager({ routeManager });
+      overrideManager = new OverrideManager(routeManager);
     });
 
     describe('createOverrideManager', () => {
@@ -69,7 +68,7 @@ describe('source/override.ts', () => {
     describe('getAll', () => {
       describe('when routes are empty', () => {
         beforeEach(() => {
-          routeManager.getAll.mockImplementation(() => []);
+          routeManager.setAll([]);
         });
 
         it('returns an empty list', () => {
@@ -79,7 +78,7 @@ describe('source/override.ts', () => {
 
       describe('when there are no possible overrides', () => {
         beforeEach(() => {
-          routeManager.getAll.mockImplementation((): Route[] => [
+          routeManager.setAll([
             { path: '/users', methods: [{ type: MethodType.GET }] },
             { path: '/dogs', methods: [{ type: MethodType.GET }] },
           ]);
@@ -92,7 +91,7 @@ describe('source/override.ts', () => {
 
       describe('when there are possible overrides', () => {
         beforeEach(() => {
-          routeManager.getAll.mockImplementation((): Route[] => routes);
+          routeManager.setAll(routes);
         });
 
         it('returns all the routes with possible overrides', () => {
@@ -139,7 +138,7 @@ describe('source/override.ts', () => {
     describe('getAllSelected', () => {
       describe('when routes are empty', () => {
         beforeEach(() => {
-          routeManager.getAll.mockImplementation(() => []);
+          routeManager.setAll([]);
         });
 
         it('returns an empty list', () => {
@@ -149,7 +148,7 @@ describe('source/override.ts', () => {
 
       describe('when there are no possible overrides', () => {
         beforeEach(() => {
-          routeManager.getAll.mockImplementation((): Route[] => [
+          routeManager.setAll([
             { path: '/users', methods: [{ type: MethodType.GET }] },
             { path: '/dogs', methods: [{ type: MethodType.GET }] },
           ]);
@@ -162,7 +161,7 @@ describe('source/override.ts', () => {
 
       describe('when there are possible overrides', () => {
         beforeEach(() => {
-          routeManager.getAll.mockImplementation((): Route[] => [
+          routeManager.setAll([
             { path: '/users', methods: [{ type: MethodType.GET }] },
             {
               path: '/dogs',
@@ -183,7 +182,7 @@ describe('source/override.ts', () => {
 
       describe('when there are selected overrides', () => {
         beforeEach(() => {
-          routeManager.getAll.mockImplementation((): Route[] => routes);
+          routeManager.setAll(routes);
         });
 
         it('returns selected overrides', () => {
@@ -206,7 +205,7 @@ describe('source/override.ts', () => {
     describe('choose', () => {
       describe('when selecting a method override', () => {
         beforeEach(() => {
-          routeManager.getAll.mockImplementation((): Route[] => routes);
+          routeManager.setAll(routes);
 
           mocked(promptRoutePath).mockImplementation(async () => ({
             url: '/dogs',

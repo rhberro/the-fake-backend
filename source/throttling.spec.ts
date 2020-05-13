@@ -1,6 +1,6 @@
-import { Throttling, ThrottlingManager } from './interfaces';
+import { Throttling } from './interfaces';
 
-import { createThrottlingManager } from './throttling';
+import { ThrottlingManager } from './throttling';
 
 describe('source/throttling.ts', () => {
   let throttlingManager: ThrottlingManager;
@@ -12,7 +12,7 @@ describe('source/throttling.ts', () => {
   ];
 
   beforeEach(() => {
-    throttlingManager = createThrottlingManager(throttlings);
+    throttlingManager = new ThrottlingManager(throttlings);
   });
 
   describe('createThrottlingManager', () => {

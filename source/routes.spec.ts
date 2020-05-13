@@ -1,10 +1,6 @@
-import { RouteManager, RouteProperties, Method } from './interfaces';
+import { RouteProperties, Method } from './interfaces';
 
-import {
-  createRouteManager,
-  findRouteMethodByType,
-  findRouteByUrl,
-} from './routes';
+import { findRouteMethodByType, findRouteByUrl, RouteManager } from './routes';
 import { MethodType } from './enums';
 
 describe('source/routes.ts', () => {
@@ -55,7 +51,7 @@ describe('source/routes.ts', () => {
     ];
 
     beforeEach(() => {
-      routeManager = createRouteManager();
+      routeManager = new RouteManager();
     });
 
     describe('createRouteManager', () => {

@@ -1,6 +1,4 @@
-import express from 'express';
-
-import { Method, Search } from '../interfaces';
+import { Method, Search, Response, Request } from '../interfaces';
 
 function filterProperty(
   query: any,
@@ -33,9 +31,9 @@ function filterContent(search: Search, query: any, item: any) {
  * @param method The route method
  */
 export default function createSearchableResponse(
-  req: express.Request,
-  res: express.Response,
-  content: Array<any>,
+  req: Request,
+  res: Response,
+  content: any[],
   method: Method
 ) {
   const { search, search: { parameter = 'search' } = {} } = method;
