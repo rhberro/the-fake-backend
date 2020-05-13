@@ -25,9 +25,15 @@ function isSuccessfulStatusCode(code: number) {
 }
 
 export function createServer(options = {} as ServerOptions): Server {
-  const { basePath = '', middlewares, proxies, throttlings } = options;
+  const {
+    basePath = '',
+    middlewares,
+    overrides,
+    proxies,
+    throttlings,
+  } = options;
 
-  const routeManager = new RouteManager();
+  const routeManager = new RouteManager(overrides);
   const overrideManager = new OverrideManager(routeManager);
   const proxyManager = new ProxyManager(proxies, routeManager, basePath);
   const throttlingManager = new ThrottlingManager(throttlings);

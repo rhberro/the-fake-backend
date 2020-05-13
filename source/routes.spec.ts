@@ -45,66 +45,166 @@ describe('source/routes.ts', () => {
   describe('RouteManager', () => {
     let routeManager: RouteManager;
 
-    const routes: RouteProperties[] = [
-      { path: '/users', methods: [{ type: MethodType.GET }] },
-      { path: '/dogs', methods: [{ type: MethodType.GET }] },
-    ];
+    describe('when has not global overrides', () => {
+      const routes: RouteProperties[] = [
+        { path: '/users', methods: [{ type: MethodType.GET }] },
+        { path: '/dogs', methods: [{ type: MethodType.GET }] },
+      ];
 
-    beforeEach(() => {
-      routeManager = new RouteManager();
-    });
-
-    describe('createRouteManager', () => {
-      it('returns an instance of RouteManager', () => {
-        expect(routeManager).toMatchObject<RouteManager>(routeManager);
-      });
-    });
-
-    describe('getAll', () => {
-      it('returns empty list as initial current routes', () => {
-        expect(routeManager.getAll()).toEqual([]);
+      beforeEach(() => {
+        routeManager = new RouteManager();
       });
 
-      describe('when setting routes', () => {
-        beforeEach(() => {
-          routeManager.setAll(routes);
+      describe('constructor', () => {
+        it('returns an instance of RouteManager', () => {
+          expect(routeManager).toMatchObject<RouteManager>(routeManager);
+        });
+      });
+
+      describe('getAll', () => {
+        it('returns empty list as initial current routes', () => {
+          expect(routeManager.getAll()).toEqual([]);
         });
 
-        it('return the current routes with an additional proxy property', () => {
-          expect(routeManager.getAll()).toEqual([
+        describe('when setting routes', () => {
+          beforeEach(() => {
+            routeManager.setAll(routes);
+          });
+
+          it('return the current routes with an additional proxy property', () => {
+            expect(routeManager.getAll()).toEqual([
+              {
+                path: '/users',
+                methods: [{ type: MethodType.GET }],
+              },
+              {
+                path: '/dogs',
+                methods: [{ type: MethodType.GET }],
+              },
+            ]);
+          });
+        });
+      });
+
+      describe('setAll', () => {
+        it('clears the current routes and set new ones', () => {
+          routeManager.setAll(routes);
+          routeManager.setAll([
             {
-              path: '/users',
+              path: '/cats',
               methods: [{ type: MethodType.GET }],
-              proxy: undefined,
-            },
-            {
-              path: '/dogs',
-              methods: [{ type: MethodType.GET }],
-              proxy: undefined,
             },
           ]);
+
+          expect(routeManager.getAll()).toHaveLength(1);
+        });
+
+        it('clears the current routes if an empty array is given', () => {
+          routeManager.setAll(routes);
+          routeManager.setAll([]);
+
+          expect(routeManager.getAll()).toHaveLength(0);
         });
       });
     });
 
-    describe('setAll', () => {
-      it('clears the current routes and set new ones', () => {
-        routeManager.setAll(routes);
-        routeManager.setAll([
+    describe('when has global overrides', () => {
+      const routes: RouteProperties[] = [
+        { path: '/users', methods: [{ type: MethodType.GET }] },
+        {
+          path: '/dogs',
+          methods: [
+            {
+              type: MethodType.GET,
+              overrides: [{ name: 'Error 404', code: 404 }],
+            },
+          ],
+        },
+      ];
+
+      beforeEach(() => {
+        routeManager = new RouteManager([
           {
-            path: '/cats',
-            methods: [{ type: MethodType.GET }],
+            name: 'Error 500',
+            code: 500,
           },
         ]);
-
-        expect(routeManager.getAll()).toHaveLength(1);
       });
 
-      it('clears the current routes if an empty array is given', () => {
-        routeManager.setAll(routes);
-        routeManager.setAll([]);
+      describe('constructor', () => {
+        it('returns an instance of RouteManager', () => {
+          expect(routeManager).toMatchObject<RouteManager>(routeManager);
+        });
+      });
 
-        expect(routeManager.getAll()).toHaveLength(0);
+      describe('getAll', () => {
+        it('returns empty list as initial current routes', () => {
+          expect(routeManager.getAll()).toEqual([]);
+        });
+
+        describe('when setting routes', () => {
+          beforeEach(() => {
+            routeManager.setAll(routes);
+          });
+
+          it('return the current routes with an additional proxy property and overrides', () => {
+            expect(routeManager.getAll()).toEqual([
+              {
+                path: '/users',
+                methods: [
+                  {
+                    type: MethodType.GET,
+                    overrides: [
+                      {
+                        name: 'Error 500 (Global)',
+                        code: 500,
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                path: '/dogs',
+                methods: [
+                  {
+                    type: MethodType.GET,
+                    overrides: [
+                      {
+                        name: 'Error 404',
+                        code: 404,
+                      },
+                      {
+                        name: 'Error 500 (Global)',
+                        code: 500,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ]);
+          });
+        });
+      });
+
+      describe('setAll', () => {
+        it('clears the current routes and set new ones', () => {
+          routeManager.setAll(routes);
+          routeManager.setAll([
+            {
+              path: '/cats',
+              methods: [{ type: MethodType.GET }],
+            },
+          ]);
+
+          expect(routeManager.getAll()).toHaveLength(1);
+        });
+
+        it('clears the current routes if an empty array is given', () => {
+          routeManager.setAll(routes);
+          routeManager.setAll([]);
+
+          expect(routeManager.getAll()).toHaveLength(0);
+        });
       });
     });
   });

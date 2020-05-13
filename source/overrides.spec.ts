@@ -59,7 +59,7 @@ describe('source/override.ts', () => {
       overrideManager = new OverrideManager(routeManager);
     });
 
-    describe('createOverrideManager', () => {
+    describe('constructor', () => {
       it('returns an instance of OverrideManager', () => {
         expect(overrideManager).toMatchObject<OverrideManager>(overrideManager);
       });

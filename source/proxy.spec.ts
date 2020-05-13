@@ -37,7 +37,7 @@ describe('source/proxy.ts', () => {
       proxyManager = new ProxyManager(proxies, routeManager);
     });
 
-    describe('createProxyManager', () => {
+    describe('constructor', () => {
       it('returns an instance of ProxyManager', () => {
         expect(proxyManager).toMatchObject<ProxyManager>(proxyManager);
       });

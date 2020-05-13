@@ -1,4 +1,4 @@
-import { Method, Route } from './interfaces';
+import { Route, Method, MethodOverride } from './interfaces';
 
 export function getRoutesPaths(routes: Route[]) {
   return routes.map(({ path }) => path);
@@ -28,13 +28,54 @@ export function findRouteMethodByType(methods: Method[], type: string) {
   throw new Error(`Method with type "${type}" not found`);
 }
 
+function cloneOverrides(overrides: MethodOverride[]) {
+  return overrides.map((override) => ({
+    ...override,
+    name: `${override.name} (Global)`,
+  }));
+}
+
+function mergeMethodWithGlobalOverrides(globalOverrides: MethodOverride[]) {
+  return function (method: Method) {
+    const methodOverrides = method.overrides || [];
+    const overrides = [...methodOverrides, ...cloneOverrides(globalOverrides)];
+
+    return {
+      ...method,
+      overrides,
+    };
+  };
+}
+
+function mergeRoutesWithGlobalOverrides(
+  routes: Route[],
+  globalOverrides: MethodOverride[] = []
+) {
+  if (globalOverrides.length) {
+    return routes.map((route) => {
+      const methods = route.methods.map(
+        mergeMethodWithGlobalOverrides(globalOverrides)
+      );
+
+      return {
+        ...route,
+        methods,
+      };
+    });
+  }
+
+  return routes;
+}
+
 export class RouteManager {
   private routes: Route[];
+  private globalOverrides?: MethodOverride[];
 
   /**
    * Create a new route manager.
    */
-  constructor() {
+  constructor(globalOverrides: MethodOverride[] = []) {
+    this.globalOverrides = globalOverrides;
     this.routes = [];
   }
 
@@ -53,11 +94,16 @@ export class RouteManager {
    * @param routes The routes
    */
   setAll(routes: Route[]) {
+    const routesWithOverrides = mergeRoutesWithGlobalOverrides(
+      routes,
+      this.globalOverrides
+    );
+
     while (this.routes.length > 0) {
       this.routes.pop();
     }
 
-    routes.forEach((route) => {
+    routesWithOverrides.forEach((route) => {
       this.routes.push(route);
     });
   }

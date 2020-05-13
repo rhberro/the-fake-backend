@@ -8,8 +8,8 @@ describe('source/input.ts', () => {
       inputManager = new InputManager();
     });
 
-    describe('createProxyManager', () => {
-      it('returns an instance of ProxyManager', () => {
+    describe('constructor', () => {
+      it('returns an instance of InputManager', () => {
         expect(inputManager).toMatchObject<InputManager>(inputManager);
       });
     });

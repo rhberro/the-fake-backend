@@ -67,7 +67,7 @@ describe('source/ui.ts', () => {
       );
     });
 
-    describe('createUIManager', () => {
+    describe('constructor', () => {
       it('returns an instance of UIManager', () => {
         expect(uiManager).toMatchObject<UIManager>(uiManager);
       });
