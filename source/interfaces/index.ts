@@ -14,6 +14,7 @@ export { default as ProxyOptions } from './ProxyOptions';
 export { default as ProxyProperties } from './ProxyProperties';
 export { default as Route } from './Route';
 export { default as RouteManager } from './RouteManager';
+export { default as RouteOptions } from './RouteOptions';
 export { default as RouteProperties } from './RouteProperties';
 export { default as Search } from './Search';
 export { default as Server } from './Server';

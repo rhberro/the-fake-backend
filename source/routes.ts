@@ -1,4 +1,10 @@
-import { Method, Route, RouteManager } from './interfaces';
+import {
+  Route,
+  Method,
+  RouteManager,
+  RouteOptions,
+  MethodOverride,
+} from './interfaces';
 
 export function getRoutesPaths(routes: Route[]) {
   return routes.map(({ path }) => path);
@@ -28,12 +34,51 @@ export function findRouteMethodByType(methods: Method[], type: string) {
   throw new Error(`Method with type "${type}" not found`);
 }
 
+function cloneOverrides(overrides: MethodOverride[]) {
+  return overrides.map((override) => ({
+    ...override,
+    name: `${override.name} (Global)`,
+  }));
+}
+
+function mergeMethodWithGlobalOverrides(globalOverrides: MethodOverride[]) {
+  return function (method: Method) {
+    const methodOverrides = method.overrides || [];
+    const overrides = [...methodOverrides, ...cloneOverrides(globalOverrides)];
+
+    return {
+      ...method,
+      overrides,
+    };
+  };
+}
+
+function mergeRoutesWithGlobalOverrides(
+  routes: Route[],
+  globalOverrides: MethodOverride[] = []
+) {
+  if (globalOverrides.length) {
+    return routes.map((route) => {
+      const methods = route.methods.map(
+        mergeMethodWithGlobalOverrides(globalOverrides)
+      );
+
+      return {
+        ...route,
+        methods,
+      };
+    });
+  }
+
+  return routes;
+}
+
 /**
  * Create a new route manager.
  *
  * @return The route manager
  */
-export function createRouteManager(): RouteManager {
+export function createRouteManager(options: RouteOptions): RouteManager {
   let allRoutes: Array<Route> = [];
 
   return {
@@ -52,11 +97,16 @@ export function createRouteManager(): RouteManager {
      * @param routes The routes
      */
     setAll(routes) {
+      const routesWithOverrides = mergeRoutesWithGlobalOverrides(
+        routes,
+        options.globalOverrides
+      );
+
       while (allRoutes.length > 0) {
         allRoutes.pop();
       }
 
-      routes.forEach((route) => {
+      routesWithOverrides.forEach((route) => {
         allRoutes.push(route);
       });
     },
