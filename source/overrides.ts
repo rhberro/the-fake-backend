@@ -1,11 +1,4 @@
-import {
-  Method,
-  MethodOverride,
-  OverrideOptions,
-  Route,
-  OverrideManager,
-  Override,
-} from './interfaces';
+import { Method, MethodOverride, Route, Override } from './interfaces';
 import {
   promptRoutePath,
   promptRouteMethodType,
@@ -16,6 +9,7 @@ import {
   getRoutesPaths,
   findRouteMethodByType,
   formatMethodType,
+  RouteManager,
 } from './routes';
 
 const OVERRIDE_DEFAULT_OPTION = 'Default';
@@ -58,68 +52,70 @@ export function findSelectedMethodOverride(method: Method) {
   return method.overrides?.find(({ selected }) => selected);
 }
 
-/**
- * Create a new override manager.
- *
- * @return The override manager
- */
-export function createOverrideManager(
-  options: OverrideOptions
-): OverrideManager {
-  return {
-    /**
-     * Get routes with overrides.
-     *
-     * @return An array containing all the routes with overrides
-     */
-    getAll() {
-      return options.routeManager
-        .getAll()
-        .filter(({ methods }) => isNotEmpty(filterOverridableMethods(methods)));
-    },
+export class OverrideManager {
+  private routeManager: RouteManager;
 
-    /**
-     * Get the selected route method overrides.
-     *
-     * @return An array containing all the selected overrides.
-     */
-    getAllSelected() {
-      return options.routeManager.getAll().reduce<Override[]>((acc, route) => {
-        route.methods.forEach((method) => {
-          const selectedOverride = findSelectedMethodOverride(method);
+  /**
+   * Creates a new override manager.
+   *
+   * @param routeManager An instance of route manager
+   */
+  constructor(routeManager: RouteManager) {
+    this.routeManager = routeManager;
+  }
 
-          if (selectedOverride) {
-            acc.push({
-              routePath: route.path,
-              methodType: method.type,
-              name: selectedOverride.name,
-            });
-          }
-        });
+  /**
+   * Get routes with overrides.
+   *
+   * @return An array containing all the routes with overrides
+   */
+  getAll() {
+    return this.routeManager
+      .getAll()
+      .filter(({ methods }) => isNotEmpty(filterOverridableMethods(methods)));
+  }
 
-        return acc;
-      }, []);
-    },
+  /**
+   * Get the selected route method overrides.
+   *
+   * @return An array containing all the selected overrides.
+   */
+  getAllSelected(): Override[] {
+    return this.routeManager.getAll().reduce<Override[]>((acc, route) => {
+      route.methods.forEach((method) => {
+        const selectedOverride = findSelectedMethodOverride(method);
 
-    /**
-     * Prompt and select a route method override.
-     */
-    async choose() {
-      const overridableRoutes = this.getAll();
-      const { url } = await promptRoutePath(getRoutesPaths(overridableRoutes));
-      const route = findRouteByUrl(overridableRoutes, url);
-      const methodTypes = getOverridableRoutesMethodsTypesNames(route);
-      const { type } = await promptRouteMethodType(methodTypes);
-      const overrides = getMethodOverridesByType(route, type.toLowerCase());
-      const { name } = await promptRouteMethodOverride(
-        getOverridesNamesWithDefault(overrides)
-      );
-
-      overrides.forEach((override) => {
-        override.selected = override.name === name;
+        if (selectedOverride) {
+          acc.push({
+            routePath: route.path,
+            methodType: method.type,
+            name: selectedOverride.name,
+          });
+        }
       });
 
-      return { routePath: url, methodType: type, name };
-    },
-  };
+      return acc;
+    }, []);
+  }
+
+  /**
+   * Prompt and select a route method override.
+   */
+  async choose(): Promise<Override> {
+    const overridableRoutes = this.getAll();
+    const { url } = await promptRoutePath(getRoutesPaths(overridableRoutes));
+    const route = findRouteByUrl(overridableRoutes, url);
+    const methodTypes = getOverridableRoutesMethodsTypesNames(route);
+    const { type } = await promptRouteMethodType(methodTypes);
+    const overrides = getMethodOverridesByType(route, type.toLowerCase());
+    const { name } = await promptRouteMethodOverride(
+      getOverridesNamesWithDefault(overrides)
+    );
+
+    overrides.forEach((override) => {
+      override.selected = override.name === name;
+    });
+
+    return { routePath: url, methodType: type, name };
+  }
 }

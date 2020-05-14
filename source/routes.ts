@@ -1,10 +1,4 @@
-import {
-  Route,
-  Method,
-  RouteManager,
-  RouteOptions,
-  MethodOverride,
-} from './interfaces';
+import { Route, Method, MethodOverride } from './interfaces';
 
 export function getRoutesPaths(routes: Route[]) {
   return routes.map(({ path }) => path);
@@ -73,42 +67,44 @@ function mergeRoutesWithGlobalOverrides(
   return routes;
 }
 
-/**
- * Create a new route manager.
- *
- * @return The route manager
- */
-export function createRouteManager(options: RouteOptions): RouteManager {
-  let allRoutes: Array<Route> = [];
+export class RouteManager {
+  private routes: Route[];
+  private globalOverrides?: MethodOverride[];
 
-  return {
-    /**
-     * Get all routes.
-     *
-     * @return An array containing all the routes
-     */
-    getAll() {
-      return allRoutes;
-    },
+  /**
+   * Create a new route manager.
+   */
+  constructor(globalOverrides: MethodOverride[] = []) {
+    this.globalOverrides = globalOverrides;
+    this.routes = [];
+  }
 
-    /**
-     * Set all the routes.
-     *
-     * @param routes The routes
-     */
-    setAll(routes) {
-      const routesWithOverrides = mergeRoutesWithGlobalOverrides(
-        routes,
-        options.globalOverrides
-      );
+  /**
+   * Get all routes.
+   *
+   * @return An array containing all the routes
+   */
+  getAll() {
+    return this.routes;
+  }
 
-      while (allRoutes.length > 0) {
-        allRoutes.pop();
-      }
+  /**
+   * Set all the routes.
+   *
+   * @param routes The routes
+   */
+  setAll(routes: Route[]) {
+    const routesWithOverrides = mergeRoutesWithGlobalOverrides(
+      routes,
+      this.globalOverrides
+    );
 
-      routesWithOverrides.forEach((route) => {
-        allRoutes.push(route);
-      });
-    },
-  };
+    while (this.routes.length > 0) {
+      this.routes.pop();
+    }
+
+    routesWithOverrides.forEach((route) => {
+      this.routes.push(route);
+    });
+  }
 }

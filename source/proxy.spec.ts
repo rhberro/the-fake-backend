@@ -1,10 +1,11 @@
 import { mocked } from 'ts-jest/utils';
 
-import { ProxyManager, ProxyProperties, Route } from './interfaces';
+import { ProxyProperties, Route } from './interfaces';
 
-import { createProxyManager } from './proxy';
+import { ProxyManager } from './proxy';
 import { MethodType } from './enums';
 import { promptProxy } from './prompts';
+import { RouteManager } from './routes';
 
 jest.mock('../source/prompts', () => ({
   promptProxy: jest.fn(),
@@ -30,15 +31,13 @@ describe('source/proxy.ts', () => {
         { path: '/dogs', methods: [{ type: MethodType.GET }] },
       ];
 
-      proxyManager = createProxyManager(proxies, {
-        routeManager: {
-          getAll: jest.fn(() => routes),
-          setAll: jest.fn(),
-        },
-      });
+      const routeManager = new RouteManager();
+      routeManager.setAll(routes);
+
+      proxyManager = new ProxyManager(proxies, routeManager);
     });
 
-    describe('createProxyManager', () => {
+    describe('constructor', () => {
       it('returns an instance of ProxyManager', () => {
         expect(proxyManager).toMatchObject<ProxyManager>(proxyManager);
       });

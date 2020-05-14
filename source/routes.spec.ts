@@ -1,10 +1,6 @@
-import { RouteManager, RouteProperties, Method } from './interfaces';
+import { RouteProperties, Method } from './interfaces';
 
-import {
-  createRouteManager,
-  findRouteMethodByType,
-  findRouteByUrl,
-} from './routes';
+import { findRouteMethodByType, findRouteByUrl, RouteManager } from './routes';
 import { MethodType } from './enums';
 
 describe('source/routes.ts', () => {
@@ -56,10 +52,10 @@ describe('source/routes.ts', () => {
       ];
 
       beforeEach(() => {
-        routeManager = createRouteManager({});
+        routeManager = new RouteManager();
       });
 
-      describe('createRouteManager', () => {
+      describe('constructor', () => {
         it('returns an instance of RouteManager', () => {
           expect(routeManager).toMatchObject<RouteManager>(routeManager);
         });
@@ -127,17 +123,15 @@ describe('source/routes.ts', () => {
       ];
 
       beforeEach(() => {
-        routeManager = createRouteManager({
-          globalOverrides: [
-            {
-              name: 'Error 500',
-              code: 500,
-            },
-          ],
-        });
+        routeManager = new RouteManager([
+          {
+            name: 'Error 500',
+            code: 500,
+          },
+        ]);
       });
 
-      describe('createRouteManager', () => {
+      describe('constructor', () => {
         it('returns an instance of RouteManager', () => {
           expect(routeManager).toMatchObject<RouteManager>(routeManager);
         });

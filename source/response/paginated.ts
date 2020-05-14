@@ -1,10 +1,10 @@
-import express from 'express';
-
 import {
   PaginationProperties,
   ServerOptions,
   Method,
   Pagination,
+  Request,
+  Response,
 } from '../interfaces';
 
 function getPagination(properties?: PaginationProperties): Pagination {
@@ -36,9 +36,9 @@ function getPagination(properties?: PaginationProperties): Pagination {
  * @return The paginated content
  */
 export default function createPaginatedResponse(
-  req: express.Request,
-  res: express.Response,
-  content: Array<any>,
+  req: Request,
+  res: Response,
+  content: any[],
   method: Method,
   options: ServerOptions
 ) {

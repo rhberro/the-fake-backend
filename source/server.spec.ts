@@ -1,15 +1,9 @@
 import { createServer } from './server';
-import {
-  Server,
-  InputManager,
-  RouteManager,
-  RouteProperties,
-  UIManager,
-} from './interfaces';
+import { Server, RouteProperties } from './interfaces';
 import { MethodType } from './enums';
 
 jest.mock('../source/ui', () => ({
-  createUIManager: (): UIManager => ({
+  UIManager: () => ({
     drawDashboard: jest.fn(),
     drawRequest: jest.fn(),
     writeRouteProxyChanged: jest.fn(),
@@ -18,14 +12,14 @@ jest.mock('../source/ui', () => ({
 }));
 
 jest.mock('../source/routes', () => ({
-  createRouteManager: (): RouteManager => ({
+  RouteManager: () => ({
     getAll: jest.fn(() => []),
     setAll: jest.fn(),
   }),
 }));
 
 jest.mock('../source/input', () => ({
-  createInputManager: (): InputManager => ({
+  InputManager: () => ({
     addListener: jest.fn(),
     init: jest.fn(),
   }),
