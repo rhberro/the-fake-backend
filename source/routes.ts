@@ -1,4 +1,4 @@
-import { Route, Method, MethodOverride } from './interfaces';
+import { Route, Method, MethodOverride, RouteProperties } from './interfaces';
 
 export function getRoutesPaths(routes: Route[]) {
   return routes.map(({ path }) => path);
@@ -67,6 +67,18 @@ function mergeRoutesWithGlobalOverrides(
   return routes;
 }
 
+function getNumberOfParameter(path: string) {
+  return (path.match(/:/g) ?? []).length;
+}
+
+function sortRoutesByNumberOfParameters(routes: RouteProperties[]) {
+  return routes.sort((routeA, routeB) => {
+    return (
+      getNumberOfParameter(routeA.path) - getNumberOfParameter(routeB.path)
+    );
+  });
+}
+
 export class RouteManager {
   private routes: Route[];
   private globalOverrides?: MethodOverride[];
@@ -98,12 +110,13 @@ export class RouteManager {
       routes,
       this.globalOverrides
     );
+    const routesSorted = sortRoutesByNumberOfParameters(routesWithOverrides);
 
     while (this.routes.length > 0) {
       this.routes.pop();
     }
 
-    routesWithOverrides.forEach((route) => {
+    routesSorted.forEach((route) => {
       this.routes.push(route);
     });
   }
