@@ -11,12 +11,18 @@ jest.mock('../source/ui', () => ({
   }),
 }));
 
-jest.mock('../source/routes', () => ({
-  RouteManager: () => ({
-    getAll: jest.fn(() => []),
-    setAll: jest.fn(),
-  }),
-}));
+jest.mock('../source/routes', () => {
+  let allRoutes: RouteProperties[] = [];
+
+  return {
+    RouteManager: () => ({
+      getAll: jest.fn(() => allRoutes),
+      setAll: jest.fn((routes) => {
+        allRoutes = routes;
+      }),
+    }),
+  };
+});
 
 jest.mock('../source/input', () => ({
   InputManager: () => ({
