@@ -67,14 +67,15 @@ function mergeRoutesWithGlobalOverrides(
   return routes;
 }
 
-function getNumberOfParameter(path: string) {
+function getRouteParametersCount(path: string) {
   return (path.match(/:/g) ?? []).length;
 }
 
-function sortRoutesByNumberOfParameters(routes: RouteProperties[]) {
+function sortRoutesByParametersCount(routes: RouteProperties[]) {
   return routes.sort((routeA, routeB) => {
     return (
-      getNumberOfParameter(routeA.path) - getNumberOfParameter(routeB.path)
+      getRouteParametersCount(routeA.path) -
+      getRouteParametersCount(routeB.path)
     );
   });
 }
@@ -110,13 +111,13 @@ export class RouteManager {
       routes,
       this.globalOverrides
     );
-    const routesSorted = sortRoutesByNumberOfParameters(routesWithOverrides);
+    const sortedRoutes = sortRoutesByParametersCount(routesWithOverrides);
 
     while (this.routes.length > 0) {
       this.routes.pop();
     }
 
-    routesSorted.forEach((route) => {
+    sortedRoutes.forEach((route) => {
       this.routes.push(route);
     });
   }
