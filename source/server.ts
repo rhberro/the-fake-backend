@@ -217,7 +217,7 @@ export function createServer(options = {} as ServerOptions): Server {
      */
     routes(routes): void {
       routeManager.setAll(routes);
-      routes.map(createRoute);
+      routeManager.getAll().map(createRoute);
     },
 
     /**
