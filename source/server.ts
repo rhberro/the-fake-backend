@@ -20,10 +20,6 @@ import { ThrottlingManager } from './throttling';
 import { ResponseHeaders, MethodAttribute } from './types';
 import { UIManager } from './ui';
 
-function isSuccessfulStatusCode(code: number) {
-  return code >= 200 && code <= 299;
-}
-
 export function createServer(options = {} as ServerOptions): Server {
   const {
     basePath = '',
@@ -179,14 +175,10 @@ export function createServer(options = {} as ServerOptions): Server {
       return routeProxy.proxy(req, res);
     }
 
-    if (isSuccessfulStatusCode(code)) {
-      const content = getContent(parsedMethod, route.path, req, res);
-      const headers = resolveMethodAttribute(parsedMethod.headers, req);
+    const content = getContent(parsedMethod, route.path, req, res);
+    const headers = resolveMethodAttribute(parsedMethod.headers, req);
 
-      sendContent(res, code, content, headers, parsedMethod.delay);
-    } else {
-      sendContent(res, code, null);
-    }
+    sendContent(res, code, content, headers, parsedMethod.delay);
   }
 
   /**
