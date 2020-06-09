@@ -129,6 +129,10 @@ export function createServer(options = {} as ServerOptions): Server {
       content = overrideContent(req, content);
     }
 
+    if (Number.isInteger(data)) {
+      content = content.toString();
+    }
+
     return content;
   }
 
