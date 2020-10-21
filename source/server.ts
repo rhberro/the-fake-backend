@@ -112,7 +112,7 @@ export function createServer(options = {} as ServerOptions): Server {
   ): any {
     const { overrideContent, pagination, search } = method;
     const { path } = req;
-    const normalizedReqPath = path.replace(basePath, '');
+    const normalizedReqPath = path?.replace(basePath, '');
 
     const data = resolveMethodAttribute(method.data, req);
     const file = resolveMethodAttribute(method.file, req);
