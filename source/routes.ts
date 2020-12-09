@@ -1,3 +1,5 @@
+import { MethodType } from './enums';
+import htmlSummary from './html-summary';
 import { Route, Method, MethodOverride } from './interfaces';
 
 export function getRoutesPaths(routes: Route[]) {
@@ -19,7 +21,7 @@ export function findRouteByUrl(routes: Route[], url: string): Route {
 }
 
 export function findRouteMethodByType(methods: Method[], type: string) {
-  const method = methods.find((method) => method.type === type);
+  const method = methods.find((m) => m.type === type);
 
   if (method) {
     return method;
@@ -105,6 +107,27 @@ export class RouteManager {
 
     routesWithOverrides.forEach((route) => {
       this.routes.push(route);
+    });
+  }
+
+  /**
+   * Add a docs route that print all the routes as HTML.
+   *
+   * @param basePath Server base path
+   * @param path Server docs route path
+   */
+  addDocsRoute(basePath: string = '', path: string = '') {
+    this.routes.push({
+      path,
+      methods: [
+        {
+          type: MethodType.GET,
+          headers: {
+            'Content-Type': 'text/html',
+          },
+          data: htmlSummary(this.routes, basePath),
+        },
+      ],
     });
   }
 }

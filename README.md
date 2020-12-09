@@ -118,6 +118,7 @@ The script above generates the following two endpoints.
 | [proxies](#proxies)         | no       | The server proxies                                                                          |
 | [throttlings](#throttlings) | no       | The server throttlings                                                                      |
 | [pagination](#pagination)   | no       | The server pagination setup                                                                 |
+| docsRoute                   | no       | The route that will print all the routes as HTML                                            |
 
 #### Proxies
 

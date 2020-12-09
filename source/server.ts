@@ -27,6 +27,7 @@ export function createServer(options = {} as ServerOptions): Server {
     overrides,
     proxies,
     throttlings,
+    docsRoute = '',
   } = options;
 
   const routeManager = new RouteManager(overrides);
@@ -213,7 +214,7 @@ export function createServer(options = {} as ServerOptions): Server {
 
     const createRouteMethod = createMethod.bind(null, route);
 
-    methods.map(createRouteMethod);
+    methods.forEach(createRouteMethod);
   }
 
   return {
@@ -224,7 +225,8 @@ export function createServer(options = {} as ServerOptions): Server {
      */
     routes(routes): void {
       routeManager.setAll(routes);
-      routeManager.getAll().map(createRoute);
+      routeManager.addDocsRoute(options.basePath, options.docsRoute);
+      routeManager.getAll().forEach(createRoute);
     },
 
     /**
