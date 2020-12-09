@@ -87,7 +87,6 @@ export function scanFixturePath(path: string, scenario?: string): string {
   const pathFixtureDirectory = join('data', path);
 
   try {
-    // Read fixture from `data/${path}/index.${ext}`
     const indexFixture = findFilePathByDirnameAndBasename(
       pathFixtureDirectory,
       'index',
@@ -96,7 +95,6 @@ export function scanFixturePath(path: string, scenario?: string): string {
 
     return indexFixture;
   } catch (error) {
-    // Read fixture from `data/${path}.${ext}`
     const fixture = findFilePathByDirnameAndBasename(
       pathDirnameFixtureDirectory,
       file,
