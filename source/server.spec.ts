@@ -20,6 +20,7 @@ jest.mock('../source/routes', () => {
       setAll: jest.fn((newRoutes) => {
         routes = newRoutes;
       }),
+      addDocsRoute: jest.fn(),
     }),
   };
 });

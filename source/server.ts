@@ -236,8 +236,8 @@ export function createServer(options = {} as ServerOptions): Server {
      */
     routes(routes): void {
       routeManager.setAll(routes);
+      routeManager.addDocsRoute(options.basePath, options.docsRoute);
       routeManager.getAll().forEach(createRoute);
-      addDocsRoute();
     },
 
     /**
