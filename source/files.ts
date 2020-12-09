@@ -51,15 +51,19 @@ export function readFixtureFileSync(path: string): any {
  *
  * @param dir The file dirname
  * @param base The file basename
+ * @param scenario An optional custom scenario for a fixture file
  * @return File path if found
  */
 export function findFilePathByDirnameAndBasename(
   dir: string,
-  base: string
+  base: string,
+  scenario?: string
 ): string {
+  const fullBasename = scenario ? `${base}--${scenario}` : base;
+
   const [fixture] = readdirSync(dir, { withFileTypes: true })
     .filter(direntIsFile)
-    .filter((dirent) => direntFilenameMatchText(base, dirent));
+    .filter((dirent) => direntFilenameMatchText(fullBasename, dirent));
 
   if (!fixture) {
     throw new Error('Fixture not found');
@@ -72,28 +76,31 @@ export function findFilePathByDirnameAndBasename(
  * Scan the fixture path of a given path, searching also as a folder with an index file.
  *
  * @param path The search path
+ * @param scenario An optional custom scenario for a fixture file
  * @return The fixture path
  */
-export function scanFixturePath(path: string): string {
+export function scanFixturePath(path: string, scenario?: string): string {
   const folder = dirname(path);
   const file = basename(path);
 
-  const pathDirnameDirectory = join('data', folder);
-  const pathDirectory = join('data', path);
+  const pathDirnameFixtureDirectory = join('data', folder);
+  const pathFixtureDirectory = join('data', path);
 
   try {
     // Read fixture from `data/${path}/index.${ext}`
     const indexFixture = findFilePathByDirnameAndBasename(
-      pathDirectory,
-      'index'
+      pathFixtureDirectory,
+      'index',
+      scenario
     );
 
     return indexFixture;
   } catch (error) {
     // Read fixture from `data/${path}.${ext}`
     const fixture = findFilePathByDirnameAndBasename(
-      pathDirnameDirectory,
-      file
+      pathDirnameFixtureDirectory,
+      file,
+      scenario
     );
 
     return fixture;
@@ -101,33 +108,41 @@ export function scanFixturePath(path: string): string {
 }
 
 /**
- * Read the first fixture file using path's dirname that matches the path's basename.
+ * Read the first file that matches a valid fixture of a given path and scenario.
  *
  * @param path The search path
+ * @param scenario An optional custom scenario for a fixture file
  * @return The file content
  */
-export function readFixturePathSync(path: string): any {
-  const fixturePath = scanFixturePath(path);
+export function readFixturePathSync(path: string, scenario?: string): any {
+  const fixturePath = scanFixturePath(path, scenario);
 
   return readFixtureFileSync(fixturePath);
 }
 
 /**
- * Read a fixture file using the extension when available or by reading the whole directory.
+ * Read a fixture file using the extension when available, or by scanning the whole directory.
  *
  * @param path The file path
  * @param fallbackPath The fallback file path
+ * @param scenario An optional custom scenario for a fixture file
  * @return The file content.
  */
-export function readFixtureSync(path: string, fallbackPath?: string): any {
+export function readFixtureSync(
+  path: string,
+  fallbackPath?: string,
+  scenario?: string
+): any {
   const extension = extname(path);
 
   try {
-    return extension ? readFixtureFileSync(path) : readFixturePathSync(path);
+    return extension
+      ? readFixtureFileSync(path)
+      : readFixturePathSync(path, scenario);
   } catch (error) {
     if (fallbackPath) {
       try {
-        return readFixturePathSync(fallbackPath);
+        return readFixturePathSync(fallbackPath, scenario);
       } catch (fallbackError) {
         console.error(
           'You probably forgot to create the fallback fixture file',

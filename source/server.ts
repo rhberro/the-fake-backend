@@ -52,7 +52,7 @@ export function createServer(options = {} as ServerOptions): Server {
    * @param method The method object
    * @return The parsed method
    */
-  function parseMethod(method: Method): Method {
+  function mergeMethodWithSelectedOverride(method: Method): Method {
     if (method.overrides) {
       const selectedOverride = findSelectedMethodOverride(method);
 
@@ -116,7 +116,9 @@ export function createServer(options = {} as ServerOptions): Server {
 
     const data = resolveMethodAttribute(method.data, req);
     const file = resolveMethodAttribute(method.file, req);
-    let content = data || readFixtureSync(file || normalizedReqPath, routePath);
+    let content =
+      data ||
+      readFixtureSync(file || normalizedReqPath, routePath, method.scenario);
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
@@ -172,18 +174,18 @@ export function createServer(options = {} as ServerOptions): Server {
     req: Request,
     res: Response
   ): void {
-    const parsedMethod = parseMethod(method);
-    const { code = 200 } = parsedMethod;
+    const mergedMethod = mergeMethodWithSelectedOverride(method);
+    const { code = 200 } = mergedMethod;
     const routeProxy = getRouteProxy(route);
 
     if (routeProxy) {
       return routeProxy.proxy(req, res);
     }
 
-    const content = getContent(parsedMethod, route.path, req, res);
-    const headers = resolveMethodAttribute(parsedMethod.headers, req);
+    const content = getContent(mergedMethod, route.path, req, res);
+    const headers = resolveMethodAttribute(mergedMethod.headers, req);
 
-    sendContent(res, code, content, headers, parsedMethod.delay);
+    sendContent(res, code, content, headers, mergedMethod.delay);
   }
 
   /**
