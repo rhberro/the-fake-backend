@@ -3,6 +3,7 @@ import express from 'express';
 
 import { readFixtureSync } from './files';
 import { InputManager } from './input';
+import htmlSummary from './html-summary';
 import {
   Method,
   Server,
@@ -19,6 +20,7 @@ import { RouteManager } from './routes';
 import { ThrottlingManager } from './throttling';
 import { ResponseHeaders, MethodAttribute } from './types';
 import { UIManager } from './ui';
+import { join } from 'path';
 
 export function createServer(options = {} as ServerOptions): Server {
   const {
@@ -27,6 +29,7 @@ export function createServer(options = {} as ServerOptions): Server {
     overrides,
     proxies,
     throttlings,
+    docsRoute = '',
   } = options;
 
   const routeManager = new RouteManager(overrides);
@@ -213,7 +216,16 @@ export function createServer(options = {} as ServerOptions): Server {
 
     const createRouteMethod = createMethod.bind(null, route);
 
-    methods.map(createRouteMethod);
+    methods.forEach(createRouteMethod);
+  }
+
+  function addDocsRoute() {
+    expressServer.get(join(basePath, docsRoute), (_req, res) => {
+      res
+        .status(200)
+        .set({ 'Content-Type': 'text/html' })
+        .send(htmlSummary(routeManager.getAll(), options.basePath));
+    });
   }
 
   return {
@@ -224,7 +236,8 @@ export function createServer(options = {} as ServerOptions): Server {
      */
     routes(routes): void {
       routeManager.setAll(routes);
-      routeManager.getAll().map(createRoute);
+      routeManager.getAll().forEach(createRoute);
+      addDocsRoute();
     },
 
     /**

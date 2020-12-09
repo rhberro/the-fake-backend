@@ -10,4 +10,5 @@ export default interface ServerOptions {
   proxies: Array<ProxyProperties>;
   throttlings: Array<Throttling>;
   overrides?: Array<MethodOverride>;
+  docsRoute?: string;
 }
