@@ -7,6 +7,7 @@ export default interface MethodProperties {
   code?: number;
   data?: MethodAttribute<any>;
   file?: MethodAttribute<string>;
+  scenario?: string;
   headers?: MethodAttribute<ResponseHeaders>;
   delay?: number;
   pagination?: boolean | PaginationProperties;

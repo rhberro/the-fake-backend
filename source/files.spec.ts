@@ -1,10 +1,12 @@
 import {
-  direntIncludes,
+  direntFilenameMatchText,
   direntIsFile,
   readJSONFileSync,
   readFixtureFileSync,
   readFixturePathSync,
   readFixtureSync,
+  findFilePathByDirnameAndBasename,
+  scanFixturePath,
 } from './files';
 
 const mock = require('mock-fs');
@@ -33,13 +35,13 @@ describe('source/files.ts', () => {
     });
   });
 
-  describe('direntIncludes', () => {
+  describe('direntFilenameMatchText', () => {
     it('returns true for a dirent that includes the text', () => {
       const dirent = new Dirent();
 
       dirent.name = 'dirent';
 
-      expect(direntIncludes('dirent', dirent)).toEqual(true);
+      expect(direntFilenameMatchText('dirent', dirent)).toEqual(true);
     });
 
     it('returns false for a dirent that does not include the text', () => {
@@ -47,7 +49,7 @@ describe('source/files.ts', () => {
 
       dirent.name = 'dirent';
 
-      expect(direntIncludes('dorent', dirent)).toEqual(false);
+      expect(direntFilenameMatchText('dorent', dirent)).toEqual(false);
     });
   });
 
@@ -77,6 +79,92 @@ describe('source/files.ts', () => {
     });
   });
 
+  describe('findFilePathByDirnameAndBasename', () => {
+    const permissions = ['write', 'read'];
+
+    beforeEach(() => {
+      mock({
+        'data/users/123': {
+          'permissions.json': JSON.stringify(permissions),
+        },
+      });
+    });
+
+    it('returns the fixture file', () => {
+      const path = findFilePathByDirnameAndBasename(
+        'data/users/123',
+        'permissions'
+      );
+
+      expect(path).toEqual('data/users/123/permissions.json');
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+  });
+
+  describe('scanFixturePath', () => {
+    const permissions = ['write', 'read'];
+    const readOnlyPermissions = ['read'];
+
+    describe('when the path is a folder and has an index file', () => {
+      beforeEach(() => {
+        mock({
+          'data/users/123/permissions': {
+            'index.json': JSON.stringify(permissions),
+            'index--read-only.json': JSON.stringify(readOnlyPermissions),
+          },
+        });
+      });
+
+      it('returns the fixture file', () => {
+        const path = scanFixturePath('users/123/permissions');
+
+        expect(path).toEqual('data/users/123/permissions/index.json');
+      });
+
+      it('returns the scenario fixture file', () => {
+        const path = scanFixturePath('users/123/permissions', 'read-only');
+
+        expect(path).toEqual(
+          'data/users/123/permissions/index--read-only.json'
+        );
+      });
+
+      afterEach(() => {
+        mock.restore();
+      });
+    });
+
+    describe('when the path is a file', () => {
+      beforeEach(() => {
+        mock({
+          'data/users/123': {
+            'permissions.json': JSON.stringify(permissions),
+            'permissions--read-only.json': JSON.stringify(readOnlyPermissions),
+          },
+        });
+      });
+
+      it('returns the fixture file', () => {
+        const path = scanFixturePath('users/123/permissions');
+
+        expect(path).toEqual('data/users/123/permissions.json');
+      });
+
+      it('returns the scenario fixture file', () => {
+        const path = scanFixturePath('users/123/permissions', 'read-only');
+
+        expect(path).toEqual('data/users/123/permissions--read-only.json');
+      });
+
+      afterEach(() => {
+        mock.restore();
+      });
+    });
+  });
+
   describe('readFixturePathSync', () => {
     const permissions = ['write', 'read'];
 
@@ -100,13 +188,13 @@ describe('source/files.ts', () => {
   });
 
   describe('readFixtureSync', () => {
-    const customPermissions = ['write', 'read'];
+    const customUserPermissions = ['write', 'read'];
     const genericPermissions = ['read'];
 
     beforeEach(() => {
       mock({
         'data/users/123': {
-          'permissions.json': JSON.stringify(customPermissions),
+          'permissions.json': JSON.stringify(customUserPermissions),
         },
         'data/users/:id': {
           'permissions.json': JSON.stringify(genericPermissions),
@@ -117,13 +205,13 @@ describe('source/files.ts', () => {
     it('loads data fixture if path is not a file', () => {
       const data = readFixtureSync('users/123/permissions');
 
-      expect(data).toEqual(customPermissions);
+      expect(data).toEqual(customUserPermissions);
     });
 
     it('loads file directly if path is a file', () => {
       const data = readFixtureSync('data/users/123/permissions.json');
 
-      expect(data).toEqual(customPermissions);
+      expect(data).toEqual(customUserPermissions);
     });
 
     it("loads fallback file if path doesn't match a file", () => {
