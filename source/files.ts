@@ -18,7 +18,7 @@ export function direntIsFile(dirent: Dirent): boolean {
  * @param dirent The dirent object
  * @return A boolean indicating that the dirent name includes the text
  */
-export function direntIncludes(text: string, dirent: Dirent): boolean {
+export function direntFilenameMatchText(text: string, dirent: Dirent): boolean {
   return parse(dirent.name).name === text;
 }
 
@@ -47,24 +47,69 @@ export function readFixtureFileSync(path: string): any {
 }
 
 /**
- * Read the first fixture file using path's dirname that matches the path's basename.
+ * Find the file path of a given dirname and basename.
  *
- * @param path The file path
- * @return The file content
+ * @param dir The file dirname
+ * @param base The file basename
+ * @return File path if found
  */
-export function readFixturePathSync(path: string): any {
+export function findFilePathByDirnameAndBasename(
+  dir: string,
+  base: string
+): string {
+  const [fixture] = readdirSync(dir, { withFileTypes: true })
+    .filter(direntIsFile)
+    .filter((dirent) => direntFilenameMatchText(base, dirent));
+
+  if (!fixture) {
+    throw new Error('Fixture not found');
+  }
+
+  return join(dir, fixture.name);
+}
+
+/**
+ * Scan the fixture path of a given path, searching also as a folder with an index file.
+ *
+ * @param path The search path
+ * @return The fixture path
+ */
+export function scanFixturePath(path: string): string {
   const folder = dirname(path);
   const file = basename(path);
 
-  const directory = join('data', folder);
+  const pathDirnameDirectory = join('data', folder);
+  const pathDirectory = join('data', path);
 
-  const direntIncludesFilename = direntIncludes.bind(null, file);
+  try {
+    // Read fixture from `data/${path}/index.${ext}`
+    const indexFixture = findFilePathByDirnameAndBasename(
+      pathDirectory,
+      'index'
+    );
 
-  const [fixture] = readdirSync(directory, { withFileTypes: true })
-    .filter(direntIsFile)
-    .filter(direntIncludesFilename);
+    return indexFixture;
+  } catch (error) {
+    // Read fixture from `data/${path}.${ext}`
+    const fixture = findFilePathByDirnameAndBasename(
+      pathDirnameDirectory,
+      file
+    );
 
-  return readFixtureFileSync(join(directory, fixture.name));
+    return fixture;
+  }
+}
+
+/**
+ * Read the first fixture file using path's dirname that matches the path's basename.
+ *
+ * @param path The search path
+ * @return The file content
+ */
+export function readFixturePathSync(path: string): any {
+  const fixturePath = scanFixturePath(path);
+
+  return readFixtureFileSync(fixturePath);
 }
 
 /**
