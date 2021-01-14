@@ -39,6 +39,7 @@ export default function createSearchableResponse(
   const { search, search: { parameter = 'search' } = {} } = method;
   const { query } = req;
 
+  // @ts-ignore
   const bindedFilterContent = filterContent.bind(null, search, query);
 
   return !query[parameter] ? content : content.filter(bindedFilterContent);

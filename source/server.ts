@@ -19,6 +19,7 @@ import { RouteManager } from './routes';
 import { ThrottlingManager } from './throttling';
 import { ResponseHeaders, MethodAttribute } from './types';
 import { UIManager } from './ui';
+import { ApolloServer, gql } from 'apollo-server-express';
 
 export function createServer(options = {} as ServerOptions): Server {
   const {
@@ -40,7 +41,54 @@ export function createServer(options = {} as ServerOptions): Server {
     overrideManager
   );
 
-  const expressServer = express();
+  const expressServer: express.Application = express();
+
+  // function useResolverWithFixture() {
+  //   return function useResolverWithFixtureResolver(
+  //     a: any,
+  //     parameters: any,
+  //     c: any,
+  //     info: any
+  //   ) {
+  //     const { fieldName } = info;
+  //     console.log(parameters, info);
+  //     return readFixtureSync('graphql/' + fieldName + '.json');
+  //   };
+  // }
+
+  const typeDefs = gql`
+    type Promotion {
+      id: String
+      title: String
+    }
+
+    type Enrollment {
+      id: String
+      title: String
+      promotion: Promotion
+    }
+
+    type Query {
+      enrollments(id: String): [Enrollment]
+      promotions: [Promotion]
+    }
+  `;
+
+  // @ts-ignore
+  console.log(typeDefs.definitions[2].fields[0].name.value);
+
+  const graphlOptions = {
+    typeDefs,
+    // resolvers: {
+    //   Query: {
+    //     enrollments: useResolverWithFixture(),
+    //     promotions: useResolverWithFixture(),
+    //   },
+    // },
+  };
+
+  const graphqlServer = new ApolloServer(graphlOptions);
+  graphqlServer.applyMiddleware({ app: expressServer });
 
   expressServer.use(middlewares || cors());
   expressServer.use((req: Request, res: Response, next: Function) =>
@@ -239,7 +287,7 @@ export function createServer(options = {} as ServerOptions): Server {
 
       inputManager.init(true);
 
-      uiManager.drawDashboard();
+      // uiManager.drawDashboard();
 
       function onConnection() {
         proxyManager.toggleCurrent();

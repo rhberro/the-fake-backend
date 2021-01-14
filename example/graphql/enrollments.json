@@ -1,0 +1,17 @@
+[
+  {
+    "id": "one",
+    "title": "enrollment one",
+    "promotion": {
+      "id": "one"
+    }
+  },
+  {
+    "id": "two",
+    "title": "enrollment two"
+  },
+  {
+    "id": "three",
+    "title": "enrollment three"
+  }
+]
