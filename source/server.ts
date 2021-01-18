@@ -19,15 +19,17 @@ import { RouteManager } from './routes';
 import { ThrottlingManager } from './throttling';
 import { ResponseHeaders, MethodAttribute } from './types';
 import { UIManager } from './ui';
+import { GraphQLManager } from './graphql';
 
 export function createServer(options = {} as ServerOptions): Server {
   const {
     basePath = '',
+    docsRoute = '',
+    definitions,
     middlewares,
     overrides,
     proxies,
     throttlings,
-    docsRoute = '',
   } = options;
 
   const routeManager = new RouteManager(overrides);
@@ -40,7 +42,12 @@ export function createServer(options = {} as ServerOptions): Server {
     overrideManager
   );
 
-  const expressServer = express();
+  const expressServer: express.Application = express();
+
+  if (definitions) {
+    const graphqlManager = new GraphQLManager(definitions);
+    graphqlManager.applyMiddlewareTo(expressServer);
+  }
 
   expressServer.use(middlewares || cors());
   expressServer.use((req: Request, res: Response, next: Function) =>
@@ -225,7 +232,7 @@ export function createServer(options = {} as ServerOptions): Server {
      */
     routes(routes): void {
       routeManager.setAll(routes);
-      routeManager.addDocsRoute(options.basePath, options.docsRoute);
+      routeManager.addDocsRoute(basePath, docsRoute);
       routeManager.getAll().forEach(createRoute);
     },
 
