@@ -43,26 +43,26 @@ function findMutationDefinitions(definition: any) {
 }
 
 export class GraphQLManager {
-  private definitions: any;
+  private typeDefs: any;
 
   constructor(definitions: TemplateStringsArray | string) {
-    this.definitions = gql(definitions);
+    this.typeDefs = gql(definitions);
   }
 
   private hasQueryDefinitions() {
-    return !!this.definitions.definitions.find(findQueryDefinitions);
+    return !!this.typeDefs.definitions.find(findQueryDefinitions);
   }
 
   private getGraphQLQueries() {
-    return this.definitions.definitions.find(findQueryDefinitions);
+    return this.typeDefs.definitions.find(findQueryDefinitions);
   }
 
   private hasMutationDefinitions() {
-    return !!this.definitions.definitions.find(findMutationDefinitions);
+    return !!this.typeDefs.definitions.find(findMutationDefinitions);
   }
 
   private getGraphQLMutations() {
-    return this.definitions.definitions.find(findMutationDefinitions);
+    return this.typeDefs.definitions.find(findMutationDefinitions);
   }
 
   private generateQueriesAndMutations(serverOptions: any) {
@@ -89,7 +89,7 @@ export class GraphQLManager {
 
   applyMiddlewareTo(app: express.Application): ApolloServer {
     const serverOptions = {
-      typeDefs: this.definitions,
+      typeDefs: this.typeDefs,
     };
 
     const serverOptionsEnhanced = this.generateQueriesAndMutations(
