@@ -1,6 +1,6 @@
-import RouteProperties from './RouteProperties';
+import { Route } from 'interfaces/Route';
 
-export default interface Server {
-  routes: (routes: RouteProperties[]) => void;
-  listen: (port?: number | string) => void;
+export interface Server {
+  routes: (routes: Route[]) => void;
+  listen: (port: number) => void;
 }

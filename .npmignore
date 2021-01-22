@@ -9,11 +9,4 @@
 source/
 
 # configurations.
-jest.config.js
-rollup.config.js
 tsconfig.json
-
-# tests.
-__mocks__/
-coverage/
-test/

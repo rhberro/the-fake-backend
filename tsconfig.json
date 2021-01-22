@@ -1,14 +1,20 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "declaration": true,
-    "module": "es2015",
-    "moduleResolution": "node",
-    "outDir": "build/",
-    "removeComments": true,
-    "rootDir": "source/",
     "strict": true,
-    "target": "es5"
+    "declaration": true,
+    "module": "umd",
+    "moduleResolution": "node",
+    "target": "es5",
+    "removeComments": true,
+    "esModuleInterop": true,
+    "rootDir": "source/",
+    "outDir": "build/",
+    "baseUrl": ".",
+    "paths": {
+      "enumerators/*": ["source/enumerators/*"],
+      "interfaces/*": ["source/interfaces/*"]
+    },
+    "jsx": "react-jsx"
   },
   "include": ["source"]
 }

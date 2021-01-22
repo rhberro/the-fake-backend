@@ -3,6 +3,3 @@ node_modules/
 
 # service.
 build/
-
-# testing.
-coverage/

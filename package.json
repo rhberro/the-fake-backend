@@ -1,10 +1,8 @@
 {
   "name": "the-fake-backend",
   "description": "Build a fake backend by providing the content of files or JavaScript objects through configurable routes.",
-  "version": "1.0.11-development",
+  "version": "0.0.0",
   "license": "ISC",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
   "engines": {
     "node": ">=12.14.1",
     "npm": ">=6.13.4"
@@ -29,53 +27,21 @@
     "express"
   ],
   "scripts": {
-    "commit": "git-cz",
-    "format": "prettier --write 'source/**/*'",
-    "format:staged": "pretty-quick --staged",
-    "prepare": "rollup --config",
-    "build": "rollup --config",
-    "test": "jest --runInBand",
-    "test:coverage": "jest --runInBand --coverage",
-    "semantic-release": "semantic-release"
+    "start": "tsc",
+    "build": "tsc --watch"
   },
   "dependencies": {
-    "chalk": "^4.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "fuzzy": "^0.1.3",
-    "http-proxy-middleware": "^0.20.0",
-    "inquirer": "^7.1.0",
-    "inquirer-autocomplete-prompt": "^1.0.2"
+    "http-proxy-middleware": "^1.0.6",
+    "ink": "^3.0.8",
+    "react": "^17.0.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-conventional": "^8.3.4",
-    "@jest-mock/express": "^0.9.4",
-    "@types/cors": "^2.8.6",
-    "@types/express": "^4.17.4",
+    "@types/cors": "^2.8.8",
+    "@types/express": "^4.17.8",
     "@types/http-proxy-middleware": "^0.19.3",
-    "@types/inquirer": "^6.5.0",
-    "@types/jest": "^25.2.1",
-    "@types/node": "^13.11.0",
-    "commitizen": "^4.0.4",
-    "cz-conventional-changelog": "^3.1.0",
-    "husky": "^4.2.5",
-    "jest": "^25.2.7",
-    "mock-fs": "^4.12.0",
-    "prettier": "2.0.4",
-    "pretty-quick": "^2.0.1",
-    "rollup": "^1.31.0",
-    "rollup-plugin-cleaner": "^1.0.0",
-    "rollup-plugin-terser": "^5.2.0",
-    "rollup-plugin-typescript2": "^0.25.3",
-    "semantic-release": "^17.0.6",
-    "strip-ansi": "^6.0.0",
-    "ts-jest": "^25.3.1",
-    "typescript": "^3.8.3"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
+    "@types/react": "^17.0.0",
+    "typescript": "^4.1.3"
   }
 }

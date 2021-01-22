@@ -1,4 +1,9 @@
 export { createServer } from './server';
-export * from './interfaces';
-export * from './enums';
-export * from './types';
+
+// // enumerators.
+// export { MethodType } from 'enumerators/MethodType';
+
+// // interfaces.
+// export { Method } from 'interfaces/Method';
+// export { Route } from 'interfaces/Route';
+// export { Server } from 'interfaces/Server';
