@@ -19,6 +19,9 @@ Build a fake backend by providing the content of files or JavaScript objects thr
     - [**Methods**](#methods)
     - [**Search**](#search)
     - [**Overrides**](#overrides)
+- [**GraphQL**](#graphql)
+  - [**Queries**](#queries)
+  - [**Mutations**](#mutations)
 - [**Guides**](#guides)
   - [**Overriding responses**](#overriding-responses)
   - [**Overriding response content**](#overriding-response-content)
@@ -118,6 +121,8 @@ The script above generates the following two endpoints.
 | [proxies](#proxies)         | no       | The server proxies                                                                          |
 | [throttlings](#throttlings) | no       | The server throttlings                                                                      |
 | [pagination](#pagination)   | no       | The server pagination setup                                                                 |
+| docsRoute                   | no       | The route that will print all the routes as HTML                                            |
+| definitions                 | no       | The GraphQL definitions.                                                                    |
 
 #### Proxies
 
@@ -205,6 +210,74 @@ This property allows you to create an array of options that will override the cu
 | overrides[].pagination      | boolean \| object         | no       | `false` | Described above |
 | overrides[].overrideContent | (req, content) => any     | no       |         | Described above |
 | overrides[].selected        | boolean                   | no       | `false` | Described above |
+
+## GraphQL
+
+We're using [apollo-server-express](https://github.com/apollographql/apollo-server/tree/main/packages/apollo-server-express) to integrate the GraphQL Server to the `the-fake-backend`. When you have the `definitions` property, the server will enable the GraphQL's related endpoints.
+
+| Method | Path                          | Response                                         |
+| ------ | ----------------------------- | ------------------------------------------------ |
+| GET    | http://localhost:8080/graphql | The graphical interactive in-browser GraphQL IDE |
+| POST   | http://localhost:8080/graphql | The queries and mutations response               |
+
+### Queries
+
+The service searches for a JSON file inside the `graphl/queries/` folder using the query name, for example, the query below tries to respond with the `graphl/queries/getPerson.json` file's content.
+
+```javascript
+const { createServer } = require('the-fake-backend');
+
+const serverOptions = {
+  definitions: `
+    type Person {
+      id: String
+      name: String
+      age: Int
+    }
+
+    type Query {
+      getPerson(id: String): Person
+    }
+  `,
+};
+
+const server = createServer(serverOptions);
+
+server.listen(8080);
+```
+
+### Mutations
+
+The same happens to the mutations, for example, the mutation below tries to respond with the `graphl/mutations/createPerson.json` file's content.
+
+```javascript
+const { createServer } = require('the-fake-backend');
+
+const serverOptions = {
+  definitions: `
+    type Person {
+      id: String
+      name: String
+      age: Int
+    }
+
+    input PersonInput {
+      name: String
+      age: Int
+    }
+
+    type Mutation {
+      createPerson(person: PersonInput): Person
+    }
+  `,
+};
+
+const server = createServer(serverOptions);
+
+server.listen(8080);
+```
+
+> The GraphQL's endpoints does not have support for throttlings, proxies, pagination, overridings and search at the moment, we are still working on these features.
 
 ## Guides
 

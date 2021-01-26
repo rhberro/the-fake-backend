@@ -1,32 +1,31 @@
-import cors from 'cors';
-import express from 'express';
-
-import { readFixtureSync } from './files';
-import { InputManager } from './input';
 import {
   Method,
-  Server,
-  ServerOptions,
-  Route,
   Request,
   Response,
+  Route,
+  Server,
+  ServerOptions,
 } from './interfaces';
-import { findSelectedMethodOverride, OverrideManager } from './overrides';
+import { MethodAttribute, ResponseHeaders } from './types';
+import { OverrideManager, findSelectedMethodOverride } from './overrides';
+
+import { GraphQLManager } from './graphql';
+import { InputManager } from './input';
 import { ProxyManager } from './proxy';
-import createPaginatedResponse from './response/paginated';
-import createSearchableResponse from './response/searchable';
 import { RouteManager } from './routes';
 import { ThrottlingManager } from './throttling';
-import { ResponseHeaders, MethodAttribute } from './types';
 import { UIManager } from './ui';
-
-function isSuccessfulStatusCode(code: number) {
-  return code >= 200 && code <= 299;
-}
+import cors from 'cors';
+import createPaginatedResponse from './response/paginated';
+import createSearchableResponse from './response/searchable';
+import express from 'express';
+import { readFixtureSync } from './files';
 
 export function createServer(options = {} as ServerOptions): Server {
   const {
     basePath = '',
+    docsRoute = '',
+    definitions,
     middlewares,
     overrides,
     proxies,
@@ -43,7 +42,12 @@ export function createServer(options = {} as ServerOptions): Server {
     overrideManager
   );
 
-  const expressServer = express();
+  const expressServer: express.Application = express();
+
+  if (definitions) {
+    const graphqlManager = new GraphQLManager(definitions);
+    graphqlManager.applyMiddlewareTo(expressServer);
+  }
 
   expressServer.use(middlewares || cors());
   expressServer.use((req: Request, res: Response, next: Function) =>
@@ -56,7 +60,7 @@ export function createServer(options = {} as ServerOptions): Server {
    * @param method The method object
    * @return The parsed method
    */
-  function parseMethod(method: Method): Method {
+  function mergeMethodWithSelectedOverride(method: Method): Method {
     if (method.overrides) {
       const selectedOverride = findSelectedMethodOverride(method);
 
@@ -116,10 +120,13 @@ export function createServer(options = {} as ServerOptions): Server {
   ): any {
     const { overrideContent, pagination, search } = method;
     const { path } = req;
+    const normalizedReqPath = path?.replace(basePath, '');
 
     const data = resolveMethodAttribute(method.data, req);
     const file = resolveMethodAttribute(method.file, req);
-    let content = data || readFixtureSync(file || path, routePath);
+    let content =
+      data ||
+      readFixtureSync(file || normalizedReqPath, routePath, method.scenario);
 
     if (search) {
       content = createSearchableResponse(req, res, content, method);
@@ -131,6 +138,10 @@ export function createServer(options = {} as ServerOptions): Server {
 
     if (overrideContent) {
       content = overrideContent(req, content);
+    }
+
+    if (Number.isInteger(data)) {
+      content = content.toString();
     }
 
     return content;
@@ -171,22 +182,18 @@ export function createServer(options = {} as ServerOptions): Server {
     req: Request,
     res: Response
   ): void {
-    const parsedMethod = parseMethod(method);
-    const { code = 200 } = parsedMethod;
+    const mergedMethod = mergeMethodWithSelectedOverride(method);
+    const { code = 200 } = mergedMethod;
     const routeProxy = getRouteProxy(route);
 
     if (routeProxy) {
       return routeProxy.proxy(req, res);
     }
 
-    if (isSuccessfulStatusCode(code)) {
-      const content = getContent(parsedMethod, route.path, req, res);
-      const headers = resolveMethodAttribute(parsedMethod.headers, req);
+    const content = getContent(mergedMethod, route.path, req, res);
+    const headers = resolveMethodAttribute(mergedMethod.headers, req);
 
-      sendContent(res, code, content, headers, parsedMethod.delay);
-    } else {
-      sendContent(res, code, null);
-    }
+    sendContent(res, code, content, headers, mergedMethod.delay);
   }
 
   /**
@@ -214,7 +221,7 @@ export function createServer(options = {} as ServerOptions): Server {
 
     const createRouteMethod = createMethod.bind(null, route);
 
-    methods.map(createRouteMethod);
+    methods.forEach(createRouteMethod);
   }
 
   return {
@@ -225,7 +232,8 @@ export function createServer(options = {} as ServerOptions): Server {
      */
     routes(routes): void {
       routeManager.setAll(routes);
-      routeManager.getAll().map(createRoute);
+      routeManager.addDocsRoute(basePath, docsRoute);
+      routeManager.getAll().forEach(createRoute);
     },
 
     /**

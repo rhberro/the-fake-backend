@@ -1,6 +1,7 @@
-import { createServer } from './server';
-import { Server, RouteProperties } from './interfaces';
+import { Route, RouteProperties, Server } from './interfaces';
+
 import { MethodType } from './enums';
+import { createServer } from './server';
 
 jest.mock('../source/ui', () => ({
   UIManager: () => ({
@@ -12,14 +13,15 @@ jest.mock('../source/ui', () => ({
 }));
 
 jest.mock('../source/routes', () => {
-  let allRoutes: RouteProperties[] = [];
+  let routes: Route[] = [];
 
   return {
     RouteManager: () => ({
-      getAll: jest.fn(() => allRoutes),
-      setAll: jest.fn((routes) => {
-        allRoutes = routes;
+      getAll: jest.fn(() => routes),
+      setAll: jest.fn((newRoutes) => {
+        routes = newRoutes;
       }),
+      addDocsRoute: jest.fn(),
     }),
   };
 });
