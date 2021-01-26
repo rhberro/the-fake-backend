@@ -1,6 +1,7 @@
+import { Method, MethodOverride, Route, RouteProperties } from './interfaces';
+
 import { MethodType } from './enums';
 import htmlSummary from './html-summary';
-import { Route, Method, MethodOverride } from './interfaces';
 
 export function getRoutesPaths(routes: Route[]) {
   return routes.map(({ path }) => path);
@@ -69,6 +70,19 @@ function mergeRoutesWithGlobalOverrides(
   return routes;
 }
 
+function getRouteParametersCount(path: string) {
+  return (path.match(/:/g) ?? []).length;
+}
+
+function sortRoutesByParametersCount(routes: RouteProperties[]) {
+  return routes.sort((routeA, routeB) => {
+    return (
+      getRouteParametersCount(routeA.path) -
+      getRouteParametersCount(routeB.path)
+    );
+  });
+}
+
 export class RouteManager {
   private routes: Route[];
   private globalOverrides?: MethodOverride[];
@@ -100,12 +114,13 @@ export class RouteManager {
       routes,
       this.globalOverrides
     );
+    const sortedRoutes = sortRoutesByParametersCount(routesWithOverrides);
 
     while (this.routes.length > 0) {
       this.routes.pop();
     }
 
-    routesWithOverrides.forEach((route) => {
+    sortedRoutes.forEach((route) => {
       this.routes.push(route);
     });
   }

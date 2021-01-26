@@ -207,5 +207,32 @@ describe('source/routes.ts', () => {
         });
       });
     });
+
+    describe('when the same route accepts a parameter or a fixed value', () => {
+      const routes: RouteProperties[] = [
+        { path: '/user/:id', methods: [] },
+        { path: '/user/admin', methods: [] },
+        { path: '/post', methods: [] },
+        { path: '/post/:id/comments/:commentId', methods: [] },
+        { path: '/post/:id/comments', methods: [] },
+        { path: '/post/:id', methods: [] },
+      ];
+
+      beforeEach(() => {
+        routeManager = new RouteManager();
+        routeManager.setAll(routes);
+      });
+
+      it('returns routes without parameter first', () => {
+        expect(routeManager.getAll()).toEqual([
+          { path: '/user/admin', methods: [] },
+          { path: '/post', methods: [] },
+          { path: '/user/:id', methods: [] },
+          { path: '/post/:id/comments', methods: [] },
+          { path: '/post/:id', methods: [] },
+          { path: '/post/:id/comments/:commentId', methods: [] },
+        ]);
+      });
+    });
   });
 });

@@ -1,25 +1,25 @@
-import cors from 'cors';
-import express from 'express';
-
-import { readFixtureSync } from './files';
-import { InputManager } from './input';
 import {
   Method,
-  Server,
-  ServerOptions,
-  Route,
   Request,
   Response,
+  Route,
+  Server,
+  ServerOptions,
 } from './interfaces';
-import { findSelectedMethodOverride, OverrideManager } from './overrides';
+import { MethodAttribute, ResponseHeaders } from './types';
+import { OverrideManager, findSelectedMethodOverride } from './overrides';
+
+import { GraphQLManager } from './graphql';
+import { InputManager } from './input';
 import { ProxyManager } from './proxy';
-import createPaginatedResponse from './response/paginated';
-import createSearchableResponse from './response/searchable';
 import { RouteManager } from './routes';
 import { ThrottlingManager } from './throttling';
-import { ResponseHeaders, MethodAttribute } from './types';
 import { UIManager } from './ui';
-import { GraphQLManager } from './graphql';
+import cors from 'cors';
+import createPaginatedResponse from './response/paginated';
+import createSearchableResponse from './response/searchable';
+import express from 'express';
+import { readFixtureSync } from './files';
 
 export function createServer(options = {} as ServerOptions): Server {
   const {
