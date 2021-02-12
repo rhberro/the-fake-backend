@@ -1,4 +1,4 @@
-import httpProxyMiddleware from 'http-proxy-middleware';
+import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
 
 import { Proxy, ProxyProperties, Route } from './interfaces';
 import { promptRoutePath, promptProxy } from './prompts';
@@ -19,7 +19,7 @@ function buildProxy(proxy: ProxyProperties, basePath?: string): Proxy {
   return {
     host,
     name,
-    proxy: httpProxyMiddleware({
+    proxy: createProxyMiddleware({
       target: host,
       pathRewrite: (path) =>
         appendBasePath ? path : path.replace(basePath || '', ''),
