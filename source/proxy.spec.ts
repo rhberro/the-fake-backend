@@ -34,7 +34,7 @@ describe('source/proxy.ts', () => {
       const routeManager = new RouteManager();
       routeManager.setAll(routes);
 
-      proxyManager = new ProxyManager(proxies, routeManager);
+      proxyManager = new ProxyManager(routeManager, proxies);
     });
 
     describe('constructor', () => {

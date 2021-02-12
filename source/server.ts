@@ -34,7 +34,7 @@ export function createServer(options = {} as ServerOptions): Server {
 
   const routeManager = new RouteManager(overrides);
   const overrideManager = new OverrideManager(routeManager);
-  const proxyManager = new ProxyManager(proxies, routeManager, basePath);
+  const proxyManager = new ProxyManager(routeManager, proxies, basePath);
   const throttlingManager = new ThrottlingManager(throttlings);
   const uiManager = new UIManager(
     proxyManager,

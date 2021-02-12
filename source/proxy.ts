@@ -36,13 +36,13 @@ export class ProxyManager {
   /**
    * Creates a new proxy manager.
    *
-   * @param proxies The proxies properties
    * @param routeManager An instance of route manager
+   * @param proxies The proxies properties
    * @param basePath The server basePath
    */
   constructor(
-    proxies: ProxyProperties[] = [],
     routeManager: RouteManager,
+    proxies: ProxyProperties[] = [],
     basePath?: string
   ) {
     this.routeManager = routeManager;
