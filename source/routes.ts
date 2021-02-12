@@ -130,4 +130,11 @@ export class RouteManager {
       ],
     });
   }
+
+  /**
+   * Find a route by path.
+   */
+  findRouteByPath(path: string) {
+    return this.routes.find((route) => route.path === path);
+  }
 }

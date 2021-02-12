@@ -138,4 +138,20 @@ export class ProxyManager {
 
     return route;
   }
+
+  /**
+   * Resolve the current proxy for a given route.
+   *
+   * @param route The route
+   * @return Resolved proxy
+   */
+  resolveRouteProxy(route: Route): RequestHandler | undefined {
+    const current = this.getCurrent();
+
+    if (route.proxy !== undefined) {
+      return route.proxy?.proxy;
+    }
+
+    return current?.proxy;
+  }
 }

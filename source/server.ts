@@ -54,6 +54,18 @@ export function createServer(options = {} as ServerOptions): Server {
     uiManager.drawRequest(req, res, next)
   );
 
+  expressServer.use((req: Request, res, next) => {
+    const route = routeManager.findRouteByPath(req.path.replace(basePath, ''));
+    if (route) {
+      const proxy = proxyManager.resolveRouteProxy(route);
+      if (proxy) {
+        return proxy?.(req, res, next);
+      }
+    }
+
+    next();
+  });
+
   /**
    * Merge method with current selected override.
    *
@@ -87,20 +99,6 @@ export function createServer(options = {} as ServerOptions): Server {
     req: Request
   ) {
     return typeof attribute === 'function' ? attribute(req) : attribute;
-  }
-
-  /**
-   * Get the route current proxy.
-   *
-   * @param route The route
-   * @return Current proxy
-   */
-  function getRouteProxy(route: Route) {
-    if (route.proxy !== undefined) {
-      return route.proxy;
-    }
-
-    return proxyManager.getCurrent();
   }
 
   /**
@@ -184,11 +182,6 @@ export function createServer(options = {} as ServerOptions): Server {
   ): void {
     const mergedMethod = mergeMethodWithSelectedOverride(method);
     const { code = 200 } = mergedMethod;
-    const routeProxy = getRouteProxy(route);
-
-    if (routeProxy) {
-      return routeProxy.proxy(req, res);
-    }
 
     const content = getContent(mergedMethod, route.path, req, res);
     const headers = resolveMethodAttribute(mergedMethod.headers, req);
