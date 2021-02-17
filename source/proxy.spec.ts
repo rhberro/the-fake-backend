@@ -22,7 +22,7 @@ describe('source/proxy.ts', () => {
     const proxies: ProxyProperties[] = [
       { name: 'First', host: 'firsthost.com' },
       { name: 'Second', host: 'secondhost.com' },
-      { name: 'Third', host: 'thirdhost.com' },
+      { name: 'Third', host: 'thirdhost.com', appendBasePath: false },
     ];
 
     beforeEach(() => {
@@ -162,6 +162,38 @@ describe('source/proxy.ts', () => {
         it('prompts and sets a null route proxy', async () => {
           await proxyManager.chooseRouteProxy();
           expect(routes[0].proxy).toBeNull();
+        });
+      });
+    });
+
+    describe('resolveRouteProxy', () => {
+      const proxy = {
+        name: 'Second',
+        host: 'secondhost.com',
+        proxy: () => 'proxy',
+      };
+
+      describe('when route has an active proxy', () => {
+        beforeEach(() => {
+          routes[0].proxy = proxy;
+        });
+
+        it('resolves to the route proxy', () => {
+          expect(proxyManager.resolveRouteProxy(routes[0])).toEqual(
+            proxy.proxy
+          );
+        });
+      });
+
+      describe('when server has an active proxy', () => {
+        beforeEach(() => {
+          proxyManager.toggleCurrent();
+        });
+
+        it('resolves to the server proxy', () => {
+          expect(proxyManager.resolveRouteProxy(routes[1])).toEqual(
+            expect.any(Function)
+          );
         });
       });
     });
