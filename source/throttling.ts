@@ -1,4 +1,4 @@
-import { Throttling } from './interfaces';
+import { Method, Middleware, Throttling } from './interfaces';
 
 export class ThrottlingManager {
   private currentThrottlingIndex: number | null;
@@ -58,5 +58,26 @@ export class ThrottlingManager {
     } else {
       this.currentThrottlingIndex += 1;
     }
+  }
+
+  /**
+   * Resolve the delay for the current route and throttling.
+   *
+   * @param routeMethod Route method
+   * @return Resolved delay
+   */
+  resolveRouteDelay(routeMethod: Method) {
+    return routeMethod.delay || this.getCurrentDelay();
+  }
+
+  /**
+   * Create a middleware that delays the execution.
+   */
+  createMiddleware(): Middleware {
+    return (_req, res, next) => {
+      const { routeMethod } = res.locals;
+
+      setTimeout(next, this.resolveRouteDelay(routeMethod));
+    };
   }
 }
