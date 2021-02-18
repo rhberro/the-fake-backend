@@ -1,6 +1,7 @@
 import { createServer } from './server';
 import { Server, RouteProperties, Route } from './interfaces';
 import { MethodType } from './enums';
+import { getMockRes } from '@jest-mock/express';
 
 jest.mock('../source/ui', () => ({
   UIManager: () => ({
@@ -8,6 +9,7 @@ jest.mock('../source/ui', () => ({
     drawRequest: jest.fn(),
     writeRouteProxyChanged: jest.fn(),
     writeMethodOverrideChanged: jest.fn(),
+    createDrawRequestMiddleware: jest.fn(),
   }),
 }));
 
@@ -15,12 +17,15 @@ jest.mock('../source/routes', () => {
   let routes: Route[] = [];
 
   return {
+    resolveMethodAttribute: jest.fn(),
     RouteManager: () => ({
       getAll: jest.fn(() => routes),
       setAll: jest.fn((newRoutes) => {
         routes = newRoutes;
       }),
       addDocsRoute: jest.fn(),
+      createResolvedRouteMiddleware: jest.fn(),
+      createRouteMethodResponseMiddleware: jest.fn(),
     }),
   };
 });
@@ -36,9 +41,14 @@ const expressServer = {
   get: jest.fn((path: string, response: Function) =>
     response(
       { type: 'get' },
-      { path, methods: [{ type: 'get' }] },
-      jest.fn(),
-      jest.fn()
+      {
+        ...getMockRes().res,
+        locals: {
+          route: { path, methods: [] },
+          routeMethod: { type: MethodType.GET },
+          response: '',
+        },
+      }
     )
   ),
   use: jest.fn(),
@@ -52,47 +62,45 @@ jest.mock('express', () => {
 });
 
 describe('source/server.ts', () => {
-  describe('InputManager', () => {
-    let server: Server;
+  let server: Server;
 
-    beforeEach(() => {
-      server = createServer();
+  beforeEach(() => {
+    server = createServer();
+  });
+
+  describe('createServer', () => {
+    it('returns an instance of Server', () => {
+      expect(server).toMatchObject<Server>(server);
     });
+  });
 
-    describe('createServer', () => {
-      it('returns an instance of Server', () => {
-        expect(server).toMatchObject<Server>(server);
-      });
+  describe('routes', () => {
+    it('defines the server routes', () => {
+      const routes: RouteProperties[] = [
+        {
+          path: '/users',
+          methods: [{ type: MethodType.GET, data: 'Users' }],
+        },
+        { path: '/dogs', methods: [{ type: MethodType.GET, data: 'Dogs' }] },
+        {
+          path: '/cats',
+          methods: [
+            {
+              type: MethodType.GET,
+              data: [{ name: 'Cat' }],
+            },
+          ],
+        },
+      ];
+      server.routes(routes);
+      expect(expressServer.get).toHaveBeenCalled();
     });
+  });
 
-    describe('routes', () => {
-      it('defines the server routes', () => {
-        const routes: RouteProperties[] = [
-          {
-            path: '/users',
-            methods: [{ type: MethodType.GET, data: 'Users' }],
-          },
-          { path: '/dogs', methods: [{ type: MethodType.GET, data: 'Dogs' }] },
-          {
-            path: '/cats',
-            methods: [
-              {
-                type: MethodType.GET,
-                data: [{ name: 'Cat' }],
-              },
-            ],
-          },
-        ];
-        server.routes(routes);
-        expect(expressServer.get).toHaveBeenCalled();
-      });
-    });
-
-    describe('listen', () => {
-      it('starts listening on given ports', () => {
-        server.listen(8081);
-        expect(expressServer.listen).toHaveBeenCalledWith(8081);
-      });
+  describe('listen', () => {
+    it('starts listening on given ports', () => {
+      server.listen(8081);
+      expect(expressServer.listen).toHaveBeenCalledWith(8081);
     });
   });
 });

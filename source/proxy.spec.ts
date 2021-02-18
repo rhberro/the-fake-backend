@@ -1,6 +1,7 @@
 import { mocked } from 'ts-jest/utils';
+import { getMockReq, getMockRes } from '@jest-mock/express';
 
-import { ProxyProperties, Route } from './interfaces';
+import { Middleware, ProxyProperties, Response, Route } from './interfaces';
 
 import { ProxyManager } from './proxy';
 import { MethodType } from './enums';
@@ -166,35 +167,39 @@ describe('source/proxy.ts', () => {
       });
     });
 
-    describe('resolveRouteProxy', () => {
-      const proxy = {
-        name: 'Second',
-        host: 'secondhost.com',
-        proxy: () => 'proxy',
-      };
+    describe('createMiddleware', () => {
+      const mockedRequest = getMockReq();
+      const mockedResponse = getMockRes().res as Response;
+      const mockedNext = jest.fn();
+      let middleware: Middleware;
 
-      describe('when route has an active proxy', () => {
-        beforeEach(() => {
-          routes[0].proxy = proxy;
-        });
-
-        it('resolves to the route proxy', () => {
-          expect(proxyManager.resolveRouteProxy(routes[0])).toEqual(
-            proxy.proxy
-          );
-        });
+      beforeEach(() => {
+        middleware = proxyManager.createMiddleware();
       });
 
-      describe('when server has an active proxy', () => {
-        beforeEach(() => {
-          proxyManager.toggleCurrent();
-        });
+      it('resolves to the route proxy when route has an active proxy', () => {
+        const secondProxy = proxyManager.getAll()[1];
+        routes[0].proxy = secondProxy;
+        mockedResponse.locals = {
+          route: routes[0],
+          routeMethod: routes[0].methods[0],
+          response: undefined,
+        };
 
-        it('resolves to the server proxy', () => {
-          expect(proxyManager.resolveRouteProxy(routes[1])).toEqual(
-            expect.any(Function)
-          );
-        });
+        middleware(mockedRequest, mockedResponse, mockedNext);
+        expect(mockedNext).toHaveBeenLastCalledWith(secondProxy.host);
+      });
+
+      it('resolves to the server proxy when server has an active proxy', () => {
+        proxyManager.toggleCurrent();
+        mockedResponse.locals = {
+          route: routes[1],
+          routeMethod: routes[1].methods[0],
+          response: undefined,
+        };
+
+        middleware(mockedRequest, mockedResponse, mockedNext);
+        expect(mockedNext).toHaveBeenLastCalledWith(proxies[0].host);
       });
     });
   });

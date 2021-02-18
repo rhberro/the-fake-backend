@@ -17,7 +17,6 @@ import createPaginatedMiddleware from './response/paginated';
 import createSearchableMiddleware from './response/searchable';
 import { resolveMethodAttribute, RouteManager } from './routes';
 import { ThrottlingManager } from './throttling';
-import { MethodAttribute } from './types';
 import { UIManager } from './ui';
 import { GraphQLManager } from './graphql';
 import { join } from 'path';

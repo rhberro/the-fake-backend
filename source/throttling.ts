@@ -15,6 +15,16 @@ export class ThrottlingManager {
   }
 
   /**
+   * Resolve the delay for the current route and throttling.
+   *
+   * @param routeMethod Route method
+   * @return Resolved delay
+   */
+  private resolveRouteDelay(routeMethod: Method) {
+    return routeMethod.delay || this.getCurrentDelay();
+  }
+
+  /**
    * Get all throttlings.
    *
    * @return The current list of throttlings
@@ -58,16 +68,6 @@ export class ThrottlingManager {
     } else {
       this.currentThrottlingIndex += 1;
     }
-  }
-
-  /**
-   * Resolve the delay for the current route and throttling.
-   *
-   * @param routeMethod Route method
-   * @return Resolved delay
-   */
-  resolveRouteDelay(routeMethod: Method) {
-    return routeMethod.delay || this.getCurrentDelay();
   }
 
   /**

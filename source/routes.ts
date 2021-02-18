@@ -107,6 +107,27 @@ export class RouteManager {
   }
 
   /**
+   * Find a route by path.
+   *
+   * @param path Route path
+   */
+  private findRouteByPath(path: string) {
+    return findRouteByUrl(this.routes, path);
+  }
+
+  /**
+   * Find a route by path and method.
+   *
+   * @param path Route path
+   * @param method Route method
+   */
+  private findRouteMethod(path: string, method: string) {
+    const route = this.findRouteByPath(path);
+
+    return findRouteMethodByType(route.methods, method);
+  }
+
+  /**
    * Get all routes.
    *
    * @return An array containing all the routes
@@ -157,27 +178,6 @@ export class RouteManager {
   }
 
   /**
-   * Find a route by path.
-   *
-   * @param path Route path
-   */
-  findRouteByPath(path: string) {
-    return findRouteByUrl(this.routes, path);
-  }
-
-  /**
-   * Find a route by path and method.
-   *
-   * @param path Route path
-   * @param method Route method
-   */
-  findRouteMethod(path: string, method: string) {
-    const route = this.findRouteByPath(path);
-
-    return findRouteMethodByType(route.methods, method);
-  }
-
-  /**
    * Create a middleware that resolves the route given a request.
    *
    * @param options Server options
@@ -185,7 +185,7 @@ export class RouteManager {
   createResolvedRouteMiddleware(options: ServerOptions): Middleware {
     return (req, res, next) => {
       const { path, method } = req;
-      const routePath = path?.replace(options.basePath || '', '');
+      const routePath = path.replace(options.basePath || '', '');
       const route = this.findRouteByPath(routePath);
       const routeMethod = this.findRouteMethod(routePath, method);
 
