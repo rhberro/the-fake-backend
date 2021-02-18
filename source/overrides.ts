@@ -128,7 +128,7 @@ export class OverrideManager {
   /**
    * Create a middleware that merges a route with the selected override.
    */
-  createOverriddenRouteMiddleware(): Middleware {
+  createOverriddenRouteMethodMiddleware(): Middleware {
     return (_req, res, next) => {
       const { routeMethod } = res.locals;
       const selectedOverride = findSelectedMethodOverride(routeMethod);
