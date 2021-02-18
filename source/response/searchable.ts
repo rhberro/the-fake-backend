@@ -20,8 +20,12 @@ function filterContent(search: Search, query: any, item: any) {
   );
 }
 
-function createSearchableResponse(search: Search, query: any, response: any[]) {
-  return response.filter((item) => filterContent(search, query, item));
+function createSearchableResponse(
+  routeSearch: Search,
+  query: any,
+  response: any[]
+) {
+  return response.filter((item) => filterContent(routeSearch, query, item));
 }
 
 /**
