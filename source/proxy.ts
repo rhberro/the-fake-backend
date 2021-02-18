@@ -1,6 +1,6 @@
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
 
-import { Proxy, ProxyProperties, Route } from './interfaces';
+import { Middleware, Proxy, ProxyProperties, Route } from './interfaces';
 import { promptRoutePath, promptProxy } from './prompts';
 import { getRoutesPaths, findRouteByUrl, RouteManager } from './routes';
 
@@ -74,6 +74,22 @@ export class ProxyManager {
   }
 
   /**
+   * Resolve the current proxy for a given route.
+   *
+   * @param route The route
+   * @return Resolved proxy
+   */
+  private resolveRouteProxy(route: Route): RequestHandler | undefined {
+    const current = this.getCurrent();
+
+    if (route.proxy !== undefined) {
+      return route.proxy?.proxy;
+    }
+
+    return current?.proxy;
+  }
+
+  /**
    * Get all proxies.
    *
    * @return An array containing all the proxies
@@ -140,18 +156,20 @@ export class ProxyManager {
   }
 
   /**
-   * Resolve the current proxy for a given route.
-   *
-   * @param route The route
-   * @return Resolved proxy
+   * Create a middleware that optionally proxy requests.
    */
-  resolveRouteProxy(route: Route): RequestHandler | undefined {
-    const current = this.getCurrent();
+  createMiddleware(): Middleware {
+    return (req, res, next) => {
+      const { route } = res.locals;
 
-    if (route.proxy !== undefined) {
-      return route.proxy?.proxy;
-    }
+      if (route) {
+        const proxy = this.resolveRouteProxy(route);
+        if (proxy) {
+          return proxy?.(req, res, next);
+        }
+      }
 
-    return current?.proxy;
+      next();
+    };
   }
 }
