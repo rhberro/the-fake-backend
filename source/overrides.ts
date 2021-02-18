@@ -1,4 +1,12 @@
-import { Method, MethodOverride, Route, Override } from './interfaces';
+import { NextFunction } from 'express';
+import {
+  Method,
+  MethodOverride,
+  Route,
+  Override,
+  Response,
+  Request,
+} from './interfaces';
 import {
   promptRoutePath,
   promptRouteMethodType,
@@ -48,7 +56,7 @@ function getOverridableRoutesMethodsTypesNames(route: Route) {
   );
 }
 
-export function findSelectedMethodOverride(method: Method) {
+function findSelectedMethodOverride(method: Method) {
   return method.overrides?.find(({ selected }) => selected);
 }
 
@@ -117,5 +125,40 @@ export class OverrideManager {
     });
 
     return { routePath: url, methodType: type, name };
+  }
+
+  /**
+   * Create a middleware that merges a route with the selected override.
+   */
+  createOverriddenRouteMiddleware() {
+    return (_req: Request, res: Response, next: NextFunction) => {
+      const { routeMethod } = res.locals;
+      const selectedOverride = findSelectedMethodOverride(routeMethod);
+
+      if (selectedOverride) {
+        res.locals.routeMethod = {
+          ...routeMethod,
+          ...selectedOverride,
+        };
+      }
+
+      next();
+    };
+  }
+
+  /**
+   * Create a middleware that applies a given route override content function.
+   */
+  createOverriddenContentMiddleware() {
+    return (req: Request, res: Response, next: NextFunction) => {
+      const { response, routeMethod } = res.locals;
+      const { overrideContent } = routeMethod;
+
+      if (overrideContent) {
+        res.locals.response = overrideContent(req, response);
+      }
+
+      next();
+    };
   }
 }
