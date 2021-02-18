@@ -1,13 +1,19 @@
 import {
-  PaginationProperties,
   ServerOptions,
-  Method,
   Pagination,
-  Request,
-  Response,
+  PaginationProperties,
+  Middleware,
 } from '../interfaces';
 
-function getPagination(properties?: PaginationProperties): Pagination {
+function resolvePaginationProperties(
+  routePagination: PaginationProperties | boolean,
+  options: ServerOptions
+): Pagination {
+  const properties =
+    typeof routePagination === 'boolean'
+      ? options.pagination
+      : { ...options.pagination, ...routePagination };
+
   return {
     count: properties?.count || 'count',
     data: properties?.data || 'data',
@@ -25,6 +31,43 @@ function getPagination(properties?: PaginationProperties): Pagination {
   };
 }
 
+function createPaginatedResponse(
+  properties: Pagination,
+  query: any,
+  response: any[]
+) {
+  const requestedSize = Number(query[properties.sizeParameter]) || 5;
+  const requestedPage = query[properties.offsetParameter]
+    ? Number(query[properties.offsetParameter]) / requestedSize
+    : Number(query[properties.pageParameter]);
+
+  const totalElements = response.length;
+  const totalPages = Math.ceil(totalElements / requestedSize);
+  const lastPage = totalPages - 1;
+
+  const currentOffset = requestedPage * requestedSize;
+  const currentPageData = response.slice(
+    currentOffset,
+    currentOffset + requestedSize
+  );
+
+  const metadata = {
+    [properties.empty]: currentPageData.length === 0,
+    [properties.first]: requestedPage === 0,
+    [properties.last]: requestedPage >= lastPage,
+    [properties.next]: requestedPage < lastPage,
+    [properties.page]: requestedPage,
+    [properties.pages]: totalPages,
+    [properties.count]: requestedSize,
+    [properties.total]: totalElements,
+  };
+
+  return {
+    data: currentPageData,
+    metadata,
+  };
+}
+
 /**
  * Create a paginated content.
  *
@@ -35,69 +78,33 @@ function getPagination(properties?: PaginationProperties): Pagination {
  * @param options The server options
  * @return The paginated content
  */
-export default function createPaginatedResponse(
-  req: Request,
-  res: Response,
-  content: any[],
-  method: Method,
+export default function createPaginatedMiddleware(
   options: ServerOptions
-) {
-  const { query } = req;
-  const properties =
-    typeof method.pagination === 'boolean'
-      ? options.pagination
-      : { ...options.pagination, ...method.pagination };
+): Middleware {
+  return (req, res, next) => {
+    const { query } = req;
+    const { response, routeMethod } = res.locals;
+    const { pagination } = routeMethod;
 
-  const {
-    count,
-    data,
-    empty,
-    first,
-    headers,
-    last,
-    next,
-    offsetParameter,
-    pageParameter,
-    page,
-    pages,
-    sizeParameter,
-    total,
-  } = getPagination(properties);
+    if (pagination) {
+      const properties = resolvePaginationProperties(pagination, options);
+      const { data, metadata } = createPaginatedResponse(
+        properties,
+        query,
+        response
+      );
 
-  const requestedSize = Number(query[sizeParameter]) || 5;
-  const requestedPage = query[offsetParameter]
-    ? Number(query[offsetParameter]) / requestedSize
-    : Number(query[pageParameter]);
+      if (properties.headers) {
+        res.set(metadata);
+        res.locals.response = data;
+      } else {
+        res.locals.response = {
+          [properties.data]: data,
+          ...metadata,
+        };
+      }
+    }
 
-  const totalElements = content.length;
-  const totalPages = Math.ceil(totalElements / requestedSize);
-  const lastPage = totalPages - 1;
-
-  const currentOffset = requestedPage * requestedSize;
-  const currentPageData = content.slice(
-    currentOffset,
-    currentOffset + requestedSize
-  );
-
-  const currentMetadata = {
-    [empty]: currentPageData.length === 0,
-    [first]: requestedPage === 0,
-    [last]: requestedPage >= lastPage,
-    [next]: requestedPage < lastPage,
-    [page]: requestedPage,
-    [pages]: totalPages,
-    [count]: requestedSize,
-    [total]: totalElements,
-  };
-
-  if (headers) {
-    res.set(currentMetadata);
-
-    return currentPageData;
-  }
-
-  return {
-    [data]: currentPageData,
-    ...currentMetadata,
+    next();
   };
 }
