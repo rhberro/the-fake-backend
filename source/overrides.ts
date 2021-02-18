@@ -1,11 +1,9 @@
-import { NextFunction } from 'express';
 import {
   Method,
   MethodOverride,
   Route,
   Override,
-  Response,
-  Request,
+  Middleware,
 } from './interfaces';
 import {
   promptRoutePath,
@@ -130,8 +128,8 @@ export class OverrideManager {
   /**
    * Create a middleware that merges a route with the selected override.
    */
-  createOverriddenRouteMiddleware() {
-    return (_req: Request, res: Response, next: NextFunction) => {
+  createOverriddenRouteMiddleware(): Middleware {
+    return (_req, res, next) => {
       const { routeMethod } = res.locals;
       const selectedOverride = findSelectedMethodOverride(routeMethod);
 
@@ -149,8 +147,8 @@ export class OverrideManager {
   /**
    * Create a middleware that applies a given route override content function.
    */
-  createOverriddenContentMiddleware() {
-    return (req: Request, res: Response, next: NextFunction) => {
+  createOverriddenContentMiddleware(): Middleware {
+    return (req, res, next) => {
       const { response, routeMethod } = res.locals;
       const { overrideContent } = routeMethod;
 
