@@ -55,7 +55,7 @@ describe('source/ui.ts', () => {
   describe('UIManager', () => {
     let uiManager: UIManager;
     const routeManager = new RouteManager();
-    const proxyManager = new ProxyManager(routeManager, []);
+    const proxyManager = new ProxyManager(routeManager);
     const throttlingManager = new ThrottlingManager();
     const overrideManager = new OverrideManager(routeManager);
 

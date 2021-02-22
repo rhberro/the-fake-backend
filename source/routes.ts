@@ -1,3 +1,4 @@
+import { propEq } from 'ramda';
 import { MethodType } from './enums';
 import { readFixtureSync } from './files';
 import htmlSummary from './html-summary';
