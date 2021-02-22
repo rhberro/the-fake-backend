@@ -1,4 +1,16 @@
 import {
+  both,
+  complement,
+  either,
+  equals,
+  isEmpty,
+  isNil,
+  pipe,
+  prop,
+  propOr,
+  propSatisfies,
+} from 'ramda';
+import {
   Method,
   MethodOverride,
   Route,
@@ -20,12 +32,10 @@ import {
 
 const OVERRIDE_DEFAULT_OPTION = 'Default';
 
-function isNotEmpty<T>(array: T[]) {
-  return array.length > 0;
-}
+const isNotEmpty = complement(either(isNil, isEmpty));
 
 function getOverridesNames(overrides: MethodOverride[]) {
-  return overrides.map(({ name }) => name);
+  return overrides.map(prop('name'));
 }
 
 function getOverridesNamesWithDefault(overrides: MethodOverride[]) {
@@ -45,17 +55,17 @@ function getMethodOverridesByType({ methods }: Route, routeMethodType: string) {
 }
 
 function filterOverridableMethods(methods: Method[]) {
-  return methods.filter(({ overrides }) => overrides && isNotEmpty(overrides));
+  return methods.filter(propSatisfies(isNotEmpty, 'overrides'));
 }
 
 function getOverridableRoutesMethodsTypesNames(route: Route) {
-  return filterOverridableMethods(route.methods).map((method) =>
-    formatMethodType(method.type)
+  return filterOverridableMethods(route.methods).map(
+    pipe(prop('type'), formatMethodType)
   );
 }
 
 function findSelectedMethodOverride(method: Method) {
-  return method.overrides?.find(({ selected }) => selected);
+  return method.overrides?.find(propSatisfies(equals(true), 'selected'));
 }
 
 export class OverrideManager {
@@ -78,7 +88,9 @@ export class OverrideManager {
   getAll() {
     return this.routeManager
       .getAll()
-      .filter(({ methods }) => isNotEmpty(filterOverridableMethods(methods)));
+      .filter(
+        pipe(propOr([], 'methods'), filterOverridableMethods, isNotEmpty)
+      );
   }
 
   /**

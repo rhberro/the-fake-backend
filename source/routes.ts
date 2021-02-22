@@ -1,4 +1,4 @@
-import { propEq } from 'ramda';
+import { prop, propEq } from 'ramda';
 import { MethodType } from './enums';
 import { readFixtureSync } from './files';
 import htmlSummary from './html-summary';
@@ -13,7 +13,7 @@ import {
 import { MethodAttribute } from './types';
 
 export function getRoutesPaths(routes: Route[]) {
-  return routes.map(({ path }) => path);
+  return routes.map(prop('path'));
 }
 
 export function formatMethodType(methodType: string) {
@@ -21,7 +21,7 @@ export function formatMethodType(methodType: string) {
 }
 
 export function findRouteByUrl(routes: Route[], url: string): Route {
-  const route = routes.find(({ path }) => path === url);
+  const route = routes.find(propEq('path', url));
 
   if (route) {
     return route;
@@ -31,9 +31,7 @@ export function findRouteByUrl(routes: Route[], url: string): Route {
 }
 
 export function findRouteMethodByType(methods: Method[], methodType: string) {
-  const method = methods.find(
-    ({ type }) => type.toLowerCase() === methodType.toLowerCase()
-  );
+  const method = methods.find(propEq('type', methodType.toLowerCase()));
 
   if (method) {
     return method;

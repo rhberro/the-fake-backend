@@ -1,4 +1,15 @@
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
+import {
+  both,
+  complement,
+  compose,
+  equals,
+  not,
+  pathSatisfies,
+  prop,
+  propEq,
+  propSatisfies,
+} from 'ramda';
 
 import { Middleware, Proxy, ProxyProperties, Route } from './interfaces';
 import { promptRoutePath, promptProxy } from './prompts';
@@ -54,7 +65,7 @@ export class ProxyManager {
    * Get all proxy names.
    */
   private getProxyNames() {
-    return this.proxies.map((proxy) => proxy.name);
+    return this.proxies.map(prop('name'));
   }
 
   /**
@@ -70,7 +81,7 @@ export class ProxyManager {
    * @param name Name
    */
   private findByName(name: string) {
-    return this.proxies.find((proxy) => proxy.name === name);
+    return this.proxies.find(propEq('name', name));
   }
 
   /**
@@ -82,8 +93,8 @@ export class ProxyManager {
   private resolveRouteProxy(route: Route): RequestHandler | undefined {
     const current = this.getCurrent();
 
-    if (route.proxy !== undefined) {
-      return route.proxy?.proxy;
+    if (route.proxy) {
+      return route.proxy.proxy;
     }
 
     return current?.proxy;
@@ -122,7 +133,10 @@ export class ProxyManager {
     return this.routeManager
       .getAll()
       .filter(
-        ({ proxy }) => proxy !== undefined && proxy?.name !== current?.name
+        both(
+          propSatisfies(complement(equals(undefined)), 'proxy'),
+          pathSatisfies(complement(equals(current?.name)), ['proxy', 'name'])
+        )
       );
   }
 
@@ -165,7 +179,7 @@ export class ProxyManager {
       if (route) {
         const proxy = this.resolveRouteProxy(route);
         if (proxy) {
-          return proxy?.(req, res, next);
+          return proxy(req, res, next);
         }
       }
 
