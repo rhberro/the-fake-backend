@@ -106,6 +106,16 @@ describe('source/routes.ts', () => {
           expect(routeManager.getAll()).toHaveLength(0);
         });
       });
+
+      describe('findRouteByPath', () => {
+        beforeEach(() => {
+          routeManager.setAll(routes);
+        });
+
+        it('returns the route that matches the path', () => {
+          expect(routeManager.findRouteByPath('/users')).toEqual(routes[0]);
+        });
+      });
     });
 
     describe('when has global overrides', () => {

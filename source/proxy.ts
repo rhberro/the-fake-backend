@@ -1,4 +1,4 @@
-import httpProxyMiddleware from 'http-proxy-middleware';
+import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
 
 import { Proxy, ProxyProperties, Route } from './interfaces';
 import { promptRoutePath, promptProxy } from './prompts';
@@ -19,7 +19,7 @@ function buildProxy(proxy: ProxyProperties, basePath?: string): Proxy {
   return {
     host,
     name,
-    proxy: httpProxyMiddleware({
+    proxy: createProxyMiddleware({
       target: host,
       pathRewrite: (path) =>
         appendBasePath ? path : path.replace(basePath || '', ''),
@@ -36,13 +36,13 @@ export class ProxyManager {
   /**
    * Creates a new proxy manager.
    *
-   * @param proxies The proxies properties
    * @param routeManager An instance of route manager
+   * @param proxies The proxies properties
    * @param basePath The server basePath
    */
   constructor(
-    proxies: ProxyProperties[] = [],
     routeManager: RouteManager,
+    proxies: ProxyProperties[] = [],
     basePath?: string
   ) {
     this.routeManager = routeManager;
@@ -137,5 +137,21 @@ export class ProxyManager {
     route.proxy = this.findByName(proxy) || null;
 
     return route;
+  }
+
+  /**
+   * Resolve the current proxy for a given route.
+   *
+   * @param route The route
+   * @return Resolved proxy
+   */
+  resolveRouteProxy(route: Route): RequestHandler | undefined {
+    const current = this.getCurrent();
+
+    if (route.proxy !== undefined) {
+      return route.proxy?.proxy;
+    }
+
+    return current?.proxy;
   }
 }
