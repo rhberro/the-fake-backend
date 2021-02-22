@@ -59,7 +59,7 @@ export function createServer(options = {} as ServerOptions): Server {
     if (route) {
       const proxy = proxyManager.resolveRouteProxy(route);
       if (proxy) {
-        return proxy?.(req, res, next);
+        return proxy(req, res, next);
       }
     }
 

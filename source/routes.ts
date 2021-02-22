@@ -1,3 +1,4 @@
+import { propEq } from 'ramda';
 import { MethodType } from './enums';
 import htmlSummary from './html-summary';
 import { Route, Method, MethodOverride } from './interfaces';
@@ -135,6 +136,6 @@ export class RouteManager {
    * Find a route by path.
    */
   findRouteByPath(path: string) {
-    return this.routes.find((route) => route.path === path);
+    return this.routes.find(propEq('path', path));
   }
 }
