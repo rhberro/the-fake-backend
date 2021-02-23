@@ -1,5 +1,5 @@
 import cors from 'cors';
-import express from 'express';
+import express, { NextFunction } from 'express';
 
 import { readFixtureSync } from './files';
 import { InputManager } from './input';
@@ -11,15 +11,15 @@ import {
   Request,
   Response,
 } from './interfaces';
-import { findSelectedMethodOverride, OverrideManager } from './overrides';
+import { OverrideManager } from './overrides';
 import { ProxyManager } from './proxy';
-import createPaginatedResponse from './response/paginated';
-import createSearchableResponse from './response/searchable';
-import { RouteManager } from './routes';
+import createPaginatedMiddleware from './response/paginated';
+import createSearchableMiddleware from './response/searchable';
+import { resolveMethodAttribute, RouteManager } from './routes';
 import { ThrottlingManager } from './throttling';
-import { ResponseHeaders, MethodAttribute } from './types';
 import { UIManager } from './ui';
 import { GraphQLManager } from './graphql';
+import { join } from 'path';
 
 export function createServer(options = {} as ServerOptions): Server {
   const {
@@ -50,143 +50,38 @@ export function createServer(options = {} as ServerOptions): Server {
   }
 
   expressServer.use(middlewares || cors());
-  expressServer.use((req: Request, res: Response, next: Function) =>
-    uiManager.drawRequest(req, res, next)
+
+  expressServer.use(
+    uiManager.createDrawRequestMiddleware(),
+    routeManager.createResolvedRouteMiddleware(options),
+    proxyManager.createMiddleware(),
+    overrideManager.createOverriddenRouteMethodMiddleware(),
+    routeManager.createRouteMethodResponseMiddleware(),
+    createSearchableMiddleware(),
+    createPaginatedMiddleware(options),
+    overrideManager.createOverriddenContentMiddleware(),
+    throttlingManager.createMiddleware()
   );
-
-  expressServer.use((req: Request, res, next) => {
-    const route = routeManager.findRouteByPath(req.path.replace(basePath, ''));
-    if (route) {
-      const proxy = proxyManager.resolveRouteProxy(route);
-      if (proxy) {
-        return proxy(req, res, next);
-      }
-    }
-
-    next();
-  });
-
-  /**
-   * Merge method with current selected override.
-   *
-   * @param method The method object
-   * @return The parsed method
-   */
-  function mergeMethodWithSelectedOverride(method: Method): Method {
-    if (method.overrides) {
-      const selectedOverride = findSelectedMethodOverride(method);
-
-      if (selectedOverride) {
-        return {
-          ...method,
-          ...selectedOverride,
-        };
-      }
-    }
-
-    return method;
-  }
-
-  /**
-   * Resolve the attribute by applying request argument if it is a function.
-   *
-   * @param attribute The attribute
-   * @param req The request object
-   * @return The resolved attribute
-   */
-  function resolveMethodAttribute(
-    attribute: MethodAttribute<any>,
-    req: Request
-  ) {
-    return typeof attribute === 'function' ? attribute(req) : attribute;
-  }
-
-  /**
-   * Get the method content.
-   *
-   * @param method The method object
-   * @param routePath The route path
-   * @param req The request object
-   * @param res The response object
-   * @return The method content
-   */
-  function getContent(
-    method: Method,
-    routePath: string,
-    req: Request,
-    res: Response
-  ): any {
-    const { overrideContent, pagination, search } = method;
-    const { path } = req;
-    const normalizedReqPath = path?.replace(basePath, '');
-
-    const data = resolveMethodAttribute(method.data, req);
-    const file = resolveMethodAttribute(method.file, req);
-    let content =
-      data ||
-      readFixtureSync(file || normalizedReqPath, routePath, method.scenario);
-
-    if (search) {
-      content = createSearchableResponse(req, res, content, method);
-    }
-
-    if (pagination) {
-      content = createPaginatedResponse(req, res, content, method, options);
-    }
-
-    if (overrideContent) {
-      content = overrideContent(req, content);
-    }
-
-    if (Number.isInteger(data)) {
-      content = content.toString();
-    }
-
-    return content;
-  }
-
-  /**
-   * Response the url with the content.
-   *
-   * @param res The response object
-   * @param code The response code
-   * @param content The response content
-   * @param headers The response headers
-   * @param delay The response delay
-   */
-  function sendContent(
-    res: Response,
-    code: number,
-    content: any,
-    headers: ResponseHeaders = {},
-    delay?: number
-  ) {
-    setTimeout(
-      () => res.status(code).set(headers).send(content),
-      delay || throttlingManager.getCurrentDelay()
-    );
-  }
 
   /**
    * Create the method response object.
    *
-   * @param method The method object
    * @param req The request object
    * @param res The response object
    */
-  function createMethodResponse(
-    method: Method,
-    route: Route,
-    req: Request,
-    res: Response
-  ): void {
-    const mergedMethod = mergeMethodWithSelectedOverride(method);
-    const { code = 200 } = mergedMethod;
+  function createMethodResponse(req: Request, res: Response): void {
+    const { response, routeMethod } = res.locals;
+    const { code = 200 } = routeMethod;
 
-    const content = getContent(mergedMethod, route.path, req, res);
-    const headers = resolveMethodAttribute(mergedMethod.headers, req);
+    const headers = resolveMethodAttribute(routeMethod.headers, req);
 
-    sendContent(res, code, content, headers, mergedMethod.delay);
+    res.set(headers).status(code);
+
+    if (Number.isInteger(response)) {
+      res.send(response.toString());
+    } else {
+      res.send(response);
+    }
   }
 
   /**
@@ -195,13 +90,11 @@ export function createServer(options = {} as ServerOptions): Server {
    * @param route The route object
    * @param method The method object
    */
-  function createMethod(route: Route, method: Method): void {
+  function createRouteMethod(route: Route, method: Method): void {
     const { path } = route;
     const { type } = method;
 
-    const response = createMethodResponse.bind(null, method, route);
-
-    expressServer[type](`${basePath}${path}`, response);
+    expressServer[type](join(basePath, path), createMethodResponse);
   }
 
   /**
@@ -212,9 +105,7 @@ export function createServer(options = {} as ServerOptions): Server {
   function createRoute(route: Route): void {
     const { methods } = route;
 
-    const createRouteMethod = createMethod.bind(null, route);
-
-    methods.forEach(createRouteMethod);
+    methods.forEach((method) => createRouteMethod(route, method));
   }
 
   return {

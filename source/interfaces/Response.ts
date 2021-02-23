@@ -1,3 +1,13 @@
 import express from 'express';
+import Method from './Method';
+import Route from './Route';
 
-export default interface Response extends express.Response {}
+type ResponseLocals<T> = {
+  response: T;
+  route: Route;
+  routeMethod: Method;
+};
+
+export default interface Response<T = any> extends express.Response<T> {
+  locals: ResponseLocals<T>;
+}

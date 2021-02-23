@@ -1,7 +1,8 @@
-import { RouteProperties, Method } from './interfaces';
+import { RouteProperties, Method, Response, Middleware } from './interfaces';
 
 import { findRouteMethodByType, findRouteByUrl, RouteManager } from './routes';
 import { MethodType } from './enums';
+import { getMockReq, getMockRes } from '@jest-mock/express';
 
 describe('source/routes.ts', () => {
   describe('findRouteByUrl', () => {
@@ -47,7 +48,10 @@ describe('source/routes.ts', () => {
 
     describe('when has not global overrides', () => {
       const routes: RouteProperties[] = [
-        { path: '/users', methods: [{ type: MethodType.GET }] },
+        {
+          path: '/users',
+          methods: [{ type: MethodType.GET, data: ['First user'] }],
+        },
         { path: '/dogs', methods: [{ type: MethodType.GET }] },
       ];
 
@@ -75,7 +79,7 @@ describe('source/routes.ts', () => {
             expect(routeManager.getAll()).toEqual([
               {
                 path: '/users',
-                methods: [{ type: MethodType.GET }],
+                methods: [{ type: MethodType.GET, data: ['First user'] }],
               },
               {
                 path: '/dogs',
@@ -107,13 +111,56 @@ describe('source/routes.ts', () => {
         });
       });
 
-      describe('findRouteByPath', () => {
+      describe('createResolvedRouteMiddleware', () => {
+        const req = getMockReq();
+        const res = getMockRes().res as Response;
+        const next = jest.fn();
+        let middleware: Middleware;
+
         beforeEach(() => {
           routeManager.setAll(routes);
+          req.path = routes[0].path;
+          req.method = routes[0].methods[0].type;
+          res.locals = {
+            route: routes[0],
+            routeMethod: routes[0].methods[0],
+            response: routes[0].methods[0].data,
+          };
+
+          middleware = routeManager.createResolvedRouteMiddleware({
+            proxies: [],
+            throttlings: [],
+          });
         });
 
-        it('returns the route that matches the path', () => {
-          expect(routeManager.findRouteByPath('/users')).toEqual(routes[0]);
+        it('resolves the route of a given request', () => {
+          middleware(req, res, next);
+          expect(res.locals.route).toEqual(routes[0]);
+        });
+      });
+
+      describe('createRouteMethodResponseMiddleware', () => {
+        const req = getMockReq();
+        const res = getMockRes().res as Response;
+        const next = jest.fn();
+        let middleware: Middleware;
+
+        beforeEach(() => {
+          routeManager.setAll(routes);
+          req.path = routes[0].path;
+          req.method = routes[0].methods[0].type;
+          res.locals = {
+            route: routes[0],
+            routeMethod: routes[0].methods[0],
+            response: routes[0].methods[0].data,
+          };
+
+          middleware = routeManager.createRouteMethodResponseMiddleware();
+        });
+
+        it('resolves the response of a given request', () => {
+          middleware(req, res, next);
+          expect(res.locals.response).toEqual(routes[0].methods[0].data);
         });
       });
     });

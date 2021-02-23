@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import readline, { Interface as ReadLine } from 'readline';
 
-import { Request, Response } from './interfaces';
+import { Middleware } from './interfaces';
 import { OverrideManager } from './overrides';
 import { ProxyManager } from './proxy';
 import { ThrottlingManager } from './throttling';
@@ -179,16 +179,18 @@ export class UIManager {
    * @param res The route response object
    * @param next The express next function
    */
-  drawRequest(req: Request, res: Response, next: Function) {
-    const currentThrottling = this.throttlingManager.getCurrent();
-    const currentThrottlingDelay = this.throttlingManager.getCurrentDelay();
+  createDrawRequestMiddleware(): Middleware {
+    return (req, _res, next) => {
+      const currentThrottling = this.throttlingManager.getCurrent();
+      const currentThrottlingDelay = this.throttlingManager.getCurrentDelay();
 
-    this.line(chalk.bold.white(`${req.method} ${req.path}`));
-    if (currentThrottling) {
-      this.line(chalk.blackBright('[' + currentThrottlingDelay + 'ms]'));
-    }
+      this.line(chalk.bold.white(`${req.method} ${req.path}`));
+      if (currentThrottling) {
+        this.line(chalk.blackBright('[' + currentThrottlingDelay + 'ms]'));
+      }
 
-    next();
+      next();
+    };
   }
 
   /**

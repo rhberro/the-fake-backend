@@ -1,4 +1,4 @@
-import { Method, Search, Response, Request } from '../interfaces';
+import { Search, Middleware } from '../interfaces';
 
 function filterProperty(
   query: any,
@@ -13,38 +13,35 @@ function filterProperty(
 }
 
 function filterContent(search: Search, query: any, item: any) {
-  const filterPropertyBinded = filterProperty.bind(
-    null,
-    query,
-    item,
-    search.parameter
+  const { parameter, properties } = search;
+
+  return properties.find((property) =>
+    filterProperty(query, item, parameter, property)
   );
-  return search.properties.filter(filterPropertyBinded).length;
+}
+
+function createSearchableResponse(
+  routeSearch: Search,
+  query: any,
+  response: any[]
+) {
+  return response.filter((item) => filterContent(routeSearch, query, item));
 }
 
 /**
- * Filters the content using the search properties and returns a filtered content.
- *
- * @param req The request object
- * @param res The response object
- * @param content The content
- * @param method The route method
+ * Create a middleware that filters the content using the search properties.
  */
-export default function createSearchableResponse(
-  req: Request,
-  res: Response,
-  content: any[],
-  method: Method
-) {
-  const { search, search: { parameter = 'search' } = {} } = method;
-  const { query } = req;
+export default function createSearchableMiddleware(): Middleware {
+  return (req, res, next) => {
+    const { query } = req;
+    const { response, routeMethod } = res.locals;
+    const { search, search: { parameter = 'search' } = {} } = routeMethod;
+    const hasParameterOnQuery = query[parameter];
 
-  const hasParameterOnQuery = query[parameter];
+    if (search && hasParameterOnQuery) {
+      res.locals.response = createSearchableResponse(search, query, response);
+    }
 
-  if (search && hasParameterOnQuery) {
-    const bindedFilterContent = filterContent.bind(null, search, query);
-    return content.filter(bindedFilterContent);
-  }
-
-  return content;
+    next();
+  };
 }

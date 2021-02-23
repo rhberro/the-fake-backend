@@ -1,10 +1,19 @@
-import { propEq } from 'ramda';
+import { prop, propEq } from 'ramda';
 import { MethodType } from './enums';
+import { readFixtureSync } from './files';
 import htmlSummary from './html-summary';
-import { Route, Method, MethodOverride } from './interfaces';
+import {
+  Route,
+  Method,
+  MethodOverride,
+  Request,
+  ServerOptions,
+  Middleware,
+} from './interfaces';
+import { MethodAttribute } from './types';
 
 export function getRoutesPaths(routes: Route[]) {
-  return routes.map(({ path }) => path);
+  return routes.map(prop('path'));
 }
 
 export function formatMethodType(methodType: string) {
@@ -12,7 +21,7 @@ export function formatMethodType(methodType: string) {
 }
 
 export function findRouteByUrl(routes: Route[], url: string): Route {
-  const route = routes.find(({ path }) => path === url);
+  const route = routes.find(propEq('path', url));
 
   if (route) {
     return route;
@@ -21,14 +30,28 @@ export function findRouteByUrl(routes: Route[], url: string): Route {
   throw new Error(`Route with url "${url}" not found`);
 }
 
-export function findRouteMethodByType(methods: Method[], type: string) {
-  const method = methods.find((m) => m.type === type);
+export function findRouteMethodByType(methods: Method[], methodType: string) {
+  const method = methods.find(propEq('type', methodType.toLowerCase()));
 
   if (method) {
     return method;
   }
 
-  throw new Error(`Method with type "${type}" not found`);
+  throw new Error(`Method with type "${methodType}" not found`);
+}
+
+/**
+ * Resolve the attribute by applying request argument if it is a function.
+ *
+ * @param attribute The attribute
+ * @param req The request object
+ * @return The resolved attribute
+ */
+export function resolveMethodAttribute(
+  attribute: MethodAttribute<any>,
+  req: Request
+) {
+  return typeof attribute === 'function' ? attribute(req) : attribute;
 }
 
 function cloneOverrides(overrides: MethodOverride[]) {
@@ -83,6 +106,27 @@ export class RouteManager {
   }
 
   /**
+   * Find a route by path.
+   *
+   * @param path Route path
+   */
+  private findRouteByPath(path: string) {
+    return findRouteByUrl(this.routes, path);
+  }
+
+  /**
+   * Find a route by path and method.
+   *
+   * @param path Route path
+   * @param method Route method
+   */
+  private findRouteMethod(path: string, method: string) {
+    const route = this.findRouteByPath(path);
+
+    return findRouteMethodByType(route.methods, method);
+  }
+
+  /**
    * Get all routes.
    *
    * @return An array containing all the routes
@@ -133,9 +177,39 @@ export class RouteManager {
   }
 
   /**
-   * Find a route by path.
+   * Create a middleware that resolves the route given a request.
+   *
+   * @param options Server options
    */
-  findRouteByPath(path: string) {
-    return this.routes.find(propEq('path', path));
+  createResolvedRouteMiddleware(options: ServerOptions): Middleware {
+    return (req, res, next) => {
+      const { path, method } = req;
+      const routePath = path.replace(options.basePath || '', '');
+      const route = this.findRouteByPath(routePath);
+      const routeMethod = this.findRouteMethod(routePath, method);
+
+      res.locals.route = route;
+      res.locals.routeMethod = routeMethod;
+
+      next();
+    };
+  }
+
+  /**
+   * Create a middleware that resolves the route method response.
+   */
+  createRouteMethodResponseMiddleware(): Middleware {
+    return (req, res, next) => {
+      const { route, routeMethod } = res.locals;
+      const data = resolveMethodAttribute(routeMethod.data, req);
+      const file = resolveMethodAttribute(routeMethod.file, req);
+      const content =
+        data ||
+        readFixtureSync(file || route.path, route.path, routeMethod.scenario);
+
+      res.locals.response = content;
+
+      next();
+    };
   }
 }

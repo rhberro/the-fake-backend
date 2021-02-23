@@ -25,7 +25,7 @@ export class InputManager {
   private onKeyPress(chunk: any, key: readline.Key): void {
     this.listeners
       .filter((listener) => this.filterInputListener(key, listener))
-      .map(this.executeEvent);
+      .forEach(this.executeEvent);
   }
 
   private isPromise(obj: any) {

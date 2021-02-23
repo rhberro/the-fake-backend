@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
 import fuzzy from 'fuzzy';
+import { prop } from 'ramda';
 
 inquirer.registerPrompt(
   'autocomplete',
@@ -7,7 +8,7 @@ inquirer.registerPrompt(
 );
 
 const filterByPredicate = (list: string[]) => (predicate: string = '') =>
-  fuzzy.filter(predicate, list).map(({ original }) => original);
+  fuzzy.filter(predicate, list).map(prop('original'));
 
 /**
  * Prompts a route path.

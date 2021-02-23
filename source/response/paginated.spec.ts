@@ -1,18 +1,20 @@
-import createPaginatedResponse from './paginated';
-import { Method, ServerOptions } from '../interfaces';
+import { Method, Response, ServerOptions } from '../interfaces';
 import { MethodType } from '../enums';
 import { getMockReq, getMockRes } from '@jest-mock/express';
+import createPaginatedMiddleware from './paginated';
 
 describe('source/response/paginated.ts', () => {
-  describe('createPaginatedResponse', () => {
+  describe('createPaginatedMiddleware', () => {
     const content = ['Dog', 'Doogo', 'Dogger', 'Doggernaut', 'Dogging'];
-    const { res } = getMockRes();
+    const next = jest.fn();
 
     describe('when server has default pagination options', () => {
       const serverOptions: ServerOptions = {
         proxies: [],
         throttlings: [],
       };
+
+      const middleware = createPaginatedMiddleware(serverOptions);
 
       describe('when method uses default pagination options', () => {
         const method: Method = {
@@ -22,62 +24,62 @@ describe('source/response/paginated.ts', () => {
 
         it('creates a paginated response object with data and metadata', () => {
           const req = getMockReq();
-          const response: any = createPaginatedResponse(
-            req,
-            res,
-            content,
-            method,
-            serverOptions
-          );
+          const res = getMockRes().res as Response;
+          res.locals = {
+            route: { path: '/users', methods: [method] },
+            routeMethod: method,
+            response: content,
+          };
 
-          expect(response).toBeInstanceOf(Object);
+          middleware(req, res, next);
+          expect(res.locals.response).toBeInstanceOf(Object);
         });
 
         describe('when using page/size query parameters', () => {
           const req = getMockReq({ query: { page: '0', size: '2' } });
+          const res = getMockRes().res as Response;
+          res.locals = {
+            route: { path: '/users', methods: [method] },
+            routeMethod: method,
+            response: content,
+          };
 
           it('creates a paginated response object with data and metadata', () => {
-            const response: any = createPaginatedResponse(
-              req,
-              res,
-              content,
-              method,
-              serverOptions
-            );
+            middleware(req, res, next);
 
-            expect(response.data).toEqual(['Dog', 'Doogo']);
+            expect(res.locals.response.data).toEqual(['Dog', 'Doogo']);
           });
         });
 
         describe('when using offset/size query parameters', () => {
           const req = getMockReq({ query: { offset: '2', size: '2' } });
+          const res = getMockRes().res as Response;
+          res.locals = {
+            route: { path: '/users', methods: [method] },
+            routeMethod: method,
+            response: content,
+          };
 
           it('slices from offset', () => {
-            const response: any = createPaginatedResponse(
-              req,
-              res,
-              content,
-              method,
-              serverOptions
-            );
+            middleware(req, res, next);
 
-            expect(response.data).toEqual(['Dogger', 'Doggernaut']);
+            expect(res.locals.response.data).toEqual(['Dogger', 'Doggernaut']);
           });
         });
 
         describe('when size query parameter is missing', () => {
           const req = getMockReq({ query: { offset: '0' } });
+          const res = getMockRes().res as Response;
+          res.locals = {
+            route: { path: '/users', methods: [method] },
+            routeMethod: method,
+            response: content,
+          };
 
           it('uses the default page size', () => {
-            const response: any = createPaginatedResponse(
-              req,
-              res,
-              content,
-              method,
-              serverOptions
-            );
+            middleware(req, res, next);
 
-            expect(response.data).toHaveLength(5);
+            expect(res.locals.response.data).toHaveLength(5);
           });
         });
       });
@@ -92,15 +94,15 @@ describe('source/response/paginated.ts', () => {
 
         it('returns the response data and sends metadata to headers', () => {
           const req = getMockReq({ query: { page: '0', size: '2' } });
-          const response = createPaginatedResponse(
-            req,
-            res,
-            content,
-            method,
-            serverOptions
-          );
+          const res = getMockRes().res as Response;
+          res.locals = {
+            route: { path: '/users', methods: [method] },
+            routeMethod: method,
+            response: content,
+          };
 
-          expect(response).toEqual(['Dog', 'Doogo']);
+          middleware(req, res, next);
+          expect(res.locals.response).toEqual(['Dog', 'Doogo']);
           expect(res.set).toHaveBeenCalled();
         });
       });

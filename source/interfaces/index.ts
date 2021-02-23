@@ -2,6 +2,7 @@ export { default as InputListener } from './InputListener';
 export { default as Method } from './Method';
 export { default as MethodOverride } from './MethodOverride';
 export { default as MethodProperties } from './MethodProperties';
+export { default as Middleware } from './Middleware';
 export { default as Override } from './Override';
 export { default as Pagination } from './Pagination';
 export { default as PaginationProperties } from './PaginationProperties';

@@ -1,6 +1,17 @@
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
+import {
+  both,
+  complement,
+  compose,
+  equals,
+  not,
+  pathSatisfies,
+  prop,
+  propEq,
+  propSatisfies,
+} from 'ramda';
 
-import { Proxy, ProxyProperties, Route } from './interfaces';
+import { Middleware, Proxy, ProxyProperties, Route } from './interfaces';
 import { promptRoutePath, promptProxy } from './prompts';
 import { getRoutesPaths, findRouteByUrl, RouteManager } from './routes';
 
@@ -54,7 +65,7 @@ export class ProxyManager {
    * Get all proxy names.
    */
   private getProxyNames() {
-    return this.proxies.map((proxy) => proxy.name);
+    return this.proxies.map(prop('name'));
   }
 
   /**
@@ -70,7 +81,23 @@ export class ProxyManager {
    * @param name Name
    */
   private findByName(name: string) {
-    return this.proxies.find((proxy) => proxy.name === name);
+    return this.proxies.find(propEq('name', name));
+  }
+
+  /**
+   * Resolve the current proxy for a given route.
+   *
+   * @param route The route
+   * @return Resolved proxy
+   */
+  private resolveRouteProxy(route: Route): RequestHandler | undefined {
+    const current = this.getCurrent();
+
+    if (route.proxy) {
+      return route.proxy.proxy;
+    }
+
+    return current?.proxy;
   }
 
   /**
@@ -106,7 +133,10 @@ export class ProxyManager {
     return this.routeManager
       .getAll()
       .filter(
-        ({ proxy }) => proxy !== undefined && proxy?.name !== current?.name
+        both(
+          propSatisfies(complement(equals(undefined)), 'proxy'),
+          pathSatisfies(complement(equals(current?.name)), ['proxy', 'name'])
+        )
       );
   }
 
@@ -140,18 +170,20 @@ export class ProxyManager {
   }
 
   /**
-   * Resolve the current proxy for a given route.
-   *
-   * @param route The route
-   * @return Resolved proxy
+   * Create a middleware that optionally proxy requests.
    */
-  resolveRouteProxy(route: Route): RequestHandler | undefined {
-    const current = this.getCurrent();
+  createMiddleware(): Middleware {
+    return (req, res, next) => {
+      const { route } = res.locals;
 
-    if (route.proxy !== undefined) {
-      return route.proxy?.proxy;
-    }
+      if (route) {
+        const proxy = this.resolveRouteProxy(route);
+        if (proxy) {
+          return proxy(req, res, next);
+        }
+      }
 
-    return current?.proxy;
+      next();
+    };
   }
 }
