@@ -107,7 +107,7 @@ describe('source/ui.ts', () => {
                 proxy: {
                   name: 'Second',
                   host: 'secondhost.com',
-                  proxy: () => 'proxy',
+                  handler: () => 'proxy',
                 },
               },
             ]);
@@ -125,7 +125,7 @@ describe('source/ui.ts', () => {
               (): Proxy => ({
                 name: 'Second',
                 host: 'secondhost.com',
-                proxy: () => 'proxy',
+                handler: () => 'proxy',
               })
             );
             getOverriddenProxyRoutes.mockImplementation(() => [

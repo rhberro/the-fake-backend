@@ -1,9 +1,5 @@
-import {
-  ServerOptions,
-  Pagination,
-  PaginationProperties,
-  Middleware,
-} from '../interfaces';
+import { ServerOptions, Pagination, PaginationProperties } from '../interfaces';
+import { Middleware } from '../types';
 
 function resolvePaginationProperties(
   routePagination: PaginationProperties | boolean,

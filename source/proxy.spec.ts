@@ -1,12 +1,13 @@
 import { mocked } from 'ts-jest/utils';
 import { getMockReq, getMockRes } from '@jest-mock/express';
 
-import { Middleware, ProxyProperties, Response, Route } from './interfaces';
+import { ProxyProperties, Response, Route } from './interfaces';
 
 import { ProxyManager } from './proxy';
 import { MethodType } from './enums';
 import { promptProxy } from './prompts';
 import { RouteManager } from './routes';
+import { Middleware } from './types';
 
 jest.mock('../source/prompts', () => ({
   promptProxy: jest.fn(),
@@ -45,15 +46,23 @@ describe('source/proxy.ts', () => {
     });
 
     describe('getAll', () => {
-      it('returns the proxies with an additional proxy property', () => {
+      it('returns the proxies with an additional handler property', () => {
         expect(proxyManager.getAll()).toEqual([
-          { name: 'First', host: 'firsthost.com', proxy: expect.any(Function) },
+          {
+            name: 'First',
+            host: 'firsthost.com',
+            handler: expect.any(Function),
+          },
           {
             name: 'Second',
             host: 'secondhost.com',
-            proxy: expect.any(Function),
+            handler: expect.any(Function),
           },
-          { name: 'Third', host: 'thirdhost.com', proxy: expect.any(Function) },
+          {
+            name: 'Third',
+            host: 'thirdhost.com',
+            handler: expect.any(Function),
+          },
         ]);
       });
     });
@@ -68,7 +77,7 @@ describe('source/proxy.ts', () => {
         expect(proxyManager.getCurrent()).toEqual({
           name: 'First',
           host: 'firsthost.com',
-          proxy: expect.any(Function),
+          handler: expect.any(Function),
         });
       });
     });
@@ -82,7 +91,7 @@ describe('source/proxy.ts', () => {
         const proxy = {
           name: 'Second',
           host: 'secondhost.com',
-          proxy: () => 'proxy',
+          handler: () => 'proxy',
         };
 
         routes[0].proxy = proxy;
@@ -130,7 +139,7 @@ describe('source/proxy.ts', () => {
           expect(routes[0].proxy).toEqual({
             name: 'Second',
             host: 'secondhost.com',
-            proxy: expect.any(Function),
+            handler: expect.any(Function),
           });
         });
       });
@@ -148,7 +157,7 @@ describe('source/proxy.ts', () => {
           expect(routes[0].proxy).toEqual({
             name: 'First',
             host: 'firsthost.com',
-            proxy: expect.any(Function),
+            handler: expect.any(Function),
           });
         });
       });

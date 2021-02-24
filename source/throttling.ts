@@ -1,4 +1,5 @@
-import { Method, Middleware, Throttling } from './interfaces';
+import { Method, Throttling } from './interfaces';
+import { Middleware } from './types';
 
 export class ThrottlingManager {
   private currentThrottlingIndex: number | null;

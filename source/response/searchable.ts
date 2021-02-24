@@ -1,4 +1,5 @@
-import { Search, Middleware } from '../interfaces';
+import { Search } from '../interfaces';
+import { Middleware } from '../types';
 
 function filterProperty(
   query: any,

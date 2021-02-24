@@ -1,7 +1,7 @@
-import searchRedact from './searchable';
+import { getMockReq, getMockRes } from '@jest-mock/express';
+
 import { Method, Response } from '../interfaces';
 import { MethodType } from '../enums';
-import { getMockReq, getMockRes } from '@jest-mock/express';
 import createSearchableMiddleware from './searchable';
 
 describe('source/response/searchable.ts', () => {

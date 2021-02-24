@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import readline, { Interface as ReadLine } from 'readline';
 
-import { Middleware } from './interfaces';
+import { Middleware } from './types';
 import { OverrideManager } from './overrides';
 import { ProxyManager } from './proxy';
 import { ThrottlingManager } from './throttling';

@@ -1,7 +1,6 @@
 import cors from 'cors';
-import express, { NextFunction } from 'express';
+import express from 'express';
 
-import { readFixtureSync } from './files';
 import { InputManager } from './input';
 import {
   Method,

@@ -2,18 +2,17 @@ import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
 import {
   both,
   complement,
-  compose,
   equals,
-  not,
   pathSatisfies,
   prop,
   propEq,
   propSatisfies,
 } from 'ramda';
 
-import { Middleware, Proxy, ProxyProperties, Route } from './interfaces';
+import { Proxy, ProxyProperties, Route } from './interfaces';
 import { promptRoutePath, promptProxy } from './prompts';
 import { getRoutesPaths, findRouteByUrl, RouteManager } from './routes';
+import { Middleware } from './types';
 
 const PROXY_DEFAULT_OPTION = 'Local';
 
@@ -25,16 +24,18 @@ const PROXY_DEFAULT_OPTION = 'Local';
  * @return The proxy with the proxy middleware
  */
 function buildProxy(proxy: ProxyProperties, basePath?: string): Proxy {
-  const { appendBasePath, name, host } = proxy;
+  const { appendBasePath, name, host, onProxyReq, onProxyRes } = proxy;
 
   return {
     host,
     name,
-    proxy: createProxyMiddleware({
+    handler: createProxyMiddleware({
       target: host,
       pathRewrite: (path) =>
         appendBasePath ? path : path.replace(basePath || '', ''),
       changeOrigin: true,
+      onProxyReq,
+      onProxyRes,
     }),
   };
 }
@@ -85,19 +86,19 @@ export class ProxyManager {
   }
 
   /**
-   * Resolve the current proxy for a given route.
+   * Resolve the current proxy handler for a given route.
    *
    * @param route The route
-   * @return Resolved proxy
+   * @return Resolved proxy handler
    */
-  private resolveRouteProxy(route: Route): RequestHandler | undefined {
+  private resolveRouteProxyHandler(route: Route): RequestHandler | undefined {
     const current = this.getCurrent();
 
     if (route.proxy) {
-      return route.proxy.proxy;
+      return route.proxy.handler;
     }
 
-    return current?.proxy;
+    return current?.handler;
   }
 
   /**
@@ -176,11 +177,9 @@ export class ProxyManager {
     return (req, res, next) => {
       const { route } = res.locals;
 
-      if (route) {
-        const proxy = this.resolveRouteProxy(route);
-        if (proxy) {
-          return proxy(req, res, next);
-        }
+      const handler = this.resolveRouteProxyHandler(route);
+      if (handler) {
+        return handler(req, res, next);
       }
 
       next();
