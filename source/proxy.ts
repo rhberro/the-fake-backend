@@ -25,7 +25,7 @@ const PROXY_DEFAULT_OPTION = 'Local';
  * @return The proxy with the proxy middleware
  */
 function buildProxy(proxy: ProxyProperties, basePath?: string): Proxy {
-  const { appendBasePath, name, host } = proxy;
+  const { appendBasePath, name, host, onProxyReq } = proxy;
 
   return {
     host,
@@ -35,6 +35,7 @@ function buildProxy(proxy: ProxyProperties, basePath?: string): Proxy {
       pathRewrite: (path) =>
         appendBasePath ? path : path.replace(basePath || '', ''),
       changeOrigin: true,
+      onProxyReq,
     }),
   };
 }
