@@ -82,7 +82,7 @@ describe('source/proxy.ts', () => {
         const proxy = {
           name: 'Second',
           host: 'secondhost.com',
-          proxy: () => 'proxy',
+          handler: () => 'proxy',
         };
 
         routes[0].proxy = proxy;

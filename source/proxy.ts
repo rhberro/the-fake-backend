@@ -30,7 +30,7 @@ function buildProxy(proxy: ProxyProperties, basePath?: string): Proxy {
   return {
     host,
     name,
-    proxy: createProxyMiddleware({
+    handler: createProxyMiddleware({
       target: host,
       pathRewrite: (path) =>
         appendBasePath ? path : path.replace(basePath || '', ''),
@@ -85,19 +85,19 @@ export class ProxyManager {
   }
 
   /**
-   * Resolve the current proxy for a given route.
+   * Resolve the current proxy handler for a given route.
    *
    * @param route The route
-   * @return Resolved proxy
+   * @return Resolved proxy handler
    */
-  private resolveRouteProxy(route: Route): RequestHandler | undefined {
+  private resolveRouteProxyHandler(route: Route): RequestHandler | undefined {
     const current = this.getCurrent();
 
     if (route.proxy) {
-      return route.proxy.proxy;
+      return route.proxy.handler;
     }
 
-    return current?.proxy;
+    return current?.handler;
   }
 
   /**
@@ -176,11 +176,9 @@ export class ProxyManager {
     return (req, res, next) => {
       const { route } = res.locals;
 
-      if (route) {
-        const proxy = this.resolveRouteProxy(route);
-        if (proxy) {
-          return proxy(req, res, next);
-        }
+      const handler = this.resolveRouteProxyHandler(route);
+      if (handler) {
+        return handler(req, res, next);
       }
 
       next();
