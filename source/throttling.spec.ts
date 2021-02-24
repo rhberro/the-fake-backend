@@ -1,9 +1,9 @@
-import { Middleware, Response, Route, Throttling } from './interfaces';
 import { getMockReq, getMockRes } from '@jest-mock/express';
 
+import { Response, Route, Throttling } from './interfaces';
 import { ThrottlingManager } from './throttling';
 import { MethodType } from './enums';
-import { mocked } from 'ts-jest/utils';
+import { Middleware } from './types';
 
 jest.useFakeTimers();
 

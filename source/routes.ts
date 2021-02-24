@@ -8,9 +8,8 @@ import {
   MethodOverride,
   Request,
   ServerOptions,
-  Middleware,
 } from './interfaces';
-import { MethodAttribute } from './types';
+import { MethodAttribute, Middleware } from './types';
 
 export function getRoutesPaths(routes: Route[]) {
   return routes.map(prop('path'));

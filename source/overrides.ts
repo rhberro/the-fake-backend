@@ -1,5 +1,4 @@
 import {
-  both,
   complement,
   either,
   equals,
@@ -10,13 +9,7 @@ import {
   propOr,
   propSatisfies,
 } from 'ramda';
-import {
-  Method,
-  MethodOverride,
-  Route,
-  Override,
-  Middleware,
-} from './interfaces';
+import { Method, MethodOverride, Route, Override } from './interfaces';
 import {
   promptRoutePath,
   promptRouteMethodType,
@@ -29,6 +22,7 @@ import {
   formatMethodType,
   RouteManager,
 } from './routes';
+import { Middleware } from './types';
 
 const OVERRIDE_DEFAULT_OPTION = 'Default';
 

@@ -1,8 +1,9 @@
-import { RouteProperties, Method, Response, Middleware } from './interfaces';
-
-import { findRouteMethodByType, findRouteByUrl, RouteManager } from './routes';
-import { MethodType } from './enums';
 import { getMockReq, getMockRes } from '@jest-mock/express';
+
+import { MethodType } from './enums';
+import { RouteProperties, Method, Response } from './interfaces';
+import { findRouteMethodByType, findRouteByUrl, RouteManager } from './routes';
+import { Middleware } from './types';
 
 describe('source/routes.ts', () => {
   describe('findRouteByUrl', () => {

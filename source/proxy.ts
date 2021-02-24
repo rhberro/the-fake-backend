@@ -9,9 +9,10 @@ import {
   propSatisfies,
 } from 'ramda';
 
-import { Middleware, Proxy, ProxyProperties, Route } from './interfaces';
+import { Proxy, ProxyProperties, Route } from './interfaces';
 import { promptRoutePath, promptProxy } from './prompts';
 import { getRoutesPaths, findRouteByUrl, RouteManager } from './routes';
+import { Middleware } from './types';
 
 const PROXY_DEFAULT_OPTION = 'Local';
 

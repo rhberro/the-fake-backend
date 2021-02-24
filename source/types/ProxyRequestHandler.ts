@@ -1,4 +1,5 @@
 import { ClientRequest } from 'http';
+import { Request, Response } from '../interfaces';
 
 type ProxyRequestHandler = (
   proxyReq: ClientRequest,
