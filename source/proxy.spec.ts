@@ -1,12 +1,13 @@
 import { mocked } from 'ts-jest/utils';
 import { getMockReq, getMockRes } from '@jest-mock/express';
 
-import { Middleware, ProxyProperties, Response, Route } from './interfaces';
+import { ProxyProperties, Response, Route } from './interfaces';
 
 import { ProxyManager } from './proxy';
 import { MethodType } from './enums';
 import { promptProxy } from './prompts';
 import { RouteManager } from './routes';
+import { Middleware } from './types';
 
 jest.mock('../source/prompts', () => ({
   promptProxy: jest.fn(),
