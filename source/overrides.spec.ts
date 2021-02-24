@@ -1,6 +1,7 @@
+import { getMockReq, getMockRes } from '@jest-mock/express';
 import { mocked } from 'ts-jest/utils';
 
-import { RouteProperties } from './interfaces';
+import { Response, RouteProperties } from './interfaces';
 
 import { MethodType } from './enums';
 import {
@@ -10,6 +11,7 @@ import {
 } from './prompts';
 import { OverrideManager } from './overrides';
 import { RouteManager } from './routes';
+import { Middleware } from './types';
 
 jest.mock('../source/prompts');
 
@@ -18,11 +20,24 @@ describe('source/override.ts', () => {
     let overrideManager: OverrideManager;
 
     const routes: RouteProperties[] = [
-      { path: '/users', methods: [{ type: MethodType.GET }] },
+      {
+        path: '/users',
+        methods: [
+          {
+            type: MethodType.GET,
+            data: 'User',
+            overrideContent: (_, content) => `Happy ${content}`,
+          },
+        ],
+      },
       {
         path: '/cats',
         methods: [
-          { type: MethodType.GET, overrides: [{ name: 'Cat', data: 'Cat' }] },
+          {
+            type: MethodType.GET,
+            data: 'Original cat',
+            overrides: [{ name: 'Cat', data: 'Cat' }],
+          },
         ],
       },
       {
@@ -101,6 +116,7 @@ describe('source/override.ts', () => {
               methods: [
                 {
                   type: MethodType.GET,
+                  data: 'Original cat',
                   overrides: [{ name: 'Cat', data: 'Cat' }],
                 },
               ],
@@ -226,6 +242,118 @@ describe('source/override.ts', () => {
               ?.methods?.find(({ type }) => type === MethodType.GET)
               ?.overrides?.find(({ name }) => name === 'Doggernaut')?.selected
           ).toBe(true);
+        });
+      });
+    });
+
+    describe('createOverriddenRouteMethodMiddleware', () => {
+      let middleware: Middleware;
+
+      beforeEach(() => {
+        middleware = overrideManager.createOverriddenRouteMethodMiddleware();
+      });
+
+      describe("when the route doesn't have a selected override", () => {
+        const req = getMockReq();
+        const res = getMockRes().res as Response;
+        const next = jest.fn();
+
+        beforeEach(() => {
+          const route = routes[1];
+          const routeMethod = route.methods[0];
+
+          req.path = route.path;
+          req.method = routeMethod.type;
+          res.locals = {
+            route,
+            routeMethod,
+            response: routeMethod.data,
+          };
+        });
+
+        it('preserves the original route method', () => {
+          middleware(req, res, next);
+          expect(res.locals.routeMethod.data).toEqual('Original cat');
+        });
+      });
+
+      describe('when the route has a selected override', () => {
+        const req = getMockReq();
+        const res = getMockRes().res as Response;
+        const next = jest.fn();
+
+        beforeEach(() => {
+          const route = routes[2];
+          const routeMethod = route.methods[1];
+
+          req.path = route.path;
+          req.method = routeMethod.type;
+          res.locals = {
+            route,
+            routeMethod,
+            response: routeMethod.data,
+          };
+        });
+
+        it('overrides res.locals.routeMethod', () => {
+          middleware(req, res, next);
+          expect(res.locals.routeMethod.code).toEqual(400);
+        });
+      });
+    });
+
+    describe('createOverriddenRouteMethodMiddleware', () => {
+      let middleware: Middleware;
+
+      beforeEach(() => {
+        middleware = overrideManager.createOverriddenContentMiddleware();
+      });
+
+      describe("when the route doesn't have overrideContent", () => {
+        const req = getMockReq();
+        const res = getMockRes().res as Response;
+        const next = jest.fn();
+
+        beforeEach(() => {
+          const route = routes[1];
+          const routeMethod = route.methods[0];
+
+          req.path = route.path;
+          req.method = routeMethod.type;
+          res.locals = {
+            route,
+            routeMethod,
+            response: routeMethod.data,
+          };
+        });
+
+        it('keeps original res.locals.response', () => {
+          middleware(req, res, next);
+          expect(res.locals.response).toEqual('Original cat');
+        });
+      });
+
+      describe('when the route has overrideContent', () => {
+        const req = getMockReq();
+        const res = getMockRes().res as Response;
+        const next = jest.fn();
+
+        beforeEach(() => {
+          const route = routes[0];
+          const routeMethod = route.methods[0];
+
+          req.path = route.path;
+          req.method = routeMethod.type;
+          res.locals = {
+            route,
+            routeMethod,
+            response: routeMethod.data,
+          };
+        });
+
+        it('overrides res.locals.response', () => {
+          middleware(req, res, next);
+          expect(res.locals.response).toEqual('Happy User');
         });
       });
     });
