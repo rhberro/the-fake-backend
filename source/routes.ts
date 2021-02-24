@@ -185,11 +185,16 @@ export class RouteManager {
     return (req, res, next) => {
       const { path, method } = req;
       const routePath = path.replace(options.basePath || '', '');
-      const route = this.findRouteByPath(routePath);
-      const routeMethod = this.findRouteMethod(routePath, method);
 
-      res.locals.route = route;
-      res.locals.routeMethod = routeMethod;
+      try {
+        const route = this.findRouteByPath(routePath);
+        const routeMethod = this.findRouteMethod(routePath, method);
+
+        res.locals.route = route;
+        res.locals.routeMethod = routeMethod;
+      } catch (e) {
+        return res.status(404).send('Not found');
+      }
 
       next();
     };
