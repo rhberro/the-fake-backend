@@ -128,11 +128,13 @@ The script above generates the following two endpoints.
 
 This property allows to proxy requests.
 
-| Property                 | Required | Default | Description                                     |
-| ------------------------ | -------- | ------- | ----------------------------------------------- |
-| proxies[].name           | yes      |         | The proxy name                                  |
-| proxies[].host           | yes      |         | The proxy host (e.g.: `http://api.dev.com/api`) |
-| proxies[].appendBasePath | No       | `false` | Whether `basePath` should be appended in target |
+| Property                 | Required | Default | Description                                                                                                                         |
+| ------------------------ | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| proxies[].name           | yes      |         | The proxy name                                                                                                                      |
+| proxies[].host           | yes      |         | The proxy host (e.g.: `http://api.dev.com/api`)                                                                                     |
+| proxies[].appendBasePath | No       | `false` | Whether `basePath` should be appended in target                                                                                     |
+| proxies[].onProxyReq     | No       |         | A proxy request handler to forward to [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware#http-proxy-events)  |
+| proxies[].onProxyRes     | No       |         | A proxy response handler to forward to [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware#http-proxy-events) |
 
 #### Throttlings
 
