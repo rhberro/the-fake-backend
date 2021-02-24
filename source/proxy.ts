@@ -2,9 +2,7 @@ import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
 import {
   both,
   complement,
-  compose,
   equals,
-  not,
   pathSatisfies,
   prop,
   propEq,
