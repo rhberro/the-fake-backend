@@ -45,15 +45,23 @@ describe('source/proxy.ts', () => {
     });
 
     describe('getAll', () => {
-      it('returns the proxies with an additional proxy property', () => {
+      it('returns the proxies with an additional handler property', () => {
         expect(proxyManager.getAll()).toEqual([
-          { name: 'First', host: 'firsthost.com', proxy: expect.any(Function) },
+          {
+            name: 'First',
+            host: 'firsthost.com',
+            handler: expect.any(Function),
+          },
           {
             name: 'Second',
             host: 'secondhost.com',
-            proxy: expect.any(Function),
+            handler: expect.any(Function),
           },
-          { name: 'Third', host: 'thirdhost.com', proxy: expect.any(Function) },
+          {
+            name: 'Third',
+            host: 'thirdhost.com',
+            handler: expect.any(Function),
+          },
         ]);
       });
     });
@@ -68,7 +76,7 @@ describe('source/proxy.ts', () => {
         expect(proxyManager.getCurrent()).toEqual({
           name: 'First',
           host: 'firsthost.com',
-          proxy: expect.any(Function),
+          handler: expect.any(Function),
         });
       });
     });
@@ -130,7 +138,7 @@ describe('source/proxy.ts', () => {
           expect(routes[0].proxy).toEqual({
             name: 'Second',
             host: 'secondhost.com',
-            proxy: expect.any(Function),
+            handler: expect.any(Function),
           });
         });
       });
@@ -148,7 +156,7 @@ describe('source/proxy.ts', () => {
           expect(routes[0].proxy).toEqual({
             name: 'First',
             host: 'firsthost.com',
-            proxy: expect.any(Function),
+            handler: expect.any(Function),
           });
         });
       });
