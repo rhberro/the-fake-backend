@@ -10,15 +10,23 @@ describe('source/routes.ts', () => {
     const routes: RouteProperties[] = [
       { path: '/users', methods: [{ type: MethodType.GET }] },
       { path: '/dogs', methods: [{ type: MethodType.GET }] },
+      { path: '/cats/:id', methods: [{ type: MethodType.GET }] },
     ];
 
     it('throws an error if path is not present', () => {
       expect(() => findRouteByUrl(routes, '/cats')).toThrowError();
     });
 
-    it('returns found routes with the given path', () => {
+    it('returns found route with the given path', () => {
       expect(findRouteByUrl(routes, '/dogs')).toEqual({
         path: '/dogs',
+        methods: [{ type: MethodType.GET }],
+      });
+    });
+
+    it('returns found parameterized route with the given path', () => {
+      expect(findRouteByUrl(routes, '/cats/123')).toEqual({
+        path: '/cats/:id',
         methods: [{ type: MethodType.GET }],
       });
     });
