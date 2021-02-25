@@ -1,4 +1,5 @@
 import { prop, propEq } from 'ramda';
+import { match } from 'path-to-regexp';
 import { MethodType } from './enums';
 import { readFixtureSync } from './files';
 import htmlSummary from './html-summary';
@@ -20,7 +21,11 @@ export function formatMethodType(methodType: string) {
 }
 
 export function findRouteByUrl(routes: Route[], url: string): Route {
-  const route = routes.find(propEq('path', url));
+  const route = routes.find(({ path }) => {
+    const routeMatch = match(path);
+
+    return routeMatch(url);
+  });
 
   if (route) {
     return route;
