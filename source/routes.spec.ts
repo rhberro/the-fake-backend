@@ -164,7 +164,10 @@ describe('source/routes.ts', () => {
             response: routes[0].methods[0].data,
           };
 
-          middleware = routeManager.createRouteMethodResponseMiddleware();
+          middleware = routeManager.createRouteMethodResponseMiddleware({
+            proxies: [],
+            throttlings: [],
+          });
         });
 
         it('resolves the response of a given request', () => {

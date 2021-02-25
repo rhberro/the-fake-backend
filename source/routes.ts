@@ -97,6 +97,10 @@ function mergeRoutesWithGlobalOverrides(
   return routes;
 }
 
+function normalizeReqPath(options: ServerOptions, req: Request) {
+  return req.path.replace(options.basePath || '', '');
+}
+
 export class RouteManager {
   private routes: Route[];
   private globalOverrides?: MethodOverride[];
@@ -187,12 +191,12 @@ export class RouteManager {
    */
   createResolvedRouteMiddleware(options: ServerOptions): Middleware {
     return (req, res, next) => {
-      const { path, method } = req;
-      const routePath = path.replace(options.basePath || '', '');
+      const { method } = req;
+      const normalizedReqPath = normalizeReqPath(options, req);
 
       try {
-        const route = this.findRouteByPath(routePath);
-        const routeMethod = this.findRouteMethod(routePath, method);
+        const route = this.findRouteByPath(normalizedReqPath);
+        const routeMethod = findRouteMethodByType(route.methods, method);
 
         res.locals.route = route;
         res.locals.routeMethod = routeMethod;
@@ -207,14 +211,19 @@ export class RouteManager {
   /**
    * Create a middleware that resolves the route method response.
    */
-  createRouteMethodResponseMiddleware(): Middleware {
+  createRouteMethodResponseMiddleware(options: ServerOptions): Middleware {
     return (req, res, next) => {
       const { route, routeMethod } = res.locals;
       const data = resolveMethodAttribute(routeMethod.data, req);
       const file = resolveMethodAttribute(routeMethod.file, req);
+      const normalizedReqPath = normalizeReqPath(options, req);
       const content =
         data ||
-        readFixtureSync(file || route.path, route.path, routeMethod.scenario);
+        readFixtureSync(
+          file || normalizedReqPath,
+          route.path,
+          routeMethod.scenario
+        );
 
       res.locals.response = content;
 

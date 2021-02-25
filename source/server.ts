@@ -55,7 +55,7 @@ export function createServer(options = {} as ServerOptions): Server {
     routeManager.createResolvedRouteMiddleware(options),
     proxyManager.createMiddleware(),
     overrideManager.createOverriddenRouteMethodMiddleware(),
-    routeManager.createRouteMethodResponseMiddleware(),
+    routeManager.createRouteMethodResponseMiddleware(options),
     createSearchableMiddleware(),
     createPaginatedMiddleware(options),
     overrideManager.createOverriddenContentMiddleware(),
