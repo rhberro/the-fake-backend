@@ -12,8 +12,8 @@ import {
 } from './interfaces';
 import { OverrideManager } from './overrides';
 import { ProxyManager } from './proxy';
-import createPaginatedMiddleware from './response/paginated';
-import createSearchableMiddleware from './response/searchable';
+import createPaginatedRouteMiddleware from './response/paginated';
+import createSearchableRouteMiddleware from './response/searchable';
 import { resolveMethodAttribute, RouteManager } from './routes';
 import { ThrottlingManager } from './throttling';
 import { UIManager } from './ui';
@@ -55,10 +55,6 @@ export function createServer(options = {} as ServerOptions): Server {
     routeManager.createResolvedRouteMiddleware(options),
     proxyManager.createMiddleware(),
     overrideManager.createOverriddenRouteMethodMiddleware(),
-    routeManager.createRouteMethodResponseMiddleware(options),
-    createSearchableMiddleware(),
-    createPaginatedMiddleware(options),
-    overrideManager.createOverriddenContentMiddleware(),
     throttlingManager.createMiddleware()
   );
 
@@ -68,7 +64,7 @@ export function createServer(options = {} as ServerOptions): Server {
    * @param req The request object
    * @param res The response object
    */
-  function createMethodResponse(req: Request, res: Response): void {
+  function createRouteMethodResponse(req: Request, res: Response): void {
     const { response, routeMethod } = res.locals;
     const { code = 200 } = routeMethod;
 
@@ -93,7 +89,14 @@ export function createServer(options = {} as ServerOptions): Server {
     const { path } = route;
     const { type } = method;
 
-    expressServer[type](join(basePath, path), createMethodResponse);
+    expressServer[type](
+      join(basePath, path),
+      routeManager.createRouteMethodResponseMiddleware(options),
+      createSearchableRouteMiddleware(),
+      createPaginatedRouteMiddleware(options),
+      overrideManager.createOverriddenRouteContentMiddleware(),
+      createRouteMethodResponse
+    );
   }
 
   /**

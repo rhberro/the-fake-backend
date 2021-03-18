@@ -32,7 +32,7 @@ function createSearchableResponse(
 /**
  * Create a middleware that filters the content using the search properties.
  */
-export default function createSearchableMiddleware(): Middleware {
+export default function createSearchableRouteMiddleware(): Middleware {
   return (req, res, next) => {
     const { query } = req;
     const { response, routeMethod } = res.locals;
