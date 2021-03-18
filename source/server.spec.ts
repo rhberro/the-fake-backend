@@ -1,7 +1,6 @@
 import { createServer } from './server';
 import { Server, RouteProperties, Route } from './interfaces';
 import { MethodType } from './enums';
-import { getMockRes } from '@jest-mock/express';
 
 jest.mock('../source/ui', () => ({
   UIManager: () => ({
@@ -38,19 +37,7 @@ jest.mock('../source/input', () => ({
 }));
 
 const expressServer = {
-  get: jest.fn((path: string, response: Function) =>
-    response(
-      { type: 'get' },
-      {
-        ...getMockRes().res,
-        locals: {
-          route: { path, methods: [] },
-          routeMethod: { type: MethodType.GET },
-          response: '',
-        },
-      }
-    )
-  ),
+  get: jest.fn(),
   use: jest.fn(),
   listen: jest.fn(),
 };

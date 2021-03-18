@@ -74,7 +74,7 @@ function createPaginatedResponse(
  * @param options The server options
  * @return The paginated content
  */
-export default function createPaginatedMiddleware(
+export default function createPaginatedRouteMiddleware(
   options: ServerOptions
 ): Middleware {
   return (req, res, next) => {

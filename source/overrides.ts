@@ -153,7 +153,7 @@ export class OverrideManager {
   /**
    * Create a middleware that applies a given route override content function.
    */
-  createOverriddenContentMiddleware(): Middleware {
+  createOverriddenRouteContentMiddleware(): Middleware {
     return (req, res, next) => {
       const { response, routeMethod } = res.locals;
       const { overrideContent } = routeMethod;

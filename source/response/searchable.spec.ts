@@ -2,7 +2,7 @@ import { getMockReq, getMockRes } from '@jest-mock/express';
 
 import { Method, Response } from '../interfaces';
 import { MethodType } from '../enums';
-import createSearchableMiddleware from './searchable';
+import createSearchableRouteMiddleware from './searchable';
 
 describe('source/response/searchable.ts', () => {
   describe('createSearchableMiddleware', () => {
@@ -14,7 +14,7 @@ describe('source/response/searchable.ts', () => {
       { name: 'Dogging', age: 5 },
     ];
     const res = getMockRes().res as Response;
-    const middleware = createSearchableMiddleware();
+    const middleware = createSearchableRouteMiddleware();
     const next = jest.fn();
 
     describe('when method is searchable', () => {

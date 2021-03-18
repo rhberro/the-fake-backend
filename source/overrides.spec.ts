@@ -306,7 +306,7 @@ describe('source/override.ts', () => {
       let middleware: Middleware;
 
       beforeEach(() => {
-        middleware = overrideManager.createOverriddenContentMiddleware();
+        middleware = overrideManager.createOverriddenRouteContentMiddleware();
       });
 
       describe("when the route doesn't have overrideContent", () => {

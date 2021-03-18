@@ -1,7 +1,7 @@
 import { Method, Response, ServerOptions } from '../interfaces';
 import { MethodType } from '../enums';
 import { getMockReq, getMockRes } from '@jest-mock/express';
-import createPaginatedMiddleware from './paginated';
+import createPaginatedRouteMiddleware from './paginated';
 
 describe('source/response/paginated.ts', () => {
   describe('createPaginatedMiddleware', () => {
@@ -14,7 +14,7 @@ describe('source/response/paginated.ts', () => {
         throttlings: [],
       };
 
-      const middleware = createPaginatedMiddleware(serverOptions);
+      const middleware = createPaginatedRouteMiddleware(serverOptions);
 
       describe('when method uses default pagination options', () => {
         const method: Method = {
