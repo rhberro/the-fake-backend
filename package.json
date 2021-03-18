@@ -5,6 +5,9 @@
   "license": "ISC",
   "main": "build/index.js",
   "types": "build/index.d.ts",
+  "files": [
+    "build"
+  ],
   "engines": {
     "node": ">=12.14.1",
     "npm": ">=6.13.4"
