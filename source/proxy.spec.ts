@@ -176,14 +176,14 @@ describe('source/proxy.ts', () => {
       });
     });
 
-    describe('createMiddleware', () => {
+    describe('createRouteMiddleware', () => {
       const mockedRequest = getMockReq();
       const mockedResponse = getMockRes().res as Response;
       const mockedNext = jest.fn();
       let middleware: Middleware;
 
       beforeEach(() => {
-        middleware = proxyManager.createMiddleware();
+        middleware = proxyManager.createRouteMiddleware();
       });
 
       it('resolves to the route proxy when route has an active proxy', () => {
@@ -198,14 +198,20 @@ describe('source/proxy.ts', () => {
         middleware(mockedRequest, mockedResponse, mockedNext);
         expect(mockedNext).toHaveBeenLastCalledWith(secondProxy.host);
       });
+    });
+
+    describe('createGlobalMiddleware', () => {
+      const mockedRequest = getMockReq();
+      const mockedResponse = getMockRes().res as Response;
+      const mockedNext = jest.fn();
+      let middleware: Middleware;
+
+      beforeEach(() => {
+        middleware = proxyManager.createGlobalMiddleware();
+      });
 
       it('resolves to the server proxy when server has an active proxy', () => {
         proxyManager.toggleCurrent();
-        mockedResponse.locals = {
-          route: routes[1],
-          routeMethod: routes[1].methods[0],
-          response: undefined,
-        };
 
         middleware(mockedRequest, mockedResponse, mockedNext);
         expect(mockedNext).toHaveBeenLastCalledWith(proxies[0].host);
