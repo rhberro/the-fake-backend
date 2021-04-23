@@ -92,11 +92,17 @@ export class ProxyManager {
    * @return Resolved proxy handler
    */
   private resolveRouteProxyHandler(route: Route): RequestHandler | undefined {
-    const current = this.getCurrent();
+    return route.proxy?.handler;
+  }
 
-    if (route.proxy) {
-      return route.proxy.handler;
-    }
+  /**
+   * Resolve the current global proxy handler.
+   *
+   * @param route The route
+   * @return Resolved proxy handler
+   */
+  private resolveGlobalProxyHandler(): RequestHandler | undefined {
+    const current = this.getCurrent();
 
     return current?.handler;
   }
@@ -171,13 +177,27 @@ export class ProxyManager {
   }
 
   /**
-   * Create a middleware that optionally proxy requests.
+   * Create a middleware that optionally proxy route requests.
    */
-  createMiddleware(): Middleware {
+  createRouteMiddleware(): Middleware {
     return (req, res, next) => {
       const { route } = res.locals;
 
       const handler = this.resolveRouteProxyHandler(route);
+      if (handler) {
+        return handler(req, res, next);
+      }
+
+      next();
+    };
+  }
+
+  /**
+   * Create a middleware that optionally proxy requests globally.
+   */
+  createGlobalMiddleware(): Middleware {
+    return (req, res, next) => {
+      const handler = this.resolveGlobalProxyHandler();
       if (handler) {
         return handler(req, res, next);
       }
