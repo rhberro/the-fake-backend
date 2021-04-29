@@ -30,6 +30,7 @@ function buildProxy(proxy: ProxyProperties, basePath?: string): Proxy {
     host,
     name,
     handler: createProxyMiddleware({
+      ...proxy,
       target: host,
       pathRewrite: (path) =>
         appendBasePath ? path : path.replace(basePath || '', ''),
