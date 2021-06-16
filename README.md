@@ -28,6 +28,9 @@ Build a fake backend by providing the content of files or JavaScript objects thr
   - [**Searching**](#searching)
   - [**Paginating**](#paginating)
   - [**Dynamic params requests**](#dynamic-params-requests)
+- [**Contributing**](#contributing)
+  - [**Setup library**](#setup-library)
+  - [**Example application**](#example-application)
 
 ## Installing
 
@@ -526,3 +529,22 @@ Given a matching HTTP request, e.g. `http://localhost:8080/dogs/3/details`, the 
 2. `data/dogs/:id/details.json`
 
 If the request has multiple dynamic params, the precedence is the same, searching the fullly specific fixture, and the fully generic one otherwise.
+
+## Contributing
+
+### Setup library
+
+1. Clone this repository
+2. Run `npm install` to install dependencies
+3. Run `npm start` to start rollup in watch mode
+4. Have fun!
+
+### Example application
+
+This repository already have an example application that already install last built version from `the-fake-backend` before run.
+
+To start this application:
+
+1. Go to `example` folder
+2. Run `npm install` to install dependencies
+3. Run `npm start` to start example application

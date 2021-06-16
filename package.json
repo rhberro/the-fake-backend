@@ -37,6 +37,7 @@
     "format:staged": "pretty-quick --staged",
     "prepare": "rollup --config",
     "build": "rollup --config",
+    "start": "rollup --config --watch",
     "test": "jest --runInBand",
     "test:coverage": "jest --runInBand --coverage",
     "semantic-release": "semantic-release"
