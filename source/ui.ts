@@ -6,6 +6,7 @@ import { OverrideManager } from './overrides';
 import { ProxyManager } from './proxy';
 import { ThrottlingManager } from './throttling';
 import { formatMethodType } from './routes';
+import { FileStorage } from './storage';
 
 function formatEndpoint(routePath: string, methodType: string) {
   return `${formatMethodType(methodType)} ${routePath}`;
@@ -13,9 +14,6 @@ function formatEndpoint(routePath: string, methodType: string) {
 
 export class UIManager {
   private display: ReadLine;
-  private proxyManager: ProxyManager;
-  private overrideManager: OverrideManager;
-  private throttlingManager: ThrottlingManager;
 
   /**
    * Write a text to the user screen.
@@ -131,6 +129,15 @@ export class UIManager {
       `- ${chalk.bold.white('p')} to toggle the connection to an endpoint`
     );
     this.paragraph(`- ${chalk.bold.white('q')} to stop and quit the service`);
+
+    if (this.fileStorage?.options.enabled) {
+      this.paragraph(
+        `- ${chalk.bold.white(
+          'x'
+        )} to reset file storage permanently (restart to apply changes)`
+      );
+    }
+
     this.linebreak();
   }
 
@@ -143,9 +150,10 @@ export class UIManager {
    * @return The UI manager
    */
   constructor(
-    proxyManager: ProxyManager,
-    throttlingManager: ThrottlingManager,
-    overrideManager: OverrideManager
+    public proxyManager: ProxyManager,
+    public throttlingManager: ThrottlingManager,
+    public overrideManager: OverrideManager,
+    private fileStorage?: FileStorage<string>
   ) {
     this.display = readline.createInterface({
       input: process.stdin,

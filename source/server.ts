@@ -19,6 +19,7 @@ import { ThrottlingManager } from './throttling';
 import { UIManager } from './ui';
 import { GraphQLManager } from './graphql';
 import { join } from 'path';
+import { FileStorage } from './storage';
 
 export function createServer(options = {} as ServerOptions): Server {
   const {
@@ -29,16 +30,19 @@ export function createServer(options = {} as ServerOptions): Server {
     overrides,
     proxies,
     throttlings,
+    fileStorageOptions,
   } = options;
 
+  const fileStorage = new FileStorage(fileStorageOptions);
   const routeManager = new RouteManager(overrides);
-  const overrideManager = new OverrideManager(routeManager);
+  const overrideManager = new OverrideManager(routeManager, fileStorage);
   const proxyManager = new ProxyManager(routeManager, proxies, basePath);
   const throttlingManager = new ThrottlingManager(throttlings);
   const uiManager = new UIManager(
     proxyManager,
     throttlingManager,
-    overrideManager
+    overrideManager,
+    fileStorage
   );
 
   const expressServer: express.Application = express();
@@ -121,6 +125,7 @@ export function createServer(options = {} as ServerOptions): Server {
       routeManager.setAll(routes);
       routeManager.addDocsRoute(basePath, docsRoute);
       routeManager.getAll().forEach(createRoute);
+      overrideManager.applyExternalOverrides();
     },
 
     /**
@@ -162,10 +167,19 @@ export function createServer(options = {} as ServerOptions): Server {
         );
       }
 
+      async function onResetFileStorage() {
+        fileStorage.clear();
+        uiManager.drawDashboard();
+      }
+
       inputManager.addListener('c', onConnection);
       inputManager.addListener('t', onThrottling);
       inputManager.addListener('o', onOverride);
       inputManager.addListener('p', onRouteProxy);
+
+      if (fileStorage.options.enabled) {
+        inputManager.addListener('x', onResetFileStorage);
+      }
 
       expressServer.listen(port);
     },
