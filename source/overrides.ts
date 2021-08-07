@@ -77,13 +77,14 @@ export class OverrideManager {
   ) {}
 
   applyExternalOverrides() {
-    if (!this.fileStorage?.options.enabled) return;
+    if (!this.fileStorage?.options.enabled || !this.fileStorage.isInitialized())
+      return;
 
-    if (this.fileStorage.isInitialized() && this.fileStorage.isEmpty()) {
+    if (this.fileStorage.isEmpty()) {
       this.fileStorage?.setItem(FILE_STORAGE_KEY, this.getAllSelected());
     } else {
       const persistedOverrides = this.fileStorage.getItem<Override[]>(
-        'overrides'
+        FILE_STORAGE_KEY
       );
 
       persistedOverrides?.forEach((override) => {
