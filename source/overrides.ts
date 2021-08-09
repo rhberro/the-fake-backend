@@ -22,6 +22,7 @@ import {
   formatMethodType,
   RouteManager,
 } from './routes';
+import { FileStorage } from './storage';
 import { Middleware } from './types';
 
 const OVERRIDE_DEFAULT_OPTION = 'Default';
@@ -62,16 +63,42 @@ function findSelectedMethodOverride(method: Method) {
   return method.overrides?.find(propSatisfies(equals(true), 'selected'));
 }
 
-export class OverrideManager {
-  private routeManager: RouteManager;
+const FILE_STORAGE_KEY = 'overrides';
 
+export class OverrideManager {
   /**
    * Creates a new override manager.
    *
    * @param routeManager An instance of route manager
    */
-  constructor(routeManager: RouteManager) {
-    this.routeManager = routeManager;
+  constructor(
+    private routeManager: RouteManager,
+    private fileStorage?: FileStorage<typeof FILE_STORAGE_KEY>
+  ) {}
+
+  applyExternalOverrides() {
+    if (!this.fileStorage?.options.enabled || !this.fileStorage.isInitialized())
+      return;
+
+    if (this.fileStorage.isEmpty()) {
+      this.fileStorage?.setItem(FILE_STORAGE_KEY, this.getAllSelected());
+    } else {
+      const persistedOverrides = this.fileStorage.getItem<Override[]>(
+        FILE_STORAGE_KEY
+      );
+
+      persistedOverrides?.forEach((override) => {
+        const overridableRoutes = this.getAll();
+        const url = override.routePath;
+        const route = findRouteByUrl(overridableRoutes, url);
+        const type = override.methodType;
+        const overrides = getMethodOverridesByType(route, type.toLowerCase());
+        const name = override.name;
+        overrides.forEach((override) => {
+          override.selected = override.name === name;
+        });
+      });
+    }
   }
 
   /**
@@ -127,6 +154,8 @@ export class OverrideManager {
     overrides.forEach((override) => {
       override.selected = override.name === name;
     });
+
+    this.fileStorage?.setItem('overrides', this.getAllSelected());
 
     return { routePath: url, methodType: type, name };
   }

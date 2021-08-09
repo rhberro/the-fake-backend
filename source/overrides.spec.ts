@@ -1,5 +1,6 @@
 import { getMockReq, getMockRes } from '@jest-mock/express';
 import { mocked } from 'ts-jest/utils';
+import { fs as inMemoryFileSystem } from 'memfs';
 
 import { Response, RouteProperties } from './interfaces';
 
@@ -12,6 +13,7 @@ import {
 import { OverrideManager } from './overrides';
 import { RouteManager } from './routes';
 import { Middleware } from './types';
+import { FileStorage } from './storage';
 
 jest.mock('../source/prompts');
 
@@ -222,16 +224,7 @@ describe('source/override.ts', () => {
       describe('when selecting a method override', () => {
         beforeEach(() => {
           routeManager.setAll(routes);
-
-          mocked(promptRoutePath).mockImplementation(async () => ({
-            url: '/dogs',
-          }));
-          mocked(promptRouteMethodType).mockImplementation(async () => ({
-            type: 'GET',
-          }));
-          mocked(promptRouteMethodOverride).mockImplementation(async () => ({
-            name: 'Doggernaut',
-          }));
+          mockOverridePrompts('GET', '/dogs', 'Doggernaut');
         });
 
         it('prompts and changes a route method override', async () => {
@@ -357,5 +350,71 @@ describe('source/override.ts', () => {
         });
       });
     });
+
+    describe('OverrideManager with FileStorage', () => {
+      const override = {
+        routePath: '/dogs',
+        methodType: 'get',
+        name: 'Doggernaut',
+      };
+
+      function createOverrideManager(fileStorage: FileStorage<'overrides'>) {
+        const overrideManager = new OverrideManager(routeManager, fileStorage);
+        overrideManager.applyExternalOverrides();
+      }
+
+      it('loads overrides from file storage', () => {
+        const fileStorage = createFileStorage();
+        fileStorage.setItem('overrides', [override]);
+        createOverrideManager(fileStorage);
+        expect(overrideManager.getAllSelected()).toContainEqual(override);
+      });
+
+      it('persists an override to file storage', async () => {
+        const fileStorage = createFileStorage();
+        mockOverridePrompts('GET', '/dogs', 'Doggernaut');
+        createOverrideManager(fileStorage);
+        await overrideManager.choose();
+        expect(fileStorage.getItem('overrides')).toContainEqual(override);
+      });
+
+      it('properly clears and apply external (file) overrides', async () => {
+        const fileStorage = createFileStorage();
+        fileStorage.setItem('overrides', [override]);
+        const overrideManager = new OverrideManager(routeManager, fileStorage);
+        overrideManager.applyExternalOverrides();
+        expect(fileStorage.getItem('overrides')).toContainEqual(override);
+
+        fileStorage.clear();
+        expect(fileStorage.isEmpty()).toBeTruthy();
+
+        overrideManager.applyExternalOverrides();
+        expect(fileStorage.getItem('overrides')).toContainEqual(override);
+      });
+    });
   });
 });
+
+function mockOverridePrompts(
+  methodType: string,
+  routePath: string,
+  name: string
+) {
+  mocked(promptRoutePath).mockImplementation(async () => ({
+    url: routePath,
+  }));
+  mocked(promptRouteMethodType).mockImplementation(async () => ({
+    type: methodType,
+  }));
+  mocked(promptRouteMethodOverride).mockImplementation(async () => ({
+    name: name,
+  }));
+}
+
+function createFileStorage() {
+  return new FileStorage<'overrides'>({
+    enabled: true,
+    path: '/.storage',
+    fs: inMemoryFileSystem as any,
+  });
+}

@@ -3,6 +3,7 @@ import ProxyProperties from './ProxyProperties';
 import Throttling from './Throttling';
 import MethodOverride from './MethodOverride';
 import { RequestHandler } from 'express';
+import { FileStorageOptions } from '../storage';
 
 export default interface ServerOptions {
   basePath?: string;
@@ -13,4 +14,5 @@ export default interface ServerOptions {
   pagination?: PaginationProperties;
   proxies: Array<ProxyProperties>;
   throttlings: Array<Throttling>;
+  fileStorageOptions?: FileStorageOptions;
 }
