@@ -1,4 +1,8 @@
-import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
+import {
+  createProxyMiddleware,
+  fixRequestBody,
+  RequestHandler,
+} from 'http-proxy-middleware';
 import {
   both,
   complement,
@@ -35,7 +39,10 @@ function buildProxy(proxy: ProxyProperties, basePath?: string): Proxy {
       pathRewrite: (path) =>
         appendBasePath ? path : path.replace(basePath || '', ''),
       changeOrigin: true,
-      onProxyReq,
+      onProxyReq: (proxyReq, req, res, options) => {
+        proxy.onProxyReq?.(proxyReq, req, res, options);
+        fixRequestBody(proxyReq, req);
+      },
       onProxyRes,
     }),
   };
