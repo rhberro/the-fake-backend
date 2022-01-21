@@ -7,6 +7,7 @@ export default {
   output: {
     dir: 'build',
     format: 'cjs',
+    sourcemap: true,
   },
   plugins: [
     cleaner({ targets: ['build'] }),
