@@ -104,6 +104,16 @@ export class ProxyManager {
   }
 
   /**
+   * Checks if the proxy is overridden to default for a given route.
+   *
+   * @param route The route
+   * @returns {boolean}
+   */
+   private isRouteProxyOverridenToDefault(route: Route): boolean {
+    return route.proxy === null;
+  }
+
+  /**
    * Resolve the current global proxy handler.
    *
    * @param route The route
@@ -206,6 +216,11 @@ export class ProxyManager {
   createGlobalMiddleware(): Middleware {
     return (req, res, next) => {
       const handler = this.resolveGlobalProxyHandler();
+
+      if (res.locals?.route && this.isRouteProxyOverridenToDefault(res.locals.route)) {
+        return next();
+      }
+
       if (handler) {
         return handler(req, res, next);
       }

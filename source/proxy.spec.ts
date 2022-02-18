@@ -216,6 +216,19 @@ describe('source/proxy.ts', () => {
         middleware(mockedRequest, mockedResponse, mockedNext);
         expect(mockedNext).toHaveBeenLastCalledWith(proxies[0].host);
       });
+
+      it('skips the server proxy when the route proxy is overriden to default', () => {
+        proxyManager.toggleCurrent();
+        routes[0].proxy = null;
+        mockedResponse.locals = {
+          route: routes[0],
+          routeMethod: routes[0].methods[0],
+          response: undefined,
+        };
+
+        middleware(mockedRequest, mockedResponse, mockedNext);
+        expect(mockedNext).toHaveBeenLastCalledWith();
+      });
     });
   });
 });
