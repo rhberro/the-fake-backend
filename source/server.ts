@@ -55,12 +55,12 @@ export function createServer(options = {} as ServerOptions): Server {
   expressServer.use(middlewares || cors());
 
   expressServer.use(
-    proxyManager.createGlobalMiddleware(),
     uiManager.createDrawRequestMiddleware(),
     routeManager.createResolvedRouteMiddleware(options),
     proxyManager.createRouteMiddleware(),
     overrideManager.createOverriddenRouteMethodMiddleware(),
-    throttlingManager.createMiddleware()
+    throttlingManager.createMiddleware(),
+    proxyManager.createGlobalMiddleware()
   );
 
   /**
