@@ -52,8 +52,8 @@ export function createServer(options = {} as ServerOptions): Server {
     graphqlManager.applyMiddlewareTo(expressServer);
   }
 
-  expressServer.use(express.json());
   expressServer.use(middlewares || cors());
+  expressServer.use(express.json());
 
   expressServer.use(
     uiManager.createDrawRequestMiddleware(),
