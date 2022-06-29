@@ -43,7 +43,7 @@ yarn add --dev the-fake-backend
 or
 
 ```
-npm install --save-dev the-fake-backend
+npm i --save-dev the-fake-backend
 ```
 
 ## Getting Started
