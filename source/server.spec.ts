@@ -43,9 +43,9 @@ const expressServer = {
 };
 
 jest.mock('express', () => {
-  return () => {
-    return expressServer;
-  };
+  const fn = () => expressServer;
+  fn.json = jest.fn();
+  return fn;
 });
 
 describe('source/server.ts', () => {
