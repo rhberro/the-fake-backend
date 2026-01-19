@@ -18,7 +18,7 @@ import { resolveMethodAttribute, RouteManager } from './routes';
 import { ThrottlingManager } from './throttling';
 import { UIManager } from './ui';
 import { GraphQLManager } from './graphql';
-import { join } from 'path';
+import { posix } from 'path';
 import { FileStorage } from './storage';
 
 export function createServer(options = {} as ServerOptions): Server {
@@ -96,7 +96,7 @@ export function createServer(options = {} as ServerOptions): Server {
     const { type } = method;
 
     expressServer[type](
-      join(basePath, path),
+      posix.join(basePath, path),
       routeManager.createRouteMethodResponseMiddleware(options),
       createSearchableRouteMiddleware(),
       createPaginatedRouteMiddleware(options),
